@@ -1,0 +1,50 @@
+
+ATHLETE
+athlete_id*
+f_name
+m_initial
+l_name
+school_id
+grade
+gender
+division_id
+
+SCHOOL
+school_id*
+school_name
+(head_coach / coaches )
+(division_ids)
+
+DIVISIONS
+division_id*
+division_name
+gender (?)
+grade (?)
+
+EVENT
+event_id*
+event_name (eg: "100 Meter", "Long Jump")
+event_abbrev (eg: "100M", "LJ")
+event_type_id 
+event_div_id
+max_heats
+
+EVENT_TYPE
+event_type_id
+event_type_name (hjump, vjump, sprint, dist)
+
+EVENT_DIV
+event_div_id
+(event_div_name? "100M Boys 7th grade"?)
+max_heats (per division)
+max_ath_per_heat (per division)
+max_rounds
+
+MEET
+meet_id*
+name
+season: (outdoor or indoor)
+
+GENDER
+gender_id
+gender_name

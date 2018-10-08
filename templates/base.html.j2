@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PLACEHOLDER TITLE{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.11/css/all.css">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+
+<body>
+    {# Put comments inside "{#"  #}
+
+    {# Display flashed messages #}
+    <h6>MESSAGES:</h6>
+    <ul>
+        {% for message in get_flashed_messages() %}
+            <li>{{message}}</li>
+        {% endfor %}
+    </ul>
+
+
+    {% block content %}
+        PLACEHOLDER CONTENT
+    {% endblock %}
+
+    <!-- PUT A FOOTER IN HERE -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+          // insert code here
+        });
+    </script>
+</body>
+</html>
+
