@@ -26,7 +26,7 @@ class testSchools(unittest.TestCase):
         num_schools = School.query.count()
         self.assertEqual(num_schools, 0)
 
-    def test_new_school(self):
+    def test_new_school_minimal(self):
         lghs = School(name="Los Gatos High School", abbrev="LOGA")
         db.session.add(lghs)
         db.session.commit()
@@ -34,6 +34,18 @@ class testSchools(unittest.TestCase):
         s = School.query.first()
         self.assertEqual(s.name, "Los Gatos High School")
         self.assertEqual(s.abbrev, "LOGA")
+
+    def test_new_school_all_info(self):
+        lghs = School(name="Los Gatos High School", abbrev="LOGA", 
+                      city="Los Gatos", state="CA")
+        db.session.add(lghs)
+        db.session.commit()
+        self.assertEqual(School.query.count(), 1)
+        s = School.query.first()
+        self.assertEqual(s.name, "Los Gatos High School")
+        self.assertEqual(s.abbrev, "LOGA")
+        self.assertEqual(s.city, "Los Gatos")
+        self.assertEqual(s.state, "CA")
 
     def test_unattached_school(self):
         init_schools()
