@@ -9,7 +9,7 @@ from model import (db, connect_to_db, reset_database, Division, Gender, Grade,
 
 
 EVENT_DEFS = ({"abbrev": "100M", "name": "100 Meter", "type": "sprint"},
-              {"abbrev": "800M", "name": "800 Meter", "type": "dist"},
+              {"abbrev": "800M", "name": "800 Meter", "type": "distance"},
               {"abbrev": "1600M", "name": "1600 Meter", "type": "distance"},
               {"abbrev": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
               {"abbrev": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
@@ -141,6 +141,8 @@ def init_constant_data():
 
 def populate_example_data():
     populate_example_meets(EXAMPLE_MEETS)
+    meet1 = Meet.query.filter_by(name="WVAL League Practice Meet #1").first()
+    populate_mdes(meet1)
 
 
 if __name__ == "__main__":

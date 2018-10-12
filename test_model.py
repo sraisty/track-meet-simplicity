@@ -8,7 +8,7 @@ import unittest
 from model import (db, reset_database, Grade, Gender, Division, School,
                    Event_Def_Type, Event_Definition, Meet, MeetDivisionEvent)
 from init_data import (init_genders, init_grades, init_divisions, init_schools,
-                       init_event_def_types, init_event_defs,
+                       init_event_def_types, init_event_defs, init_constant_data,
                        populate_example_meets, populate_mdes)
 from server import app
 
@@ -56,9 +56,11 @@ class testMeetDivisionEvent(unittest.TestCase):
         setup_test_app_db()
         self.client = app.test_client()
 
+        # init_constant_data()
         init_genders(ALLOWED_GENDERS)
         init_grades(GRADES)
         init_divisions()
+        init_schools()
         init_event_def_types(EVENT_DEF_TYPES)
         init_event_defs(EVENT_DEFS)
         populate_example_meets(EXAMPLE_MEETS)
@@ -74,6 +76,25 @@ class testMeetDivisionEvent(unittest.TestCase):
         self.assertEqual(q.count(),
                          Division.query.count() * Event_Definition.query.count())
 
+    def test_mde_meet_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_mde_event_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_mde_division_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_mde_entries_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_mde_athletes_relationship(self):
+        self.assertFalse("TODO")
+        pass
 
 
 class testMeet(unittest.TestCase):
@@ -155,6 +176,26 @@ class testMeet(unittest.TestCase):
         self.assertEqual(q.count(), 1)
         self.assertEqual(q.first().name, "A Meet from the Past")
 
+    def test_meet_to_mde_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_meet_to_entries_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_meet_to_divisions_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_meet_to_events_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_meet_to_heats(self):
+        self.assertFalse("TODO")
+        pass
+
 
 ###################################
 
@@ -166,7 +207,6 @@ class testEventDefinition(unittest.TestCase):
         init_event_def_types(EVENT_DEF_TYPES)
 
     def tearDown(self):
-        """ Stuff to do after every test """
         teardown_test_db_app()
 
     def test_new_event_definition(self):
@@ -207,6 +247,22 @@ class testEventDefinition(unittest.TestCase):
         dist_events = dist_q.all()
         for e in dist_events:
             self.assertIn("Relay", e.name)
+
+    def test_event_to_mde_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_event_to_entries_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_event_to_meets_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_event_to_divisions_relationship(self):
+        self.assertFalse("TODO")
+        pass
 
 
 class testEventDefType(unittest.TestCase):
@@ -446,15 +502,19 @@ class testDivision(unittest.TestCase):
         self.assertFalse("TODO")
         pass
 
+    def test_division_to_entries_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
+    def test_division_to_events_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
     def test_division_to_athletes_relationship(self):
         self.assertFalse("TODO")
         pass
 
     def test_division_to_schools_relationship(self):
-        self.assertFalse("TODO")
-        pass
-
-    def test_division_to_entries_relationship(self):
         self.assertFalse("TODO")
         pass
 
@@ -527,7 +587,6 @@ class testGrade(unittest.TestCase):
 
         self.assertEqual(len(ALLOWED_GENDERS), len(gr7_divs))
         self.assertEqual(len(gr7_divs), 2)
-
         for div in gr7_divs:
             self.assertIn('Grade 7', div.get_div_name())
 

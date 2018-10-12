@@ -36,11 +36,11 @@ class Meet(db.Model):
                              secondary="meet_division_events")
     divisions = db.relationship("Division",
                                 secondary="meet_division_events")
+    # entries = db.relationship("Entry", secondary="meet_division_events")
     # heats
 
     def __repr__(self):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
-
 
 
 #     def get_schools(self, no_entries=False):
@@ -209,17 +209,17 @@ class Meet(db.Model):
 #     __tablename__ = "entries"
 #     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-#     athlete_id = db.Column(db.ForeignKey("athletes.id"),
-#                            nullable=False)
-#     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
-#                        nullable=False)
-#     mark_id = db.Column(db.ForeignKey("marks.id"))
-#     assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
+#     # athlete_id = db.Column(db.ForeignKey("athletes.id"),
+#     #                        nullable=False)
+#     # mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
+#     #                    nullable=False)
+#     # mark_id = db.Column(db.ForeignKey("marks.id"))
+#     # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
-#     athlete = db.relationship("Athlete")
-#     division = db.relationship("Division",
-#                                secondary="athletes",
-#                                uselist=False)
+#     # athlete = db.relationship("Athlete")
+#     # division = db.relationship("Division",
+#     #                            secondary="athletes",
+#     #                            uselist=False)
 #     mde = db.relationship("MeetDivisionEvent")
 #     event = db.relationship("Event_Definition",
 #                             secondary="meet_division_events",
@@ -227,14 +227,17 @@ class Meet(db.Model):
 #     meet = db.relationship("Meet",
 #                            secondary="meet_division_events",
 #                            uselist=False)
-#     assigned_heat = db.relationship("Heat")
-#     mark = db.relationship("Mark")
+#     # assigned_heat = db.relationship("Heat")
+#     # mark = db.relationship("Mark")
 
 #     def __repr__(self):
-#         return ("\n<ENTRY #{}, Ath: {} {}, Event: {}, Div: {}, Meet: {}>"
+#         # return ("\n<ENTRY #{}, Ath: TODO {}, Event: {}, Div: {}, Meet: {}>"
+#         #         .format(
+#         #             self.id, self.athlete.fname, self.athlete.lname,
+#         #             self.event.abbrev, self.division, self.meet.name))
+#         return ("\n<ENTRY #{}, Ath: TODO, Event: {}, Div: {}, Meet: {}>"
 #                 .format(
-#                     self.id, self.athlete.fname, self.athlete.lname,
-#                     self.event.abbrev, self.division, self.meet.name))
+#                     self.id, self.event.abbrev, self.division, self.meet.name))
 
 
 # class Mark(db.Model):
@@ -359,6 +362,11 @@ class Event_Definition(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     etype = db.Column(db.ForeignKey("event_def_types.code"),
                       nullable=False)
+    mdes = db.relationship("MeetDivisionEvent")
+    divisions = db.relationship("Division", secondary="meet_division_events")
+    meets = db.relationship("Meet", secondary="meet_division_events")
+    # entries
+    # heats
 
     def __repr__(self):
         """
@@ -406,6 +414,8 @@ class Division(db.Model):
     grade_code = db.Column(db.ForeignKey("grades.grade_code"), nullable=False)
     mdes = db.relationship("MeetDivisionEvent")
     meets = db.relationship("Meet", secondary="meet_division_events")
+    events = db.relationship("Event_Definition",
+                             secondary="meet_division_events")
     grade = db.relationship("Grade")
     gender = db.relationship("Gender")
     # athletes
@@ -465,7 +475,7 @@ class Grade(db.Model):
     grade_name = db.Column(db.String(12), unique=True, nullable=False)
     divisions = db.relationship("Division")
     mdes = db.relationship("MeetDivisionEvent", secondary="divisions")
-    
+
     def __repr__(self):
         return "<GRADE: code: {}, name: {}>".format(
                 self.grade_code, self.grade_name)
