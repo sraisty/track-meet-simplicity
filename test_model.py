@@ -6,14 +6,15 @@ by Sue Raisty
 import unittest
 
 from model import (db, reset_database, Grade, Gender, Division, School,
-                   Event_Def_Type, Event_Definition, MeetDivisionEvent)
+                   Event_Def_Type, Event_Definition, Meet, MeetDivisionEvent)
 from init_data import (init_genders, init_grades, init_divisions, init_schools,
-                       init_event_def_types, init_event_defs)
+                       init_event_def_types, init_event_defs,
+                       populate_example_meets, populate_mdes)
 from server import app
 
 
 # We are not importing the following 'constants' from init_data because
-# we don't want these unit tests to break when we one day add more events, 
+# we don't want these unit tests to break when we one day add more events,
 # more grades, etc.
 EVENT_DEFS = ({"abbrev": "100M", "name": "100 Meter", "type": "sprint"},
               {"abbrev": "800M", "name": "800 Meter", "type": "sprint"},
@@ -35,7 +36,130 @@ GRADES = ("6", "7", "8")
 ALLOWED_GENDERS = ({"code": "M", "name": "Boys"},
                    {"code": "F", "name": "Girls"})
 
+EXAMPLE_MEETS = ({"name": "A Meet from the Past",
+                  "date": "August 5, 2018",
+                  "active": False},
+                 {"name": "WVAL League Practice Meet #1",
+                  "date": "April 15, 2019"},
+                 {"name": "WVAL League Practice Meet #2",
+                  "date": "April 25, 2019"},
+                 {"name": "WVAL League Practice Meet #3",
+                  "date": "May 8, 2019"},
+                 {"name": "Santa Clara County Middle School Championships",
+                  "date": "May 15, 2019"},
+                 {"name": "Central Coast Section Middle School Championships",
+                  "date": "May 31, 2019"})
+
+
+class testMeetDivisionEvent(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+
+        init_genders(ALLOWED_GENDERS)
+        init_grades(GRADES)
+        init_divisions()
+        init_event_def_types(EVENT_DEF_TYPES)
+        init_event_defs(EVENT_DEFS)
+        populate_example_meets(EXAMPLE_MEETS)
+
+    def tearDown(self):
+        """ Stuff to do after every test """
+        teardown_test_db_app()
+
+    def test_mde_autocreate_one_meet(self):
+        meet1 = Meet.query.filter_by(name="WVAL League Practice Meet #1").one()
+        populate_mdes(meet1)
+        q = MeetDivisionEvent.query.filter_by(meet_id=meet1.id)
+        self.assertEqual(q.count(),
+                         Division.query.count() * Event_Definition.query.count())
+
+
+
+class testMeet(unittest.TestCase):
+
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+        init_event_def_types(EVENT_DEF_TYPES)
+
+    def tearDown(self):
+        """ Stuff to do after every test """
+        teardown_test_db_app()
+
+    def test_create_meet(self):
+        meet1 = Meet(name="WVAL League Practice Meet #1",
+                     date="April 15, 2019")
+        db.session.add(meet1)
+        db.session.commit()
+        id = meet1.id
+
+        m = Meet.query.get(id)
+        self.assertTrue(m)
+        self.assertEqual(m.name, "WVAL League Practice Meet #1")
+        self.assertTrue(m.active_status)
+
+    def test_bad_create_just_name(self):
+        meet1 = Meet(name="Boo")
+        meet2 = Meet(date="September 1, 2019")
+
+    def test_meet_date(self):
+        pass
+        self.assertFalse("TODO")
+
+    def test_create_meet_with_host_school(self):
+        meet1 = Meet(name="WVAL League Practice Meet #1",
+                     date="April 15, 2019")
+        school1 = School(name="RJ Fisher Middle School",
+                         abbrev="RJFM",
+                         city="Los Gatos",
+                         state="CA")
+        meet1.host_school = school1
+        db.session.add(meet1)
+        db.session.commit()
+
+        m = Meet.query.first()
+
+        self.assertEqual(m.host_school.abbrev, "RJFM")
+        self.assertTrue(m.active_status)
+
+        sch = School.query.filter_by(abbrev="RJFM").one()
+        self.assertTrue(sch)
+        self.assertEqual(sch.city, "Los Gatos")
+        self.assertEqual(sch.state, "CA")
+
+    def test_get_meet_list(self):
+        meet1 = Meet(name="WVAL League Practice Meet #1",
+                     date="April 15, 2019")
+        meet2 = Meet(name="WVAL League Practice Meet #2",
+                     date="April 25, 2019")
+        meet3 = Meet(name="WVAL League Practice Meet #3",
+                     date="May 8, 2019")
+        meet4 = Meet(name="Santa Clara County Middle School Championships",
+                     date="May 15, 2019")
+        meet5 = Meet(name="Central Coast Section Middle School Championships",
+                     date="May 31, 2019")
+        db.session.add_all([meet1, meet2, meet3, meet4, meet5])
+        db.session.commit()
+        self.assertEqual(Meet.query.count(), 5)
+
+    def test_populate_example_meets(self):
+        populate_example_meets(EXAMPLE_MEETS)
+        self.assertEqual(Meet.query.count(), 6)
+
+    def test_get_meet_selects(self):
+        populate_example_meets(EXAMPLE_MEETS)
+        self.assertEqual(3,
+                         Meet.query.filter(Meet.name.like("%WVAL%")).count())
+        q = Meet.query.filter_by(active_status=False)
+        self.assertEqual(q.count(), 1)
+        self.assertEqual(q.first().name, "A Meet from the Past")
+
+
+###################################
+
 class testEventDefinition(unittest.TestCase):
+
     def setUp(self):
         setup_test_app_db()
         self.client = app.test_client()
@@ -209,13 +333,21 @@ class testSchools(unittest.TestCase):
         self.assertEqual(unattachedSchool.abbrev, "UNA")
 
     def test_school_to_division_relationship(self):
-        pass   
+        self.assertFalse("TODO")
+        pass
 
     def test_school_to_athlete_relationship(self):
-        pass    
+        self.assertFalse("TODO")
+        pass
 
     def test_school_to_entries_relationship(self):
-        pass    
+        self.assertFalse("TODO")
+        pass
+
+    def test_hostschool_to_meet_relationship(self):
+        self.assertFalse("TODO")
+        pass
+
 
 class testDivision(unittest.TestCase):
     def setUp(self):
@@ -307,19 +439,24 @@ class testDivision(unittest.TestCase):
         self.assertEqual(boys8.grade.grade_name, "Grade 8")
 
     def test_division_to_mdes_relationship(self):
-        pass   
+        self.assertFalse("TODO")
+        pass
 
     def test_division_to_meets_relationship(self):
-        pass     
+        self.assertFalse("TODO")
+        pass
 
     def test_division_to_athletes_relationship(self):
-        pass   
+        self.assertFalse("TODO")
+        pass
 
     def test_division_to_schools_relationship(self):
-        pass  
+        self.assertFalse("TODO")
+        pass
 
     def test_division_to_entries_relationship(self):
-        pass   
+        self.assertFalse("TODO")
+        pass
 
 
 class testGrade(unittest.TestCase):
@@ -368,10 +505,10 @@ class testGrade(unittest.TestCase):
 
     def test_init_grades_num_recs(self):
         init_grades(GRADES)
-        num_grades = Grade.query.count
+        num_grades = Grade.query.count()
         self.assertEqual(num_grades, 3)
 
-    def test_init_grades_num_recs(self):
+    def test_init_grades_num_recs_by_grade(self):
         init_grades(GRADES)
         gr6 = Grade.query.filter_by(grade_code="6").one()
         self.assertEqual(gr6.grade_name, "Grade 6")
@@ -379,6 +516,24 @@ class testGrade(unittest.TestCase):
         self.assertEqual(gr7.grade_name, "Grade 7")
         gr8 = Grade.query.filter_by(grade_code="8").one()
         self.assertEqual(gr8.grade_name, "Grade 8")
+
+    def test_grade_to_div_relationship(self):
+        init_genders(ALLOWED_GENDERS)
+        init_grades(GRADES)
+        init_divisions()
+
+        gr7 = Grade.query.get("7")
+        gr7_divs = gr7.divisions
+
+        self.assertEqual(len(ALLOWED_GENDERS), len(gr7_divs))
+        self.assertEqual(len(gr7_divs), 2)
+
+        for div in gr7_divs:
+            self.assertIn('Grade 7', div.get_div_name())
+
+    def test_grade_to_mde_relationship(self):
+        self.assertFalse("TODO")
+        pass
 
 
 class testGender(unittest.TestCase):
@@ -474,19 +629,9 @@ class testGender(unittest.TestCase):
         for div in male_divs:
             self.assertIn('Boys', div.get_div_name())
 
-    def test_grade_to_div_relationship(self):
-        init_genders(ALLOWED_GENDERS)
-        init_grades(GRADES)
-        init_divisions()
-
-        gr7 = Grade.query.get("7")
-        gr7_divs = gr7.divisions
-
-        self.assertEqual(len(ALLOWED_GENDERS), len(gr7_divs))
-        self.assertEqual(len(gr7_divs), 2)
-
-        for div in gr7_divs:
-            self.assertIn('Grade 7', div.get_div_name())
+    def test_gender_to_mde_relationship(self):
+        self.assertFalse("TODO")
+        pass
 
 
 # ############## HELPER FUNCTIONS ###############

@@ -12,32 +12,36 @@ from util import warning, error, info
 db = SQLAlchemy()
 
 
-# class Meet(db.Model):
-#     __tablename__ = "meets"
+class Meet(db.Model):
+    __tablename__ = "meets"
 
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     name = db.Column(db.String(50), nullable=False)
-#     date = db.Column(db.DateTime, nullable=True)
-#     host_school_id = db.Column(db.ForeignKey("schools.id"), nullable=True)
-#     # order_of_events at meet
-#     # order_of_divs_in_event
-#     max_entries_per_athlete = db.Column(db.Integer, nullable=True)
-#     max_team_entries_per_event = db.Column(db.Integer, nullable=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.DateTime, nullable=True)
+    host_school_id = db.Column(db.ForeignKey("schools.id"), nullable=True)
+    description = db.Column(db.String(300), nullable=True)
+    active_status = db.Column(db.Boolean, default=True, nullable=False)
 
-#     # lifecycle_code = db.Column(db.ForeignKey("lifecycles.id"),
-#     #                            default="setup", nullable=False)
+    # order_of_events at meet
+    # order_of_divs_in_event
+    max_entries_per_athlete = db.Column(db.Integer, nullable=True)
+    max_team_entries_per_event = db.Column(db.Integer, nullable=True)
 
-#     host_school = db.relationship("School")
-#     mdes = db.relationship("MeetDivisionEvent")
-#     events = db.relationship("Event_Definition",
-#                              secondary="meet_division_events")
-#     divisions = db.relationship("Division",
-#                                 secondary="meet_division_events")
+    # lifecycle_code = db.Column(db.ForeignKey("lifecycles.id"),
+    #                            default="setup", nullable=False)
 
-#     # heats
+    host_school = db.relationship("School")
+    mdes = db.relationship("MeetDivisionEvent")
+    events = db.relationship("Event_Definition",
+                             secondary="meet_division_events")
+    divisions = db.relationship("Division",
+                                secondary="meet_division_events")
+    # heats
 
-#     def __repr__(self):
-#         return "\n<MEET id# {}: {}>".format(self.id, self.name)
+    def __repr__(self):
+        return "\n<MEET id# {}: {}>".format(self.id, self.name)
+
+
 
 #     def get_schools(self, no_entries=False):
 #         """
@@ -255,19 +259,19 @@ db = SQLAlchemy()
 
 class MeetDivisionEvent(db.Model):
     """
-    Associative table to handle the many to many relationship between Events
-    and Divisions.
+    Associative table to handle the many to many relationship between Events, 
+    Divisions, and Meets
     """
     __tablename__ = "meet_division_events"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
-    # meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
-    event_def_code = db.Column(db.ForeignKey("event_defs.code"),
-                             nullable=False)
+    meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
+    event_code = db.Column(db.ForeignKey("event_defs.code"),
+                           nullable=False)
 
     division = db.relationship("Division")
     # entries = db.relationship("Entry")
-    # meet = db.relationship("Meet")
+    meet = db.relationship("Meet")
     event = db.relationship("Event_Definition")
     # athletes = db.relationship("Athlete", secondary=entries)
 
@@ -275,7 +279,7 @@ class MeetDivisionEvent(db.Model):
         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
                 self.id,
                 # self.meet.name,
-                self.event.abbrev,
+                self.event.code,
                 self.division.get_div_name())
 
     def get_schools(self):
@@ -351,7 +355,6 @@ class Event_Definition(db.Model):
     """
     __tablename__ = "event_defs"
 
-    # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.String(8), primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     etype = db.Column(db.ForeignKey("event_def_types.code"),
@@ -401,8 +404,8 @@ class Division(db.Model):
     gender_code = db.Column(db.ForeignKey("genders.gender_code"),
                             nullable=False)
     grade_code = db.Column(db.ForeignKey("grades.grade_code"), nullable=False)
-    # mdes = db.relationship("MeetDivisionEvent")
-    # meets = db.relationship("Meet", secondary="meet_division_events")
+    mdes = db.relationship("MeetDivisionEvent")
+    meets = db.relationship("Meet", secondary="meet_division_events")
     grade = db.relationship("Grade")
     gender = db.relationship("Gender")
     # athletes
@@ -444,6 +447,7 @@ class Gender(db.Model):
                             autoincrement=False)
     gender_name = db.Column(db.String(10), unique=True, nullable=False)
     divisions = db.relationship("Division")
+    mdes = db.relationship("MeetDivisionEvent", secondary="divisions")
 
     def __repr__(self):
         return "GENDER: {}, {}".format(self.gender_code, self.gender_name)
@@ -460,7 +464,8 @@ class Grade(db.Model):
     grade_code = db.Column(db.String(2), primary_key=True, autoincrement=False)
     grade_name = db.Column(db.String(12), unique=True, nullable=False)
     divisions = db.relationship("Division")
-
+    mdes = db.relationship("MeetDivisionEvent", secondary="divisions")
+    
     def __repr__(self):
         return "<GRADE: code: {}, name: {}>".format(
                 self.grade_code, self.grade_name)
