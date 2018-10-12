@@ -56,14 +56,9 @@ class testMeetDivisionEvent(unittest.TestCase):
         setup_test_app_db()
         self.client = app.test_client()
 
-        # init_constant_data()
-        init_genders(ALLOWED_GENDERS)
-        init_grades(GRADES)
-        init_divisions()
-        init_schools()
-        init_event_def_types(EVENT_DEF_TYPES)
-        init_event_defs(EVENT_DEFS)
+        init_constant_data()
         populate_example_meets(EXAMPLE_MEETS)
+
 
     def tearDown(self):
         """ Stuff to do after every test """
@@ -76,16 +71,31 @@ class testMeetDivisionEvent(unittest.TestCase):
         self.assertEqual(q.count(),
                          Division.query.count() * Event_Definition.query.count())
 
-    def test_mde_meet_relationship(self):
-        self.assertFalse("TODO")
-        pass
+    def test_meet_to_mde_relationship(self):
+        meet1 = Meet.query.filter_by(name="WVAL League Practice Meet #1").one()
+        populate_mdes(meet1)
+        self.assertEqual(len(meet1.mdes), 66)
 
-    def test_mde_event_relationship(self):
-        self.assertFalse("TODO")
-        pass
+        self.assertEqual(meet1.mdes[10].gender.gender_name, 'Girls')
+        self.assertEqual(meet1.mdes[10].grade.grade_name, 'Grade 7')
+        self.assertEqual(meet1.mdes[10].event.name, "800 Meter")
+        self.assertEqual(meet1.mdes[10].meet.name, "WVAL League Practice Meet #1")
 
-    def test_mde_division_relationship(self):
-        self.assertFalse("TODO")
+
+    def test_mde_to_meet_elationship(self):
+        meet1 = Meet.query.filter_by(name="WVAL League Practice Meet #1").one()
+        populate_mdes(meet1)
+
+        q = MeetDivisionEvent.query.filter_by(meet_id=meet1.id)
+        q = q.filter_by(div_id=2)
+        q = q.filter_by(event_code="100M")
+        mde = q.first()
+
+        self.assertEqual(mde.division.get_div_name(), "Grade 7 Boys")
+        self.assertEqual(mde.gender.gender_code, "M")
+        self.assertEqual(mde.grade.grade_code, "7")
+
+    def test_event_to_mde_relationship(self):
         pass
 
     def test_mde_entries_relationship(self):
@@ -249,6 +259,9 @@ class testEventDefinition(unittest.TestCase):
             self.assertIn("Relay", e.name)
 
     def test_event_to_mde_relationship(self):
+        e = Event_Definition.query.get("1600M")
+        for mde in e.mdes:
+            print(mde)
         self.assertFalse("TODO")
         pass
 
@@ -591,8 +604,13 @@ class testGrade(unittest.TestCase):
             self.assertIn('Grade 7', div.get_div_name())
 
     def test_grade_to_mde_relationship(self):
-        self.assertFalse("TODO")
-        pass
+        init_constant_data()
+        populate_example_meets(EXAMPLE_MEETS)
+        meet1 = Meet.query.first()
+        populate_mdes(meet1)
+
+        gr7 = Grade.query.get("7")
+        self.assertEqual(len(gr7.mdes), 22)
 
 
 class testGender(unittest.TestCase):
@@ -689,8 +707,15 @@ class testGender(unittest.TestCase):
             self.assertIn('Boys', div.get_div_name())
 
     def test_gender_to_mde_relationship(self):
-        self.assertFalse("TODO")
-        pass
+        init_constant_data()
+        populate_example_meets(EXAMPLE_MEETS)
+        meet1 = Meet.query.first()
+        populate_mdes(meet1)
+
+        male=Gender.query.get("M")
+        self.assertEqual(len(male.mdes), 33)
+
+
 
 
 # ############## HELPER FUNCTIONS ###############

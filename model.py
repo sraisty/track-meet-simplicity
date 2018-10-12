@@ -276,12 +276,14 @@ class MeetDivisionEvent(db.Model):
     # entries = db.relationship("Entry")
     meet = db.relationship("Meet")
     event = db.relationship("Event_Definition")
+    gender = db.relationship("Gender", secondary="divisions", uselist=False)
+    grade = db.relationship("Grade", secondary="divisions", uselist=False)    
     # athletes = db.relationship("Athlete", secondary=entries)
 
     def __repr__(self):
         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
                 self.id,
-                # self.meet.name,
+                self.meet.name,
                 self.event.code,
                 self.division.get_div_name())
 

@@ -117,6 +117,16 @@ def populate_example_meets(meet_list):
     db.session.commit()
 
 
+def init_constant_data():
+    init_genders(ALLOWED_GENDERS)
+    init_grades(GRADES)
+    init_divisions()
+    init_schools()
+    init_event_def_types(EVENT_DEF_TYPES)
+    init_event_defs(EVENT_DEFS)
+
+
+
 def populate_mdes(meet):
     events = Event_Definition.query.all()
     divisions = Division.query.all()
@@ -128,15 +138,6 @@ def populate_mdes(meet):
                                     event_code=event.code)
             db.session.add(mde)
     db.session.commit()
-
-
-def init_constant_data():
-    init_genders(ALLOWED_GENDERS)
-    init_grades(GRADES)
-    init_divisions()
-    init_schools()
-    init_event_def_types(EVENT_DEF_TYPES)
-    init_event_defs(EVENT_DEFS)
 
 
 def populate_example_data():
