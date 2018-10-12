@@ -4,13 +4,12 @@ Load up the "Constants" for our MVP's database.
 """
 
 from model import (db, connect_to_db, reset_database, Division, Gender, Grade,
-                   School)
-                   # Event_Definition,
-                   # Event_Def_Type, MeetDivisionEvent)
+                   School, Event_Def_Type, Event_Definition,
+                   MeetDivisionEvent)
 
 
 EVENT_DEFS = ({"abbrev": "100M", "name": "100 Meter", "type": "sprint"},
-              {"abbrev": "800M", "name": "800 Meter", "type": "sprint"},
+              {"abbrev": "800M", "name": "800 Meter", "type": "dist"},
               {"abbrev": "1600M", "name": "1600 Meter", "type": "distance"},
               {"abbrev": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
               {"abbrev": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
@@ -79,23 +78,20 @@ def init_schools():
     db.session.commit()
 
 
-# def init_event_def_types(event_def_type_list):
-#     """ """
-#     for type in event_def_type_list:
-#         db.session.add(Event_Def_Type(code=type))
-#     db.session.commit()
+def init_event_def_types(event_def_type_list):
+    """ """
+    for type in event_def_type_list:
+        db.session.add(Event_Def_Type(code=type))
+    db.session.commit()
 
 
-# def init_event_defs(event_list):
-#     """ """
-#     for ev in event_list:
-#         # Need to GET the event_type id
-#         ev_type = Event_Def_Type(code=ev['type'])
-#         db.session.add(Event_Definition(abbrev=ev['abbrev'],
-#                                         name=ev['name'],
-#                                         event_type_code=ev_type.code))
-#     db.session.commit()
-
+def init_event_defs(event_list):
+    """ """
+    for ev in event_list:
+        db.session.add(Event_Definition(code=ev['abbrev'],
+                                        name=ev['name'],
+                                        etype=ev['type']))
+    db.session.commit()
 
 
 # def populate_meet_division_events(meet):
@@ -115,8 +111,8 @@ def init_constant_data():
     init_genders(ALLOWED_GENDERS)
     init_grades(GRADES)
     init_divisions()
-    # init_schools()
-    # init_event_def_types(EVENT_DEF_TYPES)
+    init_schools()
+    init_event_def_types(EVENT_DEF_TYPES)
     # init_event_defs(EVENT_DEFS)
 
 

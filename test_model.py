@@ -5,11 +5,166 @@ by Sue Raisty
 """
 import unittest
 
-from model import db, reset_database, Grade, Gender, Division, School
+from model import (db, reset_database, Grade, Gender, Division, School,
+                   Event_Def_Type, Event_Definition, MeetDivisionEvent)
 from init_data import (init_genders, init_grades, init_divisions, init_schools,
-                       GRADES, ALLOWED_GENDERS)
+                       init_event_def_types, init_event_defs)
 from server import app
-from util import info
+
+
+# We are not importing the following 'constants' from init_data because
+# we don't want these unit tests to break when we one day add more events, 
+# more grades, etc.
+EVENT_DEFS = ({"abbrev": "100M", "name": "100 Meter", "type": "sprint"},
+              {"abbrev": "800M", "name": "800 Meter", "type": "sprint"},
+              {"abbrev": "1600M", "name": "1600 Meter", "type": "distance"},
+              {"abbrev": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
+              {"abbrev": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
+              {"abbrev": "4x400M", "name": "4x400 Meter Relay", "type": "relay"},
+              {"abbrev": "LJ", "name": "Long Jump", "type": "horzjump"},
+              {"abbrev": "TJ", "name": "Triple Jump", "type": "horzjump"},
+              {"abbrev": "DT", "name": "Discus Throw", "type": "throw"},
+              {"abbrev": "SP", "name": "Shot Put Throw", "type": "throw"},
+              {"abbrev": "HJ", "name": "High Jump", "type": "vertjump"})
+
+EVENT_DEF_TYPES = ("sprint", "distance", "relay",
+                   "vertjump", "horzjump", "throw")
+
+GRADES = ("6", "7", "8")
+
+ALLOWED_GENDERS = ({"code": "M", "name": "Boys"},
+                   {"code": "F", "name": "Girls"})
+
+class testEventDefinition(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+        init_event_def_types(EVENT_DEF_TYPES)
+
+    def tearDown(self):
+        """ Stuff to do after every test """
+        teardown_test_db_app()
+
+    def test_new_event_definition(self):
+        e = Event_Definition(code="3000S",
+                             name="3000M Steeplechase",
+                             etype="distance")
+        db.session.add(e)
+        db.session.commit()
+        self.assertEqual(1, Event_Definition.query.count())
+        steeple = Event_Definition.query.get("3000S")
+        self.assertIsNotNone(steeple)
+
+    def test_new_event_def_bad_type(self):
+        e = Event_Definition(code="3000S",
+                             name="3000M Steeplechase",
+                             etype="bananas")
+        db.session.add(e)
+        try:
+            db.session.commit()
+        except:  # TODO - compare to sqlalchemy.exc.IntegrityError
+            self.assertTrue(True)
+        else:
+            self.assertTrue(False)
+
+    def test_init_event_defs(self):
+        init_event_defs(EVENT_DEFS)
+
+        q = Event_Definition.query
+
+        e = q.get("100M")
+        self.assertEqual(e.name, "100 Meter")
+
+        jumps = q.filter(Event_Definition.name.like("%Jump%")).all()
+        self.assertEqual(len(jumps), 3)
+
+        dist_q = q.filter(Event_Definition.etype == "relay")
+        self.assertEqual(dist_q.count(), 2)
+        dist_events = dist_q.all()
+        for e in dist_events:
+            self.assertIn("Relay", e.name)
+
+
+class testEventDefType(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+
+    def tearDown(self):
+        """ Stuff to do after every test """
+        teardown_test_db_app()
+
+    def test_new_event_def_type(self):
+        edt = Event_Def_Type(code="distance")
+        db.session.add(edt)
+        db.session.commit()
+        self.assertEqual(Event_Def_Type.query.count(), 1)
+        e = Event_Def_Type.query.get("distance")
+        self.assertIsNotNone(e)
+
+    def test_init_event_def_types(self):
+        init_event_def_types(EVENT_DEF_TYPES)
+        num_types = len(EVENT_DEF_TYPES)
+        self.assertEqual(num_types, Event_Def_Type.query.count())
+
+    def test_is_track(self):
+        dist = Event_Def_Type(code="distance")
+        sprint = Event_Def_Type(code="sprint")
+        relay = Event_Def_Type(code="relay")
+        vjump = Event_Def_Type(code="vertjump")
+        hjump = Event_Def_Type(code="horzjump")
+        throw = Event_Def_Type(code="throw")
+        db.session.add_all([dist, sprint, relay, vjump, hjump, throw])
+        db.session.commit()
+
+        self.assertTrue(dist.is_track())
+        self.assertTrue(sprint.is_track())
+        self.assertTrue(relay.is_track())
+        self.assertFalse(vjump.is_track())
+        self.assertFalse(hjump.is_track())
+        self.assertFalse(throw.is_track())
+
+    def test_is_field(self):
+        dist = Event_Def_Type(code="distance")
+        sprint = Event_Def_Type(code="sprint")
+        relay = Event_Def_Type(code="relay")
+        vjump = Event_Def_Type(code="vertjump")
+        hjump = Event_Def_Type(code="horzjump")
+        throw = Event_Def_Type(code="throw")
+        db.session.add_all([dist, sprint, relay, vjump, hjump, throw])
+        db.session.commit()
+
+        self.assertFalse(dist.is_field())
+        self.assertFalse(sprint.is_field())
+        self.assertFalse(relay.is_field())
+        self.assertTrue(vjump.is_field())
+        self.assertTrue(hjump.is_field())
+        self.assertTrue(throw.is_field())
+
+    def test_is_indiv(self):
+        dist = Event_Def_Type(code="distance")
+        sprint = Event_Def_Type(code="sprint")
+        relay = Event_Def_Type(code="relay")
+        vjump = Event_Def_Type(code="vertjump")
+        hjump = Event_Def_Type(code="horzjump")
+        throw = Event_Def_Type(code="throw")
+        db.session.add_all([dist, sprint, relay, vjump, hjump, throw])
+        db.session.commit()
+
+        self.assertTrue(dist.is_indiv())
+        self.assertTrue(sprint.is_indiv())
+        self.assertFalse(relay.is_indiv())
+        self.assertTrue(vjump.is_indiv())
+        self.assertTrue(hjump.is_indiv())
+        self.assertTrue(throw.is_indiv())
+
+    def test_event_type_to_event_def_relationship(self):
+        init_event_def_types(EVENT_DEF_TYPES)
+        init_event_defs(EVENT_DEFS)
+        horzjump = Event_Def_Type.query.get('horzjump')
+        self.assertEqual(len(horzjump.events), 2)
+        for e in horzjump.events:
+            self.assertIn(e.code, ["LJ", "TJ"])
 
 
 class testSchools(unittest.TestCase):
@@ -36,7 +191,7 @@ class testSchools(unittest.TestCase):
         self.assertEqual(s.abbrev, "LOGA")
 
     def test_new_school_all_info(self):
-        lghs = School(name="Los Gatos High School", abbrev="LOGA", 
+        lghs = School(name="Los Gatos High School", abbrev="LOGA",
                       city="Los Gatos", state="CA")
         db.session.add(lghs)
         db.session.commit()
@@ -54,14 +209,13 @@ class testSchools(unittest.TestCase):
         self.assertEqual(unattachedSchool.abbrev, "UNA")
 
     def test_school_to_division_relationship(self):
-        pass
+        pass   
 
     def test_school_to_athlete_relationship(self):
-        pass
+        pass    
 
     def test_school_to_entries_relationship(self):
-        pass
-
+        pass    
 
 class testDivision(unittest.TestCase):
     def setUp(self):
@@ -81,7 +235,8 @@ class testDivision(unittest.TestCase):
         boysGr8 = Division(gender_code="M", grade_code="8")
         db.session.add(boysGr8)
         db.session.commit()
-        num_divs = Division.query.filter_by(gender_code="M", grade_code="8").count()
+        num_divs = Division.query.filter_by(
+                   gender_code="M", grade_code="8").count()
         self.assertEqual(num_divs, 1)
 
     def test_create_division_illegal_gender(self):
@@ -151,20 +306,20 @@ class testDivision(unittest.TestCase):
         db.session.commit()
         self.assertEqual(boys8.grade.grade_name, "Grade 8")
 
-    def test_division_to_mdes_relationship():
-        pass
+    def test_division_to_mdes_relationship(self):
+        pass   
 
-    def test_division_to_meets_relationship():
-        pass
+    def test_division_to_meets_relationship(self):
+        pass     
 
-    def test_division_to_athletes_relationship():
-        pass
+    def test_division_to_athletes_relationship(self):
+        pass   
 
-    def test_division_to_schools_relationship():
-        pass
+    def test_division_to_schools_relationship(self):
+        pass  
 
-    def test_division_to_entries_relationship():
-        pass
+    def test_division_to_entries_relationship(self):
+        pass   
 
 
 class testGrade(unittest.TestCase):
@@ -224,6 +379,7 @@ class testGrade(unittest.TestCase):
         self.assertEqual(gr7.grade_name, "Grade 7")
         gr8 = Grade.query.filter_by(grade_code="8").one()
         self.assertEqual(gr8.grade_name, "Grade 8")
+
 
 class testGender(unittest.TestCase):
     def setUp(self):

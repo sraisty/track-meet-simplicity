@@ -253,43 +253,42 @@ db = SQLAlchemy()
 #         return self.mde.division
 
 
-# class MeetDivisionEvent(db.Model):
-#     """
-#     Associative table to handle the many to many relationship between Events
-#     and Divisions.
-#     """
-#     __tablename__ = "meet_division_events"
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
-#     meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
-#     event_def_id = db.Column(db.ForeignKey("event_defs.id"),
-#                              nullable=False)
+class MeetDivisionEvent(db.Model):
+    """
+    Associative table to handle the many to many relationship between Events
+    and Divisions.
+    """
+    __tablename__ = "meet_division_events"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
+    # meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
+    event_def_code = db.Column(db.ForeignKey("event_defs.code"),
+                             nullable=False)
 
-#     # event = db.relationship("Event")
-#     division = db.relationship("Division")
-#     entries = db.relationship("Entry")
-#     meet = db.relationship("Meet")
-#     event = db.relationship("Event_Definition")
-#     athletes = db.relationship("Athlete", secondary=entries)
+    division = db.relationship("Division")
+    # entries = db.relationship("Entry")
+    # meet = db.relationship("Meet")
+    event = db.relationship("Event_Definition")
+    # athletes = db.relationship("Athlete", secondary=entries)
 
-#     def __repr__(self):
-#         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
-#                 self.id,
-#                 self.meet.name,
-#                 self.event.abbrev,
-#                 self.division.get_div_name())
+    def __repr__(self):
+        return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
+                self.id,
+                # self.meet.name,
+                self.event.abbrev,
+                self.division.get_div_name())
 
-#     def get_schools(self):
-#         schools = set()
-#         for athlete in self.athletes:
-#             schools.add(athlete.school)
-#         return list(schools)
+    def get_schools(self):
+        schools = set()
+        for athlete in self.athletes:
+            schools.add(athlete.school)
+        return list(schools)
 
-#     def form_heats(self):
-#         pass
+    def form_heats(self):
+        pass
 
-#     def assign_athletes(self):
-#         pass
+    def assign_athletes(self):
+        pass
 
 
 # class Heat(db.Model):
@@ -347,52 +346,51 @@ class School(db.Model):
 # # ###### THESE TABLES ARE INITIALIZED BUT NOT MODIFIED GOING FORWARD
 # # ###### CONTAIN "Constant" Data or are used for referential integrity
 
-# class Event_Definition(db.Model):
-#     """
-#     """
-#     __tablename__ = "event_defs"
+class Event_Definition(db.Model):
+    """
+    """
+    __tablename__ = "event_defs"
 
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     abbrev = db.Column(db.String(8), unique=True, nullable=False)
-#     name = db.Column(db.String(50), unique=True, nullable=False)
-#     event_type_code = db.Column(db.ForeignKey("event_def_types.code"),
-#                                 nullable=False)
+    # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.String(8), primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    etype = db.Column(db.ForeignKey("event_def_types.code"),
+                      nullable=False)
 
-#     def __repr__(self):
-#         """
-#         Returns human-readable representation of the Event_Definition object
-#         """
-#         return "\n<EVENT_DEF ID#{}: {}, {}, Type: {}>".format(
-#                 self.id,
-#                 self.abbrev,
-#                 self.name,
-#                 self.event_type_code)
+    def __repr__(self):
+        """
+        Returns human-readable representation of the Event_Definition object
+        """
+        return "\n<EVENT_DEF. CODE: {}, Name: {}, Type: {}>".format(
+                self.code,
+                self.name,
+                self.etype)
 
 
-# class Event_Def_Type(db.Model):
-#     """
-#     """
-#     __tablename__ = "event_def_types"
+class Event_Def_Type(db.Model):
+    """
+    """
+    __tablename__ = "event_def_types"
 
-#     code = db.Column(db.String(8), primary_key=True)
-#     events = db.relationship("Event_Definition")
+    code = db.Column(db.String(8), primary_key=True)
+    events = db.relationship("Event_Definition")
 
-#     def __repr__(self):
-#         return f"<EVENTTYPE: {self.code}>"
+    def __repr__(self):
+        return f"<EVENTTYPE: {self.code}>"
 
-#     def is_field(self):
-#         if self.code in ['horzjump', 'vertjump', 'throw']:
-#             return True
-#         return False
+    def is_field(self):
+        if self.code in ['horzjump', 'vertjump', 'throw']:
+            return True
+        return False
 
-#     def is_track(self):
-#         return ~self.is_field()
+    def is_track(self):
+        return not self.is_field()
 
-#     def is_indiv(self):
-#         if self.code == 'relay':
-#             return False
-#         else:
-#             return True
+    def is_indiv(self):
+        if self.code == 'relay':
+            return False
+        else:
+            return True
 
 
 class Division(db.Model):
