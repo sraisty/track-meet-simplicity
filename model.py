@@ -5,7 +5,6 @@ by Susan Raisty
 NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 """
 
-
 from flask_sqlalchemy import SQLAlchemy
 from util import warning, error, info
 
@@ -36,8 +35,10 @@ class Meet(db.Model):
                              secondary="meet_division_events")
     divisions = db.relationship("Division",
                                 secondary="meet_division_events")
-    # entries = db.relationship("Entry", secondary="meet_division_events")
+    entries = db.relationship("Entry", secondary="meet_division_events")
     # heats
+    # athletes
+    # schools
 
     def __repr__(self):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
@@ -81,163 +82,153 @@ class Meet(db.Model):
 #         return list(set(entries))
 
 
-# class Athlete(db.Model):
-#     """ """
-#     __tablename__ = "athletes"
+class Athlete(db.Model):
+    """ """
+    __tablename__ = "athletes"
 
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     fname = db.Column(db.String(30), nullable=False)
-#     lname = db.Column(db.String(30), nullable=False)
-#     minitial = db.Column(db.String(1), nullable=True)
-#     # TODO - Making school_id and div_id nullable so I can initially create
-#     # an athlete without having these, but then quickly add them to athlete
-#     # via db.relationship instead of by id.
-#     school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
-#     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=True)
-#     phone = db.Column(db.String(12), nullable=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    fname = db.Column(db.String(30), nullable=False)
+    lname = db.Column(db.String(30), nullable=False)
+    minitial = db.Column(db.String(1), nullable=True)
+    # TODO - Making school_id and div_id nullable so I can initially create
+    # an athlete without having these, but then quickly add them to athlete
+    # via db.relationship instead of by id.
+    school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
+    div_id = db.Column(db.ForeignKey('divisions.id'), nullable=True)
+    phone = db.Column(db.String(12), nullable=True)
 
-#     school = db.relationship("School")
-#     division = db.relationship("Division")
-#     entries = db.relationship("Entry")
-#     mdes = db.relationship("MeetDivisionEvent", secondary="entries")
+    school = db.relationship("School")
+    division = db.relationship("Division")
+    entries = db.relationship("Entry")
+    mdes = db.relationship("MeetDivisionEvent", secondary="entries")
+    # meets
 
-#     def __repr__(self):
-#         return "\n<ATHL# {}: {}, {}, {}>".format(
-#                 self.id,
-#                 self.get_full_name(self.fname, self.minitial, self.lname),
-#                 self.school.__repr__(),
-#                 self.division.__repr__())
+    def __repr__(self):
+        return "\n<ATHL# {}: {}, {}, {}>".format(
+                self.id,
+                self.get_full_name(self.fname, self.minitial, self.lname),
+                self.school.__repr__(),
+                self.division.__repr__())
 
-#     @classmethod
-#     def newAthlete(cls, fname, lname, gender_string, grade_num, minitial="",
-#                    school_name="Unattached"):
-#         """ Creates a new Athlete, but does more than the
-#         regular SQLAlchemy class constructor. It creates the mandatory
-#         relationship for school and division
-#         """
-#         info("Creating new athlete")
-#         athlete = cls(fname=fname, minitial=minitial, lname=lname)
+    @classmethod
+    def newAthlete(cls, fname, lname, gender_string, grade_num, minitial="",
+                   school_name="Unattached"):
+        """ Creates a new Athlete, but does more than the
+        regular SQLAlchemy class constructor. It creates the mandatory
+        relationship for school and division
+        """
+        info("Creating new athlete")
+        athlete = cls(fname=fname, minitial=minitial, lname=lname)
 
-#         school = School.query.filter_by(name=school_name).first()
-#         if school:
-#             athlete.school = school
-#         else:
-#             warning(f"Athlete in unknown school: {school_name}")
+        school = School.query.filter_by(name=school_name).first()
+        if school:
+            athlete.school = school
+        else:
+            warning(f"Athlete in unknown school: {school_name}")
 
-#         div = Division.get_by_gender_grade(gender_string=gender_string,
-#                                            grade_num=grade_num)
-#         if div:
-#             athlete.division = div
-#         else:
-#             warning("Athlete in unknown division. Gender={}, Grade={}".format(
-#                   gender_string, grade_num))
-#             # TODO: add the division?
+        div = Division.get_by_gender_grade(gender_string=gender_string,
+                                           grade_num=grade_num)
+        if div:
+            athlete.division = div
+        else:
+            warning("Athlete in unknown division. Gender={}, Grade={}".format(
+                  gender_string, grade_num))
+            # TODO: add the division?
 
-#         # maybe we should change the "nullable" value for the school & div
-#         # columns back to False?
-#         db.session.add(athlete)
-#         db.session.commit()
-#         return athlete
+        # maybe we should change the "nullable" value for the school & div
+        # columns back to False?
+        db.session.add(athlete)
+        db.session.commit()
+        return athlete
 
-#     def get_meets(self):
-#         """
-#         Returns the list of Meet objects where this athlete was entered
-#         """
-#         meets = {mde.meet for mde in self.mdes}
-#         return meets
+    # def get_meets(self):
+    #     """
+    #     Returns the list of Meet objects where this athlete was entered
+    #     """
+    #     meets = {mde.meet for mde in self.mdes}
+    #     return meets
 
-#     def get_meet_entries(self, meet):
-#         """
-#         Returns a non-duplicated list of the athlete's Entry objects for the
-#         specied meet
-#         """
-#         entries_set = {mde.entries[0] for mde in self.mdes
-#                        if mde.meet_id == meet.id}
-#         # TODO - combine with above, but make it easier
-#         return entries_set
+    # def get_meet_entries(self, meet):
+    #     """
+    #     Returns a non-duplicated list of the athlete's Entry objects for the
+    #     specied meet
+    #     """
+    #     entries_set = {mde.entries[0] for mde in self.mdes
+    #                    if mde.meet_id == meet.id}
+    #     # TODO - combine with above, but make it easier
+    #     return entries_set
 
-#     def enter_event(self, meet, event_abbrev):
-#         """ """
-#         # Get the corresponding meet_event_div
-#         query = MeetDivisionEvent.query.filter_by(meet_id=meet.id)
-#         query = query.filter_by(div_id=self.division.id)
-#         event_def = Event_Definition.query.filter_by(abbrev=event_abbrev).one()
-#         query = query.filter_by(event_def_id=event_def.id)
+    # def enter_event(self, meet, event_abbrev):
+    #     """ """
+    #     # Get the corresponding meet_event_div
+    #     query = MeetDivisionEvent.query.filter_by(meet_id=meet.id)
+    #     query = query.filter_by(div_id=self.division.id)
+    #     event_def = Event_Definition.query.filter_by(abbrev=event_abbrev).one()
+    #     query = query.filter_by(event_def_id=event_def.id)
 
-#         mde = query.first()
-#         if mde:
-#             # TODO: Did the athlete already enter this event? If they did,
-#             # warn and don't create a new Entry
-#             entry = Entry(athlete_id=self.id,
-#                           mde_id=mde.id)
-#             self.entries.append(entry)
-#             db.session.commit()
-#         else:
-#             error("Athlete entering non-existent event that does not exist.",
-#                   "Athlete: {} {}. Event: {}, Meet: {}".format(
-#                    self.fname, self.lname, event_abbrev, meet.name))
+    #     mde = query.first()
+    #     if mde:
+    #         # TODO: Did the athlete already enter this event? If they did,
+    #         # warn and don't create a new Entry
+    #         entry = Entry(athlete_id=self.id,
+    #                       mde_id=mde.id)
+    #         self.entries.append(entry)
+    #         db.session.commit()
+    #     else:
+    #         error("Athlete entering non-existent event that does not exist.",
+    #               "Athlete: {} {}. Event: {}, Meet: {}".format(
+    #                self.fname, self.lname, event.code, meet.name))
 
-#     @staticmethod
-#     def get_full_name(fname, minitial, lname):
-#         """
-#         Creates a fullname from the first name, last name, and middle initial,
-#         with spaces in between. Note that middle initial might not be present,
-#         or it might have been passed as more than one character, in which case
-#         we just take the first character.
-
-#         >>> Athlete.get_full_name("Susan", "Kathleen", "Raisty")
-#         'Susan K. Raisty'
-
-#         >>> Athlete.get_full_name("Jane", "", "Doe")
-#         'Jane Doe'
-#         """
-#         if minitial:
-#             return f"{fname} {minitial[0]}. {lname}"
-#         return f"{fname} {lname}"
+    @staticmethod
+    def get_full_name(fname, minitial, lname):
+        """ Creates a fullname from the first, last name, and middle initial
+        >>> Athlete.get_full_name("Jane", "", "Doe")
+        'Jane Doe'
+        """
+        if minitial:
+            return f"{fname} {minitial[0]}. {lname}"
+        return f"{fname} {lname}"
 
 
-# class Entry(db.Model):
-#     """
-#     A middle object between Athlete and MeetDivisionEvent.  Each Entry object
-#     has an entry of one athletes into one MeetDivisionEvent-combo object. Each
-#     athlete can enter multiple events at a meet, within his/her division.
-#     Each division within an event has multiple athletes.
+class Entry(db.Model):
+    """
+    A middle object between Athlete and MeetDivisionEvent.  Each Entry object
+    has an entry of one athletes into one MeetDivisionEvent-combo object. Each
+    athlete can enter multiple events at a meet, within his/her division.
+    Each division within an event has multiple athletes.
 
-#     Note that entering into an event doesn't mean the athlete will actually
-#     get assigned to the event
-#     """
-#     __tablename__ = "entries"
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Note that entering into an event doesn't mean the athlete will actually
+    get assigned to the event
+    """
+    __tablename__ = "entries"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-#     # athlete_id = db.Column(db.ForeignKey("athletes.id"),
-#     #                        nullable=False)
-#     # mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
-#     #                    nullable=False)
-#     # mark_id = db.Column(db.ForeignKey("marks.id"))
-#     # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
+    athlete_id = db.Column(db.ForeignKey("athletes.id"),
+                           nullable=False)
+    mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
+                       nullable=False)
+    # # mark_id = db.Column(db.ForeignKey("marks.id"))
+    # # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
-#     # athlete = db.relationship("Athlete")
-#     # division = db.relationship("Division",
-#     #                            secondary="athletes",
-#     #                            uselist=False)
-#     mde = db.relationship("MeetDivisionEvent")
-#     event = db.relationship("Event_Definition",
-#                             secondary="meet_division_events",
-#                             uselist=False)
-#     meet = db.relationship("Meet",
-#                            secondary="meet_division_events",
-#                            uselist=False)
-#     # assigned_heat = db.relationship("Heat")
-#     # mark = db.relationship("Mark")
+    athlete = db.relationship("Athlete", uselist=False)
+    division = db.relationship("Division",
+                               secondary="athletes",
+                               uselist=False)
+    mde = db.relationship("MeetDivisionEvent", uselist=False)
+    event = db.relationship("Event_Definition",
+                            secondary="meet_division_events",
+                            uselist=False)
+    meet = db.relationship("Meet",
+                           secondary="meet_division_events",
+                           uselist=False)
+    # assigned_heat = db.relationship("Heat")
+    # mark = db.relationship("Mark")
 
-#     def __repr__(self):
-#         # return ("\n<ENTRY #{}, Ath: TODO {}, Event: {}, Div: {}, Meet: {}>"
-#         #         .format(
-#         #             self.id, self.athlete.fname, self.athlete.lname,
-#         #             self.event.abbrev, self.division, self.meet.name))
-#         return ("\n<ENTRY #{}, Ath: TODO, Event: {}, Div: {}, Meet: {}>"
-#                 .format(
-#                     self.id, self.event.abbrev, self.division, self.meet.name))
+    def __repr__(self):
+        return ("\n<ENTRY #{}, Ath: TODO {}, Event: {}, Div: {}, Meet: {}>"
+                .format(
+                    self.id, self.athlete.fname, self.athlete.lname,
+                    self.event.abbrev, self.division, self.meet.name))
 
 
 # class Mark(db.Model):
@@ -262,7 +253,7 @@ class Meet(db.Model):
 
 class MeetDivisionEvent(db.Model):
     """
-    Associative table to handle the many to many relationship between Events, 
+    Associative table to handle the many to many relationship between Events,
     Divisions, and Meets
     """
     __tablename__ = "meet_division_events"
@@ -272,13 +263,14 @@ class MeetDivisionEvent(db.Model):
     event_code = db.Column(db.ForeignKey("event_defs.code"),
                            nullable=False)
 
-    division = db.relationship("Division")
-    # entries = db.relationship("Entry")
-    meet = db.relationship("Meet")
-    event = db.relationship("Event_Definition")
+    entries = db.relationship("Entry")
+    athletes = db.relationship("Athlete", secondary="entries")
+    meet = db.relationship("Meet", uselist=False)
+    division = db.relationship("Division", uselist=False)
+    event = db.relationship("Event_Definition", uselist=False)
     gender = db.relationship("Gender", secondary="divisions", uselist=False)
-    grade = db.relationship("Grade", secondary="divisions", uselist=False)    
-    # athletes = db.relationship("Athlete", secondary=entries)
+    grade = db.relationship("Grade", secondary="divisions", uselist=False)
+
 
     def __repr__(self):
         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
@@ -344,9 +336,9 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
-    # athletes = db.relationship("Athlete")
-    # divisions = db.relationship("Division", secondary="athletes")
-    # entries = db. relationship("Entry", secondary="athletes")
+    athletes = db.relationship("Athlete")
+    divisions = db.relationship("Division", secondary="athletes")
+    entries = db.relationship("Entry", secondary="athletes")
 
     def __repr__(self):
         return "<SCHOOL id#{}: {}>".format(self.id, self.name)
@@ -367,7 +359,7 @@ class Event_Definition(db.Model):
     mdes = db.relationship("MeetDivisionEvent")
     divisions = db.relationship("Division", secondary="meet_division_events")
     meets = db.relationship("Meet", secondary="meet_division_events")
-    # entries
+    entries = db.relationship("Entry", secondary="meet_division_events")
     # heats
 
     def __repr__(self):
@@ -418,11 +410,11 @@ class Division(db.Model):
     meets = db.relationship("Meet", secondary="meet_division_events")
     events = db.relationship("Event_Definition",
                              secondary="meet_division_events")
-    grade = db.relationship("Grade")
-    gender = db.relationship("Gender")
-    # athletes
-    # schools
-    # entries
+    grade = db.relationship("Grade", uselist=False)
+    gender = db.relationship("Gender", uselist=False)
+    athletes = db.relationship("Athlete")
+    schools = db.relationship("School", secondary="athletes")
+    entries = db.relationship("Entry", secondary="athletes")
 
     def __repr__(self):
         """ returns human-readable representation of Division object """
@@ -430,13 +422,11 @@ class Division(db.Model):
 
     @classmethod
     def get_by_gender_grade(cls, gender_string, grade_num):
-        """ Gets the division given the gender string (as "M" or "F"),
-        and the grade as a number. Returns None if no division exists that
-        matches the gender/grade combo.
+        """ Gets the division w/ gender_string ("M" or "F"),
+        and grade as a number. Returns None if none match.
         """
-        division = cls.query.filter_by(gender_code=gender_string,
-                                       grade_code=str(grade_num)).first()
-        return division
+        return cls.query.filter_by(gender_code=gender_string,
+                                   grade_code=str(grade_num)).one_or_none()
 
     def get_div_name(self):
         # To do  - move this into a __init__
@@ -509,6 +499,6 @@ def reset_database():
 
 if __name__ == "__main__":
     from server import app
-    reset_database()
+    # reset_database()
     connect_to_db(app, "tms-dev")
     db.create_all()
