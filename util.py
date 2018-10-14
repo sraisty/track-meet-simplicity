@@ -18,6 +18,7 @@ def print_and_log(level, message, repr_string):
 def error(message, repr_string=""):
     """ prints and logs the message with "ERROR" prefix """
     print_and_log("error", message, repr_string)
+    raise Exception(f"{message} {repr_string}")
 
 
 def warning(message, repr_string=""):
