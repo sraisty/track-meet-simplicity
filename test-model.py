@@ -243,69 +243,69 @@ class TestRelationships(unittest.TestCase):
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_event_to_mde(self):
-        pass
+    # def test_event_to_mde(self):
+    #     pass
 
-    def test_mde_to_entries(self):
-        pass
+    # def test_mde_to_entries(self):
+    #     pass
 
-    def test_mde_to_athletes(self):
-        pass
+    # def test_mde_to_athletes(self):
+    #     pass
 
-    def test_meet_to_mdes(self):
-        pass
+    # def test_meet_to_mdes(self):
+    #     pass
 
-    def test_meet_to_entries(self):
-        pass
+    # def test_meet_to_entries(self):
+    #     pass
 
-    def test_meet_to_divisions(self):
-        pass
+    # def test_meet_to_divisions(self):
+    #     pass
 
-    def test_meet_to_event_defs(self):
-        pass
+    # def test_meet_to_event_defs(self):
+    #     pass
 
-    def test_meet_to_heats(self):
-        pass
+    # def test_meet_to_heats(self):
+    #     pass
 
-    def test_meet_to_athletes(self):
-        pass
+    # def test_meet_to_athletes(self):
+    #     pass
 
-    def test_meet_to_schools(self):
-        pass
+    # def test_meet_to_schools(self):
+    #     pass
 
-    def test_meet_to_host_school(self):
-        pass
+    # def test_meet_to_host_school(self):
+    #     pass
 
     def test_event_to_mde_relationship(self):
         e = Event_Definition.query.filter_by(code="1600M").one()
         self.assertEqual(6, len(e.mdes))
 
-    def test_event_to_entries_relationship(self):
-        pass
+    # def test_event_to_entries_relationship(self):
+    #     pass
 
-    def test_event_to_meets_relationship(self):
-        pass
+    # def test_event_to_meets_relationship(self):
+    #     pass
 
-    def test_event_to_divisions_relationship(self):
-        pass
+    # def test_event_to_divisions_relationship(self):
+    #     pass
 
-    def test_division_to_mdes_relationship(self):
-        pass
+    # def test_division_to_mdes_relationship(self):
+    #     pass
 
-    def test_division_to_meets_relationship(self):
-        pass
+    # def test_division_to_meets_relationship(self):
+    #     pass
 
-    def test_division_to_entries_relationship(self):
-        pass
+    # def test_division_to_entries_relationship(self):
+    #     pass
 
-    def test_division_to_events_relationship(self):
-        pass
+    # def test_division_to_events_relationship(self):
+    #     pass
 
-    def test_division_to_athletes_relationship(self):
-        pass
+    # def test_division_to_athletes_relationship(self):
+    #     pass
 
-    def test_division_to_schools_relationship(self):
-        pass
+    # def test_division_to_schools_relationship(self):
+    #     pass
 
 
 class testAthlete(unittest.TestCase):
@@ -542,17 +542,17 @@ class testSchools(unittest.TestCase):
         self.assertEqual(unattachedSchool.name, "Unattached")
         self.assertEqual(unattachedSchool.abbrev, "UNA")
 
-    def test_school_to_division_relationship(self):
-        pass
+    # def test_school_to_division_relationship(self):
+    #     pass
 
-    def test_school_to_athlete_relationship(self):
-        pass
+    # def test_school_to_athlete_relationship(self):
+    #     pass
 
-    def test_school_to_entries_relationship(self):
-        pass
+    # def test_school_to_entries_relationship(self):
+    #     pass
 
-    def test_hostschool_to_meet_relationship(self):
-        pass
+    # def test_hostschool_to_meet_relationship(self):
+    #     pass
 
 
 class testDivision(unittest.TestCase):
