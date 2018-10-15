@@ -3,13 +3,14 @@ TESTS on data model in model.py
 by Sue Raisty
 
 """
+from decimal import *
 import unittest
 
 from sqlalchemy.exc import IntegrityError, DataError
 
 from model import (db, reset_database, Division, School, Event_Definition,
                    Meet, MeetDivisionEvent, Athlete, Entry,
-                   GENDERS, GRADES)
+                   GENDERS, GRADES, EVENT_DEFS)
 from init_data import (populate_example_meets, populate_example_data)
 from server import app
 
@@ -17,18 +18,7 @@ from server import app
 # We are not importing the following 'constants' from init_data because
 # we don't want these unit tests to break when we one day add more events,
 # more grades, etc.
-EVENT_DEFS = ({"code": "100M", "name": "100 Meter", "type": "sprint"},
-              {"code": "800M", "name": "800 Meter", "type": "sprint"},
-              {"code": "1600M", "name": "1600 Meter", "type": "distance"},
-              {"code": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
-              {"code": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
-              {"code": "4x400M", "name": "4x400 Meter Relay", "type": "relay"},
-              {"code": "LJ", "name": "Long Jump", "type": "horzjump"},
-              {"code": "TJ", "name": "Triple Jump", "type": "horzjump"},
-              {"code": "DT", "name": "Discus Throw", "type": "throw"},
-              {"code": "SP", "name": "Shot Put Throw", "type": "throw"},
-              {"code": "HJ", "name": "High Jump", "type": "vertjump"},
-              {"code": "PV", "name": "Pole Vault", "type": "vertjump"})
+
 
 
 EXAMPLE_MEETS = ({"name": "A Meet from the Past",
@@ -189,20 +179,32 @@ class testMeetDivisionEvent(unittest.TestCase):
         db.session.commit()
         self.meet1 = Meet.query.filter_by(name="Meet #1").one()
 
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_mde_generate_mdes_one_meet_and_count(self):
         Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
         divs = Division.query.all()
         Event_Definition.generate_event_defs(EVENT_DEFS)
         events = Event_Definition.query.all()
         MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
+        num_mdes = MeetDivisionEvent.query.count()
+        self.assertEqual(num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
 
-    def tearDown(self):
-        teardown_test_db_app()
-
-    def test_mde_generate_mdes_one_meet_and_count(self):
+    def test_mde_generate_mdes_with_returned_divs_and_events(self):
+        divs = Division.generate_divisions(gender_list=GENDERS,
+                                           grade_list=GRADES)
+        events = Event_Definition.generate_event_defs(EVENT_DEFS)
+        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
         num_mdes = MeetDivisionEvent.query.count()
         self.assertEqual(num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
 
     def test_mde_meet_division_event_relationships(self):
+        divs = Division.generate_divisions(gender_list=GENDERS, 
+                                           grade_list=GRADES)
+        events = Event_Definition.generate_event_defs(EVENT_DEFS)
+        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
+
         g7 = Division.query.filter_by(grade="7", gender="F").one()
         hj = Event_Definition.query.filter_by(code="HJ").one()
 
@@ -319,8 +321,8 @@ class testAthlete(unittest.TestCase):
         teardown_test_db_app()
 
     def test_Athlete_constructor(self):
-        sue = Athlete(fname="Susan", minitial="K", lname="Raisty",
-                      gender="F", grade="7")
+
+        sue = Athlete("Susan", "K", "Raisty", "F", "7")
         # sue.school = unattached
         db.session.add(sue)
         db.session.commit()
@@ -367,6 +369,23 @@ class testEntry(unittest.TestCase):
 
     def test_one_entry_one_meet(self):
         pass
+
+
+    def test_time_mark_conversion(self):
+        self.assertAlmostEqual(11.45, Entry.time_string_to_seconds('11.45'))
+        self.assertAlmostEqual(61.34, Entry.time_string_to_seconds('1:01.34'))
+        self.assertAlmostEqual(7201.24, 
+                               Entry.time_string_to_seconds('2:00:01.24'))
+        self.assertAlmostEqual(3601.24,
+                               Entry.time_string_to_seconds('01:00:01.24'))
+ 
+    def test_time_mark_to_string(self):
+        self.assertEqual("23:23:23.23", Entry.time_mark_to_string(84203.23))
+        self.assertEqual("1:01:01.01", Entry.time_mark_to_string(3661.01))
+        self.assertEqual("59:59.59", Entry.time_mark_to_string(3599.592))
+        self.assertEqual("4:04.04", Entry.time_mark_to_string(244.04))
+        self.assertEqual("58.90", Entry.time_mark_to_string(58.9))
+        self.assertEqual("9.93", Entry.time_mark_to_string(9.93))
 
 
 ###################################

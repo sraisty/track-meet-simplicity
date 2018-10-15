@@ -23,14 +23,13 @@ EXAMPLE_MEETS = ({"name": "A Meet from the Past",
 ########################################
 
 
-
 def populate_example_meets(meet_list):
     for meet_dict in meet_list:
         meet = Meet(name=meet_dict['name'], date=meet_dict['date'],
                     status=meet_dict.get('status', 'accepting_entries'))
+
         db.session.add(meet)
         db.session.commit()
-
 
 
 def populate_example_data():

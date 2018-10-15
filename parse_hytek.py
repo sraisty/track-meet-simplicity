@@ -1,8 +1,237 @@
 """ This file parses a "Hytek" meet entry file, which is in a semicolon
 separated format.  Details on this file format follow:
+"""
+
+# import sys
 
 
-################
+from model import (Athlete, School, Entry, Division, Event_Definition,
+                    MeetDivisionEvent,
+                   db, connect_to_db, GENDERS, GRADES)
+from util import warning, error, info
+
+# Translate HyTek's codes for events into our codes
+ht_event_translator = {'100': '100M', '200': '200M', '400': '400M',
+                      '800': '800M', '1600': '1600M', '3200': '3200M'}
+
+
+def parse_hytek_file(filename, meet):
+    """
+    Opens a hytek entry file, parses it and writes the records to the database
+    """
+
+    with open(filename) as file:
+
+        for line in file:
+            tokens = line.strip().split(';')
+            linetype = tokens[0]
+
+            if linetype == "I":
+                parse_athlete(tokens)
+
+            elif linetype == "D":
+                parse_entry(tokens, meet)
+
+            elif linetype == "Q":
+                parse_relay(tokens)
+
+            else:
+                warning(f"Ignoring unknown line type: {line}")
+
+
+def parse_athlete(tokens):
+    """
+    SIDE EFFECTS: might add an athlete and/or their school to the Database.
+
+    Parses the "I" line in a hytek file.
+    I LINE FORMAT:
+    <filed> <data> <numchars>  <notes>
+    1   I   1               Information Record
+    2   Last Name   20      (Required)
+    3   First Name   20     (Required)
+    4   Initial   1
+    5   Gender   1          M = Male, F = Female (Required)
+    6   Birth Date   10     MM/DD/YYYY (Optional)
+    7   Team Code   4       4 character max; use UNA if unknown (Required)
+    8   Team Name   30      Use Unattached if unknown (Required)
+    9   Age   3             Optional if birth date provided
+    10   School Year   2   (Optional)
+    18   Home Phone   20   (Optional)
+
+    More specific detail about the file format and its rules are at bottom o
+    of this file
+
+    """
+    tokens = tokens[:]  # make a copy so we don't mutate the original list
+    info(f"Parsing I-Line: {tokens}")
+    if len(tokens) < 10:
+        # TODO - one day, only require 7 fields. But for first release we
+        # need files that have the School Year at tokens[9]
+        error(f"I-Line requires at least 9 fields. <{tokens}>")
+
+    (last_name, first_name, middle, gender, _junk, team_code,
+        team_name, _junk2, grade) = tokens[1:10]
+
+    athlete = add_athlete_to_db(first_name, middle, last_name, gender,
+                                grade, team_code, team_name)
+    assert(athlete)  # athlete should definitely be in the DB at this point.
+
+    # If present in this I-record, add the athlete's phone (for SMS) to db
+    # Note that this will override any previous phone numbers for this athlete
+    # in the databse.
+    if len(tokens) > 17:
+        phone = tokens[17]
+
+    if athlete.phone and phone:
+        athlete.phone = phone
+        # db.session.add(athlete)
+        db.session.commit()
+
+
+
+def parse_entry(tokens, meet):
+    """
+    Data   MaxChar   Notes for the D Record
+    1   D   1               Individual Entry Record
+    2   Last Name   20      (Required)
+    3   First Name  20      (Required)
+    4   Initial     1       (Optional)
+    5   Athlete Gender   1   M = Male, F = Female (Required)
+    6   Birth Date   10     MM/DD/YYYY (Optional)
+    7   Team Code   4       4 characters max; use UNA if unknown (Required)
+    8   Team Name   30      Use Unattached if unknown (Required)
+    9   Age   3             Age is optional if birth date provided
+    10   School Year   2    (Optional)
+    11   Event Code   10    Examples: 100, 5000S, 10000W, SP, HJ, DEC
+    12   Entry Mark   11    Time: hh:mm:ss.tt (1:23.44.55, 1:19.14, 58.83, 13.4h)
+            Field Metric: 12.33, 1233;
+            English: 12-10.25", 12', 121025, 12' 10
+            Combined-event: 3020 (points)
+    13   Event measure (required): M for Metric, E for English (Required)
+    """
+    tokens = tokens[:]  # make a copy so we don't mutate the original list
+    info(f"Parsing D-Line: {tokens}")
+    if len(tokens) < 10:
+        # TODO - one day, only require 7 fields. But for first release we
+        # need files that have the School Year at tokens[9]
+        error(f"I-Line requires at least 9 fields. <{tokens}>")
+
+    (last_name, first_name, middle, gender, _junk, team_code,
+        team_name, _junk2, grade) = tokens[1:10]
+
+    athlete = add_athlete_to_db(first_name, middle, last_name, gender,
+                                grade, team_code, team_name)
+
+
+    # Now, get the event the athlete is entering
+    ht_event_code = tokens[10]
+    tms_event_code = ht_event_translator.get(ht_event_code, ht_event_code)
+
+    # Get the MDE for this event
+    q = MeetDivisionEvent.query
+    mde = q.filter_by(meet_id=meet.id,
+                      event_code=tms_event_code,
+                      div_id=athlete.division.id).one()
+    entry = Entry()
+    entry.athlete = athlete
+    mde.entries.append(entry)  # shouldn't have to do a db.session cuz of this
+
+    # If the athlete has a previous mark for this event, get it.
+    if len(tokens[11:13]) == 2:
+        mark_string = tokens[11]
+        mark_measure_type = tokens[12]
+
+        if mark_string and mark_measure_type:       #aren't the empty string
+
+            if mark_measure_type == "E":
+                # TODO - fix this for field events that are measured in Metric.
+                # But for now it will work with california high school & ms meets
+                mark_type = "inches"
+                mark = Entry.field_english_mark_to_inches(mark_string)
+            else:
+                mark_type = "seconds"
+                mark = Entry.time_string_to_seconds(mark_string)
+            entry.mark = mark
+            entry.mark_type = mark_type
+
+
+    db.session.commit()
+
+
+
+def parse_relay(tokens):
+    pass
+
+
+##### Helper Functions
+
+def add_athlete_to_db(first_name, middle, last_name, gender,
+                       grade, team_code, team_name):
+    """ If the Athlete is not already in the database, add him/her. Will
+    also add the athlete's school if it is not already in the database as well.
+
+    Fields 2-8 of any record uniquely identify an athlete and must be the
+    same across all entry records and athlete info records
+    See if this athlete is already in the database.
+    """
+
+    # See if there is an athlete with the same name, gender and team code
+    # in the database. Note that the GRADE is NOT used to idenitfy the
+    # athlete, per HyTek's file format rules.
+    athlete = Athlete.get_athlete(first_name, middle, last_name, gender,
+                                  team_code)
+    # Athlete is already in DB, so return it.
+    if athlete:
+        return athlete
+
+
+    # The athlete is NOT already in the database, so let's add him/her.
+
+    # First check if this athlete's school is already in the database. If not,
+    # add the school to the database. Note: the school must be committed to the 
+    # database before adding the athlete, or an Exception will result.
+    school = School.query.filter_by(name=team_name,
+                                    abbrev=team_code).one_or_none()
+    if not school:
+        warning(f"Unknown School Found: {team_name}, code:{team_code}")
+        school = School(name=team_name, abbrev=team_code)
+        db.session.add(school)
+        db.session.commit()
+        warning(f"Added new school): {team_name}, code:{team_code}")
+
+    # create a new athlete, and add it to the database.
+    athlete = Athlete(first_name, middle, last_name, gender, grade,
+                      team_code)
+    db.session.add(athlete)
+    db.session.commit()
+    return athlete
+
+
+
+# ###############
+if __name__ == "__main__":
+    from server import app
+    connect_to_db(app, "tms-dev")
+    db.session.remove()
+    db.drop_all()
+    db.create_all()
+
+    School.init_unattached_school()
+    Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
+    Event_Definition.generate_event_defs(EVENT_DEFS)
+
+
+    parse_hytek_file("seed_data/MiddleSchool_PCS_45.txt")
+    # if len(sys.argv) > 1:
+    #     open_hytek_file(sys.argv[1])
+    # else:
+    #     print "Please provide the filename that contains athelete and event entry information."
+
+
+
+
+"""
+# ################
 INFORMATION FROM HYTEK:
 
 A semi-colon delimited format is available for importing entries, relays,
@@ -300,114 +529,3 @@ Distance Medley relays:   Distance plus D, such as 3200D.
 Shuttle Hurdle relay:   Distance plus H, such as 240H.
 
 """
-
-import sys
-from model import Athlete, School, Entry
-from util import warn, error, info
-
-
-def open_hytek_file(filename):
-    """
-    Opens a hytek entry file, parses it and writes the records to the database
-    """
-
-    with open(filename) as file:
-        for line in file:
-            tokens = line.strip().split(';')
-            linetype = tokens[0]
-            if linetype == "I":
-                parse_athlete_info(tokens)
-            elif linetype == "D" or linetype == "E":
-                parse_event_entry(tokens)
-            elif linetype == "Q" or linetype == "R":
-                parse_relay_entry(tokens)
-
-
-def parse_athlete_info(tokens):
-    """
-    This line is "optional", but if it is present, it must include at least the
-    first 
-
-    I LINE FORMAT:
-    <filed> <data> <numchars>  <notes>
-    1   I   1               Information Record
-    2   Last Name   20      (Required)
-    3   First Name   20     (Required)
-    4   Initial   1
-    5   Gender   1          M = Male, F = Female (Required)
-    6   Birth Date   10     MM/DD/YYYY (Optional)
-    7   Team Code   4       4 character max; use UNA if unknown (Required)
-    8   Team Name   30      Use Unattached if unknown (Required)
-    9   Age   3             Optional if birth date provided
-    10   School Year   2   (Optional)
-    18   Home Phone   20   (Optional)
-
-    RULES:
-
-    1. If no information for a given field, leave it blank, but include the
-    semi-colon.
-
-    2. Each record must be followed by a carriage return & line feed.
-
-    3. At any point in a record, if all remaining fields are blank,
-    it can be ended with a carriage return without all the extra semi-colons.
-
-    4. For each athlete there can be one information record. You create one E
-    record or D record for each individual entry. The 2nd thru 10th fields of
-    both the I, D and E record types are identical. One relay per relay entry
-    record with up to 8 relay runner names.
-
-    5. The order of each record makes no difference.
-
-    6. For each I, D or E record for the same athlete, fields 2 through 8 must
-    be the same.
-
-    7. The I record is optional and thus not required.
-
-    """
-    tokens = tokens[:]  # make a copy so we don't mutate the original list
-    info(f"Parsing I-Line: {tokens}")
-    if len(tokens) < 10:
-        # TODO - one day, only require 7 fields. But for first release we
-        # need files that have the School Year at tokens[9]
-        error(f"I-Line requires at least 9 fields. <{tokens}>")
-
-    (last_name,
-     first_name,
-     middle,
-     gender,
-     __birth_date,            # not using this in first release
-     team_code,
-     team_name,
-     __age,                   # not using this in first release
-     school_year) = tokens[1:10]
-
-    # If present, use the athlete's phone number to send text alerts to him/her
-    if tokens[17]:
-        phone = tokens[17]
-    else:
-        phone = None
-
-    # First check if this athlete's school is already in the meet, and make
-    # sure it is a legal school
-    school = School.query.filter_by(name=team_name,
-                                    abbrev=team_code).one_or_none()
-
-    # Check to make sure that this athlete belongs to an existing divisiion?
-    division = Division.query.filter_by(gender_code=gender,
-                                        grade=school_year).one_or_none()
-
-    athlete = Athlete(fname=first_name, lname=last_name, middle=middle)
-    if school:
-        athlete.school = school
-
-    return athlete
-
-
-# ###############
-if __name__ == "__main__":
-
-    if len(sys.argv) > 1:
-        athletes = open_hytek_file(sys.argv[1])
-    else:
-        print "Please provide the filename that contains athelete and event entry information."

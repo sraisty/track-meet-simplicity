@@ -4,11 +4,12 @@ by Susan Raisty
 
 NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 """
-
+from decimal import *
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import NoResultFound
+
 from util import warning, error, info
 
 GENDERS = ('M', 'F')
@@ -17,32 +18,55 @@ ADULT_CHILD = ('adult', 'child')
 DIV_NAME_DICT = {"child": {"M": "Boys", "F": "Girls"},
                  "adult": {"M": "Men", "F": "Women"}}
 
+EVENT_DEFS = ({"code": "100M", "name": "100 Meter", "type": "sprint"},
+              {"code": "200M", "name": "200 Meter", "type": "sprint"},
+              {"code": "400M", "name": "400 Meter", "type": "sprint"},
+              {"code": "800M", "name": "800 Meter", "type": "sprint"},
+              {"code": "1600M", "name": "1600 Meter", "type": "distance"},
+              {"code": "3200M", "name": "3200 Meter", "type": "distance"},
+              {"code": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
+              {"code": "4x400M", "name": "4x400 Meter Relay", "type": "relay"},
+              {"code": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
+              {"code": "100H", "name": "100 Meter Hurdles (Girls Only)", "type": "sprint"},
+              {"code": "110H", "name": "110 Meter Hurdles (Boys Only)", "type": "sprint"},
+              {"code": "300H", "name": "300 Meter Hurdles", "type": "sprint"},  
+              {"code": "LJ", "name": "Long Jump", "type": "horzjump"},
+              {"code": "TJ", "name": "Triple Jump", "type": "horzjump"},
+              {"code": "DT", "name": "Discus Throw", "type": "throw"},
+              {"code": "SP", "name": "Shot Put Throw", "type": "throw"},
+              {"code": "HJ", "name": "High Jump", "type": "vertjump"},
+              {"code": "PV", "name": "Pole Vault", "type": "vertjump"})
+
+
 EVENT_TYPES = ("sprint", "distance", "relay",
                 "vertjump", "horzjump", "throw")
 
 MEET_STATUS = ("accepting_entries", "entries_closed", "athletes_assigned",
                "done")
 
+MARK_TYPES = ("seconds", "inches", "meters")
+
 db = SQLAlchemy()
 
 # #############
-class Tms_App:
-    """ 
-    TODO - This is just a regular class, not mapped to the database?  
-    Do I really need this?
-    """
-    def __init__(self):
-        self.meets = []
-        self.athletes = []
-        self.schools = []
-        School.init_unattached_school()
-        Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-        Event_Definition.generate_event_defs(EVENT_DEFS)
+# class Tms_App:
+#     """ 
+#     TODO - This is just a regular class, not mapped to the database?  
+#     Do I really need this?
+#     """
+#     def __init__(self):
+#         self.meets = []
+#         self.athletes = []
+#         self.schools = []
+#         School.init_unattached_school()
+#         Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
+#         Event_Definition.generate_event_defs(EVENT_DEFS)
 
-    # def get_all_meets(self):
-    """ returns a list of all meets, inactive, active, and whatever status """
+# def get_all_meets(self):
+""" returns a list of all meets, inactive, active, and whatever status """
 
 meet_status_enum = Enum(*MEET_STATUS, name="meet_status")
+
 
 class Meet(db.Model):
     __tablename__ = "meets"
@@ -61,14 +85,14 @@ class Meet(db.Model):
     max_entries_per_athlete = db.Column(db.Integer, nullable=True)
     max_team_entries_per_event = db.Column(db.Integer, nullable=True)
 
-
-    host_school = db.relationship("School")
-    mdes = db.relationship("MeetDivisionEvent")
+    host_school = db.relationship("School", uselist=False)
+    mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
     events = db.relationship("Event_Definition",
                              secondary="meet_division_events")
     divisions = db.relationship("Division",
                                 secondary="meet_division_events")
-    entries = db.relationship("Entry", secondary="meet_division_events")
+    entries = db.relationship("Entry", secondary="meet_division_events",
+                              back_populates="meet")
     # heats
     # athletes
     # schools
@@ -76,43 +100,6 @@ class Meet(db.Model):
     def __repr__(self):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
 
-
-#     def get_schools(self, no_entries=False):
-#         """
-#         Returns the a list of School objects who are "entered" into the Meet,
-#         by virtue of having at least one athlete entered into one of its
-#         DivisionEvents
-#         """
-#         schools_set = set()
-#         athletes = self.get_athletes()
-#         for athlete in athletes:
-#             schools_set.add(athlete.school)
-#         return list(schools_set)
-
-#     def get_athletes(self):
-#         """
-#         Returns the list of Athlete objects who are entered into this meet,
-#         so that none are duplicated
-#         """
-#         entries = self.get_entries()
-#         athletes = []
-#         for entry in entries:
-#             athletes.append(entry.athlete)
-#         return list(set(athletes))
-
-#     def get_heat_list():
-#         """
-#         Returns ordered list of all of a meet's heats, from beginning of
-#         meet to end of meet
-#         """
-#         pass
-
-#     def get_entries(self):
-#         """ get all the entries the meet (all divisions & events) """
-#         entries = []
-#         for mde in self.mdes:
-#             entries.extend(mde.entries)
-#         return list(set(entries))
 
 
 class Athlete(db.Model):
@@ -125,20 +112,20 @@ class Athlete(db.Model):
     minitial = db.Column(db.String(1), nullable=True)
     phone = db.Column(db.String(12), nullable=True)
 
-    school_id = db.Column(db.ForeignKey('schools.id'), nullable=False)
+    school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
 
-    school = db.relationship("School")
-    division = db.relationship("Division")
-    entries = db.relationship("Entry")
-    mdes = db.relationship("MeetDivisionEvent", secondary="entries")
+    school = db.relationship("School", back_populates="athletes")
+    division = db.relationship("Division", back_populates="athletes")
+    entries = db.relationship("Entry", back_populates="athlete")
+    mdes = db.relationship("MeetDivisionEvent", secondary="entries",
+                           back_populates="athletes")
     # meets
 
     def __init__(self, fname, minitial, lname, gender, grade,
                  school_abbrev="UNA", phone=None):
-
-        """ You actually CAN have a __init__ method for a class mapped to 
-        SQLAlchemy!!!  You just have to map the  colums 
+        """ You actually CAN have a __init__ method for a class mapped to
+        SQLAlchemy!!!  You just have to map the  columns
         via self.<dbColumn Name> =  foo
         Note that the athlete hasn't been added to the db session or committed
         """
@@ -153,15 +140,16 @@ class Athlete(db.Model):
         try:
             div = div_q.one()
         except NoResultFound:
-           error(f"Athlete {fname} {lname}: age and/or gender don't match any Division")
+            error(f"Athlete {fname} {lname}: No division for age/gender")
         self.division = div
 
         school = School.query.filter_by(abbrev=school_abbrev).one_or_none()
         if not school:
-            warning(f"Athete {fname} {lname}:School ({school_abrev}) doesn't exist in TMS.")
+            warning(f"Athete {fname} {lname}:School ({school_abbrev}) doesn't exist in TMS.")
             warning(f"\nAssigning {fname} {lname} to 'Unattached' school.")
-            school = School.query.filter_by(abbrev="UNA").one
+            school = School.query.filter_by(abbrev="UNA").one()
         self.school = school
+
 
     def __repr__(self):
         return "\n<ATHL# {}: {}, {}, {}>".format(
@@ -182,29 +170,28 @@ class Athlete(db.Model):
             return f"{fname} {minitial[0]}. {lname}"
         return f"{fname} {lname}"
 
+    @classmethod
+    def get_athlete(cls, fname, middle, lname, gender, school_code):
+        """ The HyTek file format requires that the first 7 fields of an 
+        athlete's entry record be the same as the first 8 fields of any
+        athlete info record.  This method makes the test. If the athlete is
+        alaredy in the database, returns that athlete's object.
 
-    # def enter_event(self, meet, event_abbrev):
-    #     """ """
-    #     # Get the corresponding meet_event_div
-    #     query = MeetDivisionEvent.query.filter_by(meet_id=meet.id)
-    #     query = query.filter_by(div_id=self.division.id)
-    #     event_def = Event_Definition.query.filter_by(abbrev=event_abbrev).one()
-    #     query = query.filter_by(event_def_id=event_def.id)
+        Returns none if this athlete is not already in the database
+        """
+        athletes_same_name = Athlete.query.filter_by(fname=fname, lname=lname,
+                                                     minitial=middle).all()
+        for ath in athletes_same_name:
+            if (ath.school.abbrev == school_code and
+                    ath.division.gender == gender):
+                return ath
 
-    #     mde = query.first()
-    #     if mde:
-    #         # TODO: Did the athlete already enter this event? If they did,
-    #         # warn and don't create a new Entry
-    #         entry = Entry(athlete_id=self.id,
-    #                       mde_id=mde.id)
-    #         self.entries.append(entry)
-    #         db.session.commit()
-    #     else:
-    #         error("Athlete entering non-existent event that does not exist.",
-    #               "Athlete: {} {}. Event: {}, Meet: {}".format(
-    #                self.fname, self.lname, event.code, meet.name))
+        # no athletes match what's in the database
+        return None
 
 
+
+mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
 
 class Entry(db.Model):
     """
@@ -223,50 +210,113 @@ class Entry(db.Model):
                            nullable=False)
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
-    # # mark_id = db.Column(db.ForeignKey("marks.id"))
+
+    mark = db.Column(db.Numeric(7, 2), nullable=True)
+    mark_type = db.Column(mark_type_enum, nullable=True)
+    # mark_measure_type = db.Column(measure_type_enum, nullable=True)
+
+ 
     # # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
     meet = db.relationship("Meet",
                            secondary="meet_division_events",
-                           uselist=False)
-    athlete = db.relationship("Athlete", uselist=False)
-    mde = db.relationship("MeetDivisionEvent", uselist=False)
+                           uselist=False,
+                           back_populates="entries")
+    athlete = db.relationship("Athlete",
+                              uselist=False,
+                              back_populates="entries")
+    mde = db.relationship("MeetDivisionEvent",
+                          uselist=False,
+                          back_populates="entries")
     division = db.relationship("Division",
                                secondary="athletes",
-                               uselist=False)
+                               uselist=False,
+                               back_populates="entries")
     event = db.relationship("Event_Definition",
                             secondary="meet_division_events",
-                            uselist=False)
+                            uselist=False,
+                            back_populates="entries")
 
     # assigned_heat = db.relationship("Heat")
-    # mark = db.relationship("Mark")
-
     def __repr__(self):
         return ("\n<ENTRY #{}, Ath: TODO {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
                     self.id, self.athlete.fname, self.athlete.lname,
-                    self.event.abbrev, self.division, self.meet.name))
+                    self.event.code, self.division.abbrev(), self.meet.name))
+
+    @staticmethod
+    def time_string_to_seconds(time_string):
+        """ Takes a string like '1:23.44.55, 1:19.14, 58.83, 13.4' and 
+        returns it in seconds, with resolution to the tenth or hundreth of a 
+        second
+
+        TODO - deal with hand-timed marks, which have a 'h' at the end and
+        are only recorded in tenths of seconds instead of hundredths
+        """
+        # turn the time string into a [seconds, minutes, hours] list
+        t_list = time_string.split(':')[::-1]
+
+        secs = 0
+        for i in range(0, len(t_list)):
+            secs += float(t_list[i]) * 60**i
+        return secs
+
+    def time_mark_to_string(unconv_time):
+        seconds = 0.0
+        minutes = 0
+        hours = 0
+
+        if unconv_time > 60*60:
+            hours = int (unconv_time // (60 * 60))
+            unconv_time -= hours * 60 * 60
+        if unconv_time > 60:
+            minutes = int (unconv_time // 60)
+            unconv_time -= minutes * 60
+        seconds = unconv_time
+
+        if hours:
+            return '{:d}:{:02d}:{:05.2f}'.format(hours, minutes, seconds)
+        elif minutes:
+            # less than an hour, more than a minute
+            return '{:d}:{:05.2f}'.format(minutes, seconds)
+        else:
+            # less than a minute
+            return '{:.2f}'.format(seconds)
+
+    def field_english_mark_to_inches(distance_str):
+        """
+        Convert a string that represents an English distance, in inches,
+        for a field distance mark.
+        Examples 12' || 12' 10 || 12' 10.5 || 32' 4 || 5' 0
+        TODO later: numbers like: 121025 12-10.25".
+
+        Returns distance_str converted to inches. If it can't be converted, 
+        returns None.
+        """
+        [feet, inches] = distance_str.split()
+        # verify feet has the ' character at the end, and remove it.
+
+        if feet[-1] != "'":
+            return None
+        feet = int(feet[0:-1])
+        return float(inches) + (12 * feet)
+
+
+    def english_dist_mark_to_string(inches):
+        if inches >= 12:
+            feet = int(inches // 12)
+            inches = inches - feet * 12
+
+
+        return "{:d}".format(feet) + "' " + "{:.2f}".format(inches)
+        # TODO - Need to fix this so it will only retur 10' 6" instead of 
+        # 10' 6.00" for events like the high jump that aren't measured so the 
+        # fraction of an inch
+
 
 
 # class Mark(db.Model):
-#     __tablename__ = "marks"
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     # All our marks should be under 99,999.00 or less (centimeters or seconds),
-#     # so total digits of 7 and precision of 2 works
-#     mark = db.Column(db.Numeric(7, 2), nullable=True)
-#     date = db.Column(db.DateTime, nullable=True)
-
-#     entry = db.relationship("Entry", uselist=False)
-#     athlete = db.relationship("Athlete", secondary="entries")
-#     mde = db.relationship("MeetDivisionEvent", secondary="entries")
-#     heat = db.relationship("Heat", secondary="entries")
-
-#     def get_event(self):
-#         return self.mde.event
-
-#     def get_division(self):
-#         return self.mde.division
-
+# TODO - Eventually pull the Mark out of the Entry class into its own class.
 
 
 class MeetDivisionEvent(db.Model):
@@ -345,8 +395,7 @@ class School(db.Model):
 
     # Set up so that the "Unattached" School always uses primary key #1
     id = db.Column(db.Integer, primary_key=True,
-                   autoincrement=True,
-                   default=1)
+                   autoincrement=True)
     abbrev = db.Column(db.String(8),
                        nullable=False,
                        unique=True,
@@ -368,6 +417,8 @@ class School(db.Model):
     @classmethod
     def init_unattached_school(cls):
         """
+        Side Effects: Writes to the database
+
         This shoudl only be called before any records have been added to the
         schools table.
 
@@ -380,6 +431,11 @@ class School(db.Model):
         unattached_school = cls()
         db.session.add(unattached_school)
         db.session.commit()
+        return unattached_school
+
+    @classmethod
+    def get_unattached(cls):
+        return School.query.filter_by(abbrev="UNA").one()
 
 
 # # ###### THESE TABLES ARE INITIALIZED BUT NOT MODIFIED GOING FORWARD
@@ -413,15 +469,21 @@ class Event_Definition(db.Model):
 
     @classmethod
     def generate_event_defs(cls, event_list):
-        """  event_list is a tuple of event_dictionaries:
+        """  
+        Side Effects: Writes to the database
+
+        event_list is a tuple of event_dictionaries:
         eg: ({"code": "100M", "name": "100 Meter", "type": "sprint"})
         """
+        event_defs = []
         for e_dict in event_list:
-            event_def = cls(code=e_dict["code"],
-                            name=e_dict['name'],
-                            etype=e_dict['type'])
-            db.session.add(event_def)
+            event_defs.append(cls(code=e_dict["code"],
+                              name=e_dict['name'],
+                              etype=e_dict['type']))
+        db.session.add_all(event_defs)
         db.session.commit()
+        return event_defs
+
 
     def is_field(self):
         if self.etype in ['horzjump', 'vertjump', 'throw']:
@@ -471,12 +533,15 @@ class Division(db.Model):
 
     @classmethod
     def generate_divisions(cls, gender_list, grade_list):
-        """ Generate a combination of divisions for every combination of genders
+        """   
+        Side Effects: Writes to the database  
+
+        Generate a combination of divisions for every combination of genders
         and grades. If a particular division already exists in the database,
         do nothing.
         >>> generate_divisions(gender_list=("M", "F"), grade_list=(6, 7, 8))
         """
-        div_set = set()
+        divs = []
         for gender_str in gender_list:
             for grade_str in grade_list:
                 if (grade_str.isnumeric() and
@@ -495,9 +560,10 @@ class Division(db.Model):
                     div = Division(gender=gender_str,
                                    grade=grade_str,
                                    adult_child=adult_child_str)
-                    div_set.add(div)
-        db.session.add_all(list(div_set))
+                    divs.append(div)
+        db.session.add_all(divs)
         db.session.commit()
+        return divs
         # TODO Now, change our list back into an orderd list
 
 
@@ -527,6 +593,8 @@ def reset_database():
 
 if __name__ == "__main__":
     from server import app
-    reset_database()
     connect_to_db(app, "tms-dev")
+    db.session.remove()
+    db.drop_all()
+
     db.create_all()
