@@ -7,7 +7,7 @@ import os
 from flask import (Flask, render_template, redirect, request, flash, session)
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
-# import requests
+import requests
 
 from model import (connect_to_db, db, User, Meet, Athlete, Entry,
                    Division, School, Event_Definition, MeetDivisionEvent)
@@ -101,15 +101,18 @@ def show_user_profile(user_id):
 #     user = User.query.filter_by(username=username).first_or_404()
 #     return render_template('show_user.html', user=user)
 
+
 @app.route('/meets')
 def show_all_meets():
     meets = Meet.query.all()
     return render_template('list_meets.html.j2', meet_list=meets)
 
+
 @app.route('/athletes')
 def show_all_athletes():
     athletes = Athlete.query.all()
     return render_template('list_athletes.html.j2', athlete_list=athletes)
+
 
 @app.route('/display-info-from-server.json')
 def example_json():
@@ -147,5 +150,3 @@ if __name__ == '__main__':
         # app.run(port=5000, host='0.0.0.0' debug=True)
         # Is the following better?
         app.run(port=5000, host='0.0.0.0', debug=app.debug)
-
-

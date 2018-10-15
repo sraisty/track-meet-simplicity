@@ -1,10 +1,14 @@
+"""
+Tests the parse-hytek.py file.
+"""
+
 from parse_hytek import parse_hytek_file
 
 import unittest
 
 from model import (db, reset_database, Meet, Athlete, Entry,
-                   Division, School, Event_Definition, MeetDivisionEvent,
-                   GENDERS, GRADES, EVENT_DEFS)
+        Division, School, Event_Definition, MeetDivisionEvent,
+        GENDERS, GRADES, EVENT_DEFS)
 
 
 from server import app

@@ -1,20 +1,46 @@
-README
+<h1>README</h1>
 
-1. Create the seeddatabase with test-parse-hytek.py. Put a pdb breakpoint on 
+<h2>Stuff to Remember</h2>
+<ol>
+    <li> Create the seeddatabase with test-parse-hytek.py. Put a pdb breakpoint on 
 the end of the test_parse_whole_file test, and then while it is paused, 
-dump the test database to a SQL file:  
-    
+dump the test database to a SQL file:     
+    <pre>
     $  pg_dump tms-test > seed_data/seed_sqlfile.sql
+    </pre>
+    Later restore
 
-2. 
-
+    <pre>
+    $ psql tms-dev < seed_data/seed_sqlfile.sql
+    </pre>
+</li>
+<li>s</li>
+</ol>
 
 <h2>STUFF I LEARNED</h2>
 
-<ol>
-<li>Database Enums  - really cleaned up my tables and reduced the frantic 
-dependencies.</li>
 
+<h3> SQLAlchemy</h3>
+<ol>
+<li>Database Enums (PostGres) - really cleaned up my tables and reduced the frantic 
+dependencies.
+<p>At top of model.py:</p>
+<pre>MARK_TYPES = ("seconds", "inches", "meters")</pre>
+Then near my class definition for that table:
+<pre>mark_type_enum = Enum(*MARK_TYPES, name="mark_type")</pre>
+
+Then the class:
+<pre>
+class Entry(db.Model):
+    __tablename__ = "entry"
+    ...
+    mark_type = db.Column(mark_type_enum, nullable=True)
+    ...
+</pre>
+
+</li>
+
+<li>Secondary relationships
 
 <li>Back_populates appears to be necessary if not using backref</li>
 
@@ -27,11 +53,15 @@ database to the appropriate column using "self":
             self.b = b
             self.wow = Transfmorgify_first(c)
     </pre>
-    And this is a better alternative than a class method
+    And this is a better alternative than a class method<br><br>
 </li>
+</ol>
+
+<h3>Automated Testing</h3>
+<ol>
 
 <li>Raising exceptioins
-    raise Exception("This should never have happened")
+    <pre>raise Exception("This should never have happened")</pre>
 </li>
 
 <li>Unit Testing - especially how to make a test succeed if an exception is 
