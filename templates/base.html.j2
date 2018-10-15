@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}PLACEHOLDER TITLE{% endblock %}</title>
+    <title>{% block title %}PLACEHOLDER TITLE{% endblock %}: Track Meet Simplicity</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.11/css/all.css">
     <link rel="stylesheet" href="static/styles.css">
@@ -10,19 +10,20 @@
 
 <body>
     {# Put comments inside "{#"  #}
+    <div id="root">
+        {# Display flashed messages #}
+        <h6>Flash MESSAGES:</h6>
+        <ul>
+            {% for message in get_flashed_messages() %}
+                <li>{{message}}</li>
+            {% endfor %}
+        </ul>
 
-    {# Display flashed messages #}
-    <h6>MESSAGES:</h6>
-    <ul>
-        {% for message in get_flashed_messages() %}
-            <li>{{message}}</li>
-        {% endfor %}
-    </ul>
 
-
-    {% block content %}
-        PLACEHOLDER CONTENT
-    {% endblock %}
+        {% block content %}
+            PLACEHOLDER CONTENT
+        {% endblock %}
+    </div>
 
     <!-- PUT A FOOTER IN HERE -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>

@@ -1,5 +1,4 @@
-""" Track Meet Simplicity """
-"""
+""" Track Meet Simplicity
 Some module docstring
 """
 import os
@@ -8,10 +7,11 @@ import os
 from flask import (Flask, render_template, redirect, request, flash, session)
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
-import requests
+# import requests
 
-from model import (connect_to_db, db, Meet, Athlete, Entry,
+from model import (connect_to_db, db, User, Meet, Athlete, Entry,
                    Division, School, Event_Definition, MeetDivisionEvent)
+
 
 # from model import more stuff
 
@@ -31,8 +31,8 @@ app.jinja_env.undefined = StrictUndefined
 def index():
     # Check if the user is already logged in by looking at the flask session
     # if not, redirect to the login page.
-    if session.get('userid'):
-        return render_template('index.html')
+    if session.get('user_id'):
+        return render_template('index.html.j2')
     return redirect('/login')
 
 
@@ -41,15 +41,15 @@ def show_login_form():
     return render_template('login_form.html.j2')
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/do-login', methods=['POST'])
 def do_login():
     """ Receive the login credentials from form user filled in """
 
-    # get the userid and login from the form
+    # get the user_id and login from the form
     email = request.form.get('email')
     password = request.form.get('password')
-    # Test whether this userid and password match the database.
-    user = User.query.filter_by(email=email, password=password).one()
+    # Test whether this user_id and password match the database.
+    user = User.query.filter_by(email=email, password=password).one_or_none()
 
     if user is None:
         # bad login
@@ -57,25 +57,24 @@ def do_login():
         return redirect('/login')
 
     # Successful login
-    session['userid'] = user.userid
+    session['user_id'] = user.id
     flash('Here\'s a big Welcome message.')
     return redirect('/')
 
 
-@app.route('/logout', methods=['GET'])
+@app.route('/do-logout', methods=['GET'])
 def do_logout():
-    del(session['userid'])
+    del(session['user_id'])
     return redirect('/register')
 
 
 @app.route('/register', methods=['GET'])
 def register_form():
     """Show form for user signup."""
-
     return render_template("register_form.html.j2")
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/do-register', methods=['POST'])
 def register_process():
     """Process user sign-up."""
 
@@ -94,13 +93,23 @@ def register_process():
 
 @app.route('/user/<int:user_id>')
 def show_user_profile(user_id):
-    user = User.query.filter_by(user_id=user_id).first_or_404()
+    user = User.query.filter_by(id=user_id).first_or_404()
     return render_template('show_user.html.js', user=user)
 
 # @app.route('/user/<username>')
 # def show_user(username):
 #     user = User.query.filter_by(username=username).first_or_404()
 #     return render_template('show_user.html', user=user)
+
+@app.route('/meets')
+def show_all_meets():
+    meets = Meet.query.all()
+    return render_template('list_meets.html.j2', meet_list=meets)
+
+@app.route('/athletes')
+def show_all_athletes():
+    athletes = Athlete.query.all()
+    return render_template('list_athletes.html.j2', athlete_list=athletes)
 
 @app.route('/display-info-from-server.json')
 def example_json():
@@ -113,7 +122,7 @@ def example_json():
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('page_not_found.html.js'), 404
+    return render_template('page_not_found.html.j2'), 404
 
 
 if __name__ == '__main__':

@@ -121,7 +121,7 @@ class testCreateMeet(unittest.TestCase):
     def test_parse_whole_file(self):
         parse_hytek_file("seed_data/MiddleSchool_HyTekEntry_45_FIXED.txt",
                          self.meet1)
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
 # ############## HELPER FUNCTIONS ###############
 

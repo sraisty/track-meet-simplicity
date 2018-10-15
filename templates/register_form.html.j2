@@ -1,0 +1,25 @@
+{% extends "base.html.j2" %}
+
+{% block title %}
+   Sign Up to use Track Meet Simplicity
+{% endblock %}
+
+<!-- NOTE: I always have access to "session" from within here.  Use for 
+    State info I need to pass between pages? -->
+{% block content %}
+
+    <p>Please register:</p>
+     <form  action="/do-register" method="POST">
+        <div>
+            <label for="name">Email:</label>
+            <input type="text" name="email" placeholder="Enter your email" required>
+        </div>
+        <div>
+            <label for="name">Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        <input type="submit">
+    </form> 
+
+      <p>Already have an account?  <a href="/login">Log in!</a></p>
+{% endblock %}

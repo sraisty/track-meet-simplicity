@@ -46,6 +46,8 @@ MEET_STATUS = ("accepting_entries", "entries_closed", "athletes_assigned",
 
 MARK_TYPES = ("seconds", "inches", "meters")
 
+USER_ROLES = ("meet_director", "coach", "athlete", "other")
+
 db = SQLAlchemy()
 
 # #############
@@ -213,7 +215,6 @@ class Entry(db.Model):
 
     mark = db.Column(db.Numeric(7, 2), nullable=True)
     mark_type = db.Column(mark_type_enum, nullable=True)
-    # mark_measure_type = db.Column(measure_type_enum, nullable=True)
 
  
     # # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
@@ -565,6 +566,30 @@ class Division(db.Model):
         db.session.commit()
         return divs
         # TODO Now, change our list back into an orderd list
+
+
+
+
+user_role_enum = Enum(*USER_ROLES, name="user_roles")
+
+
+class User(db.Model):
+    """User of TrackMeetSimplicity website."""
+
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    email = db.Column(db.String(64), nullable=True)
+    password = db.Column(db.String(64), nullable=True)
+    # TO DO - fix this to somethine less privileged by default
+    role = db.Column(user_role_enum, nullable=False, default="coach")
+
+    def __repr__(self):
+        return f"<USER # {self.user_id} email={self.email}, role={self.role}>"
+
+
+
+
 
 
 ###############

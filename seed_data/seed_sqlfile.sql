@@ -108,6 +108,20 @@ CREATE TYPE public.meet_status AS ENUM (
 
 ALTER TYPE public.meet_status OWNER TO vagrant;
 
+--
+-- Name: user_roles; Type: TYPE; Schema: public; Owner: vagrant
+--
+
+CREATE TYPE public.user_roles AS ENUM (
+    'meet_director',
+    'coach',
+    'athlete',
+    'other'
+);
+
+
+ALTER TYPE public.user_roles OWNER TO vagrant;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -345,6 +359,41 @@ ALTER SEQUENCE public.schools_id_seq OWNED BY public.schools.id;
 
 
 --
+-- Name: users; Type: TABLE; Schema: public; Owner: vagrant
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    email character varying(64),
+    password character varying(64),
+    role public.user_roles NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO vagrant;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: vagrant
+--
+
+CREATE SEQUENCE public.users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO vagrant;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vagrant
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: public; Owner: vagrant
 --
 
@@ -384,6 +433,13 @@ ALTER TABLE ONLY public.meets ALTER COLUMN id SET DEFAULT nextval('public.meets_
 --
 
 ALTER TABLE ONLY public.schools ALTER COLUMN id SET DEFAULT nextval('public.schools_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: vagrant
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
@@ -2101,6 +2157,21 @@ SELECT pg_catalog.setval('public.schools_id_seq', 15, true);
 
 
 --
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: vagrant
+--
+
+COPY public.users (id, email, password, role) FROM stdin;
+\.
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+
+
+--
 -- Name: athletes_pkey; Type: CONSTRAINT; Schema: public; Owner: vagrant
 --
 
@@ -2178,6 +2249,14 @@ ALTER TABLE ONLY public.schools
 
 ALTER TABLE ONLY public.schools
     ADD CONSTRAINT schools_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: vagrant
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --

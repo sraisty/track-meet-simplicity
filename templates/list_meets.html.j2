@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+
+{% block title %}
+   Meets | Track Meet Simplicity
+{% endblock %}
+
+{% block content %}
+    <h1>Meets</h1>
+    <ul>
+       {% for meet in meet_list %}
+            <li>{{meet.name}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

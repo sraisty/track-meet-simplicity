@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+
+{% block title %}
+   Athletes | Track Meet Simplicity
+{% endblock %}
+
+{% block content %}
+    <h2>Athletes</h2>
+    <ul>
+    {% for athlete in athlete_list %}
+        <li>{{athlete.fname}} {{athlete.lname}}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

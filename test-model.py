@@ -11,7 +11,6 @@ from sqlalchemy.exc import IntegrityError, DataError
 from model import (db, reset_database, Division, School, Event_Definition,
                    Meet, MeetDivisionEvent, Athlete, Entry,
                    GENDERS, GRADES, EVENT_DEFS)
-from init_data import (populate_example_meets, populate_example_data)
 from server import app
 
 
@@ -630,7 +629,13 @@ class testDivision(unittest.TestCase):
 
 
 # ############## HELPER FUNCTIONS ###############
+def populate_example_meets(meet_list):
+    for meet_dict in meet_list:
+        meet = Meet(name=meet_dict['name'], date=meet_dict['date'],
+                    status=meet_dict.get('status', 'accepting_entries'))
 
+        db.session.add(meet)
+        db.session.commit()
 
 def setup_test_app_db():
     """

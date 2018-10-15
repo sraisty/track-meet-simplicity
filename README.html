@@ -1,0 +1,43 @@
+README
+
+1. Create the seeddatabase with test-parse-hytek.py. Put a pdb breakpoint on 
+the end of the test_parse_whole_file test, and then while it is paused, 
+dump the test database to a SQL file:  
+    
+    $  pg_dump tms-test > seed_data/seed_sqlfile.sql
+
+2. 
+
+
+<h2>STUFF I LEARNED</h2>
+
+<ol>
+<li>Database Enums  - really cleaned up my tables and reduced the frantic 
+dependencies.</li>
+
+
+<li>Back_populates appears to be necessary if not using backref</li>
+
+<li>You can actually define regular __init__ with clases derived from the SQLAlchemy
+db.Model.  Within it, make sure to assign the stuff you want to be in the 
+database to the appropriate column using "self":
+    <pre>
+        def __init__(self, a, b, c):
+            self.a = a
+            self.b = b
+            self.wow = Transfmorgify_first(c)
+    </pre>
+    And this is a better alternative than a class method
+</li>
+
+<li>Raising exceptioins
+    raise Exception("This should never have happened")
+</li>
+
+<li>Unit Testing - especially how to make a test succeed if an exception is 
+    triggered.  
+    <pre>
+        with self.assertRaises(DataError):
+            db.session.commit()
+    </pre>
+</ol>
