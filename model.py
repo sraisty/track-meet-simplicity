@@ -264,16 +264,16 @@ class Entry(db.Model):
             secs += float(t_list[i]) * 60**i
         return secs
 
-    def time_mark_to_string(unconv_time):
+    def time_mark_to_string(self):
         seconds = 0.0
         minutes = 0
         hours = 0
-
+        unconv_time = self.mark
         if unconv_time > 60*60:
-            hours = int (unconv_time // (60 * 60))
+            hours = int(unconv_time // (60 * 60))
             unconv_time -= hours * 60 * 60
         if unconv_time > 60:
-            minutes = int (unconv_time // 60)
+            minutes = int(unconv_time // 60)
             unconv_time -= minutes * 60
         seconds = unconv_time
 
@@ -286,7 +286,7 @@ class Entry(db.Model):
             # less than a minute
             return '{:.2f}'.format(seconds)
 
-    def field_english_mark_to_inches(distance_str):
+    def field_english_mark_to_inches(self):
         """
         Convert a string that represents an English distance, in inches,
         for a field distance mark.
@@ -296,6 +296,7 @@ class Entry(db.Model):
         Returns distance_str converted to inches. If it can't be converted, 
         returns None.
         """
+
         [feet, inches] = distance_str.split()
         # verify feet has the ' character at the end, and remove it.
 
@@ -305,11 +306,11 @@ class Entry(db.Model):
         return float(inches) + (12 * feet)
 
 
-    def english_dist_mark_to_string(inches):
+    def english_dist_mark_to_string(self):
+        inches = self.mark
         if inches >= 12:
             feet = int(inches // 12)
             inches = inches - feet * 12
-
 
         return "{:d}".format(feet) + "' " + "{:.2f}".format(inches)
         # TODO - Need to fix this so it will only retur 10' 6" instead of 
@@ -413,6 +414,13 @@ class School(db.Model):
     athletes = db.relationship("Athlete")
     divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship("Entry", secondary="athletes")
+
+
+    def __init__(self, name=name, abbrev=abbrev, city=city, state=state):
+        self.name = name.title()
+        self.abbrev = abbrev.upper()
+        self.city = city.title()
+        self.state = state.upper()
 
     def __repr__(self):
         return "<SCHOOL id#{}: {}>".format(self.id, self.name)

@@ -141,6 +141,11 @@ def show_meet_detail(meet_id):
 def show_meet_school_entries(meet_id, school_id):
     pass
 
+@app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
+def show_meet_division_events(meet_id, mde_id):
+    mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
+    return render_template('mde_detail.html.j2', mde=mde)
+
 @app.route('/athletes')
 def show_all_athletes():
     # athletes = Athlete.query.order_by(fname).order_by(lname).all()
@@ -159,13 +164,13 @@ def show_athlete_detail(athlete_id):
 def show_all_schools():
     schools = School.query.order_by(School.name).all()
     return render_template(
-        'item_list.html.j2', section="schools", list=schools)
+        'school_list.html.j2', section="schools", list=schools)
 
 
 @app.route('/schools/<int:school_id>')
 def show_school_detail(school_id):
     school = School.query.get(school_id)
-    return render_template('detail.html.j2', section="schools", item=school)
+    return render_template('school_detail.html.j2', section="schools", item=school)
 
 
 @app.route('/display-info-from-server.json')
