@@ -1,0 +1,39 @@
+{% extends "base.html.j2" %}
+<!-- NOTE: I always have access to "session" from within here.  Use for 
+    State info I need to pass between pages? -->
+
+{# The NAV BAR doesn't appear on the login or registration form pages #}
+{% block nav_not_on_login_reg_pages %}
+{% endblock %}
+
+{% block content %}
+
+    {% block directions %}PLACEHOLDER DIRECTIONS{% endblock %}
+
+        {% block post_route %}
+        <form action="/do-login" method="POST">
+        {% endblock %}  {# post_route #}
+
+        {# {% block get_school %} #}
+            {# PLACE HOLDER FOR OPTIONAL FORM-GROUP THAT COLLECTS SCHOOL NAME #}
+        {# {% endblock %} #}
+            <div class="form-group">
+                <label for="name">Email:</label>
+                <input type="text" class="form-control" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Password:</label>
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form> 
+
+        <row>
+            <p>
+            {% block refer_user %}
+                PLACEHOLDER TO ASK USER IF NEED OTHER REG/LOGIN PAGE
+            {% endblock %}  {# refer_user #}
+            </p>
+        </row>
+
+{% endblock %}   {# content #}

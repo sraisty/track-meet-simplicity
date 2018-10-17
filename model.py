@@ -152,6 +152,8 @@ class Athlete(db.Model):
             school = School.query.filter_by(abbrev="UNA").one()
         self.school = school
 
+        ## TODO THIS IS A HACK CLEAN IT UP.
+        # self.name = get_full_name(self.fname, self.minitial, self.lname)
 
     def __repr__(self):
         return "\n<ATHL# {}: {}, {}, {}>".format(
@@ -583,12 +585,15 @@ class User(db.Model):
     password = db.Column(db.String(64), nullable=True)
     # TO DO - fix this to somethine less privileged by default
     role = db.Column(user_role_enum, nullable=False, default="coach")
+    # TODO FUTURE - add school is
+    # school = db.Column(db.ForeignKey("schools.id"), nullable=True)
 
     def __repr__(self):
-        return f"<USER # {self.user_id} email={self.email}, role={self.role}>"
-
-
-
+        # CHANGE TO ONE DAY STORE SCHOOL
+        # return "<USER #{}, {}, school={}, role={}".format(
+        #     self.user_id, self.email, self.school, self.role)
+        return "<USER #{}, {}, role={}".format(
+            self.user_id, self.email, self.role)
 
 
 

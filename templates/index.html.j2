@@ -1,10 +1,12 @@
 {% extends "base.html.j2" %}
 
-{% block title %}
-   Track Meet Simplicity
-{% endblock %}
 
 {% block content %}
-    <h1>AWESOME HOME PAGE</h1>
-    <h2>Welcome, user {{session['user_id']}}</h2>
+    <h1>Dashboard</h1>
+    <h2>Welcome, user {{session['user_email']}}</h2>
+    <ul>
+        <li><a href="#">Create a New Meet</a></li>
+        <li><a href="#">Manage my Track Meet</a></li>
+        <li><a href="#">Find a Track Meet</a></li>
+    </ul>
 {% endblock %}

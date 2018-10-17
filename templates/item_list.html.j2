@@ -1,0 +1,27 @@
+{% extends "base.html.j2" %}
+
+
+{% block content %}
+    <h1>{{ section.title() }}</h1>
+    <ul>
+        {% for item in list %}
+            <li>
+                <a href="/{{ section }}/{{ item.id }}">
+                    {% if section == "athletes" %}
+                        {{ item.fname }} {{ item.lname }}
+                    {% else %}
+                        {{ item.name }}
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+
+    <script>
+        $(document).ready( function () {
+           $('#table_id').DataTable();
+        } );
+    </script>
+{% endblock %}
+

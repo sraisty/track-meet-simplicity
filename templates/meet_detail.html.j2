@@ -1,0 +1,36 @@
+{% extends "base.html.j2" %}
+
+
+{% block content %}
+
+    <h1>{{ meet.name }}</h1>
+
+    <div id="event_accordion">
+
+        {% for event in meet.events %}
+            <div class="card">
+                <div class="card-header" id="{{ event.name }}">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls="collapse{{event.code}}">
+                            EVENT: {{ event.name.upper() }}
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul>
+                            {% for mde in event.mdes %}
+                                <li>{{ mde.division.longname() }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>    <!-- Event Accordion -->
+{% endblock %}
+
+
+
+

@@ -1,0 +1,22 @@
+{% extends "login_reg_form.html.j2" %}
+
+{% block directions %}<h1>Please register:</h1>{% endblock %}
+
+{% block post_route %}
+    <form action="/do-register" method="POST">
+{% endblock %}
+
+{# {% block get_school %}
+    <div class="form-group">
+        <label for="school">School:</label>
+        <select class="form-control" name="user_school">
+            {% for school in school_list %}
+                <option>{{school.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endblock %} #}
+        
+{% block refer_user %}
+    Already have an account?  <a href="/login">Log in!</a>
+{% endblock %}
