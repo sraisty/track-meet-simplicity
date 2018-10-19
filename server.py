@@ -55,8 +55,10 @@ def do_login():
 
     if user is None:
         # bad login
-        flash("Incorrect email address and / or password.")
-        flash("Please try again, or <a href='/register'>sign up</a> as a new user.")
+        flash(
+                "ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
+                "danger"
+            )
         return redirect('/login')
 
     # Successful login
@@ -64,14 +66,14 @@ def do_login():
     session['user_email'] = user.email
     # session['user_school'] = user.school
 
-    flash('Successfully logged in. Welcome to TrackMeetSimplicity!')
+    flash("Successfully logged in. Welcome to TrackMeetSimplicity!", "success")
     return redirect('/')
 
 
 @app.route('/do-logout', methods=['GET'])
 def do_logout():
-    del(session['user_id'])
-    flash("You've successfully logged out.")
+    session.pop('user_id', None)
+    flash("You've successfully logged out.", "success")
     return redirect('/register')
 
 
@@ -95,8 +97,9 @@ def register_process():
     # If user with the email already exists, don't allow registration
     user = User.query.filter_by(email=email).one_or_none()
     if user:
-        flash(f"A user with email {email} already exists!")
-        flash(f"Please try signing up again, or <a href='/login'>log in</a>.")
+        flash(
+            f"ERROR: A user with email {email} already exists!\nTry again, or <a href='/login'>log in</a> if you already have an account.", 
+            "danger")
         return redirect("/register")
 
     # TODO GATHER THE SCHOOL IN THE FUTURE
@@ -107,8 +110,7 @@ def register_process():
 
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
-    flash("Thanks for signing up!")
-    flash("Welcome to TrackMeetSimplicity!")
+    flash("Welcome to TrackMeetSimplicity!", "success")
     return redirect("/index")
 
 
@@ -116,6 +118,7 @@ def register_process():
 def show_user_profile(user_id):
     user = User.query.filter_by(id=user_id).first_or_404()
     return render_template('user_profile.html.j2', user=user)
+
 
 @app.route('/profile')
 def show_user():
@@ -128,7 +131,7 @@ def show_user():
 def show_all_meets():
     meets = Meet.query.all()
     return render_template(
-        'item_list.html.j2', section="meets", list=meets)
+        'meets_list.html.j2', section="meets", list=meets)
 
 
 @app.route('/meets/<int:meet_id>')
@@ -139,38 +142,41 @@ def show_meet_detail(meet_id):
 
 @app.route('/meets/<int:meet_id>/athletes/<int:school_id>')
 def show_meet_school_entries(meet_id, school_id):
+    meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
     pass
+
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
 def show_meet_division_events(meet_id, mde_id):
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
     return render_template('mde_detail.html.j2', mde=mde)
 
+
 @app.route('/athletes')
 def show_all_athletes():
     # athletes = Athlete.query.order_by(fname).order_by(lname).all()
     athletes = Athlete.query.all()
     return render_template(
-        'athlete_list.html.j2', section="athletes", list=athletes)
+        'all_athletes.html.j2', list=athletes)
 
 
 @app.route('/athletes/<int:athlete_id>')
 def show_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
-    return render_template('detail.html.j2', section="athletes", item=athlete)
+    return render_template('athlete_detail.html.j2', item=athlete)
 
 
 @app.route('/schools')
 def show_all_schools():
     schools = School.query.order_by(School.name).all()
     return render_template(
-        'school_list.html.j2', section="schools", list=schools)
+        'school_list.html.j2', list=schools)
 
 
 @app.route('/schools/<int:school_id>')
 def show_school_detail(school_id):
     school = School.query.get(school_id)
-    return render_template('school_detail.html.j2', section="schools", item=school)
+    return render_template('school_detail.html.j2', school=school)
 
 
 @app.route('/display-info-from-server.json')

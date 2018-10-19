@@ -1,0 +1,16 @@
+
+/*#mschool-tab {
+    color: #ffffff;
+}*/
+
+a.tms-tab {
+    color: #ffffff;
+}
+
+.tinted-image {
+    background-image: 
+        linear-gradient( rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+        url("/static/img/juniors.jpg");
+    /*background-color: #444444;*/
+}
+

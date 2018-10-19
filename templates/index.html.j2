@@ -2,11 +2,55 @@
 
 
 {% block content %}
-    <h1>Dashboard</h1>
-    <h2>Welcome, user {{session['user_email']}}</h2>
-    <ul>
-        <li><a href="#">Create a New Meet</a></li>
-        <li><a href="#">Manage my Track Meet</a></li>
-        <li><a href="#">Find a Track Meet</a></li>
-    </ul>
+  <h1>Dashboard</h1>
+  <h4 class="mb-5">Welcome, user {{ session['user_email'] }}</h4>
+
+  <div class="card-deck mb-5">
+    <div class="card">
+      <div class="card-header">
+        <h5>My Team's Meets</h5>
+      </div>
+      <div class="card-body">
+        <div class="card-text">
+          <div>
+            Upcoming Entries
+            Your team hasn't entered any meets yet
+          </div>
+          <div>
+              Past
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="card-deck mb-5">
+
+    <div class="card">
+      <div class="card-header">
+          <h5>Meets My Team Has Entered</h5>
+      </div>
+      <div class="card-body">
+
+        <div class="card-text">
+        </div>
+
+        <button class="btn btn-primary">Create a New Meet</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5>Manage my Team</h5>
+      </div>
+      <div class="card-body">
+        <div class="card-text">
+        </div>
+      </div>
+    </div>
+
+  </div>
+ 
 {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html.j2" %}
+
+
+{% block content %}
+    <h1>Athletes</h1>
+    {% include '/template-includes/athlete_list.html.j2' %}
+{% endblock content %}
+
+
+{% block my_javascripts %}
+   <script type="text/javascript" src="static/js/tms-datatable.js"></script>
+{% endblock my_javascripts %}
+

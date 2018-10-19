@@ -495,7 +495,6 @@ class Event_Definition(db.Model):
         db.session.commit()
         return event_defs
 
-
     def is_field(self):
         if self.etype in ['horzjump', 'vertjump', 'throw']:
             return True
@@ -513,6 +512,7 @@ class Event_Definition(db.Model):
 gender_enum = Enum(*GENDERS, name="gender")
 grade_enum = Enum(*GRADES, name='grade')
 adult_enum = Enum(*ADULT_CHILD, name='adultchild')
+
 
 class Division(db.Model):
     __tablename__ = "divisions"
@@ -541,11 +541,10 @@ class Division(db.Model):
         return (f"Grade {self.grade} " +
                 f"{DIV_NAME_DICT[self.adult_child][self.gender]}")
 
-
     @classmethod
     def generate_divisions(cls, gender_list, grade_list):
-        """   
-        Side Effects: Writes to the database  
+        """
+        Side Effects: Writes to the database 
 
         Generate a combination of divisions for every combination of genders
         and grades. If a particular division already exists in the database,
@@ -576,7 +575,6 @@ class Division(db.Model):
         db.session.commit()
         return divs
         # TODO Now, change our list back into an orderd list
-
 
 
 

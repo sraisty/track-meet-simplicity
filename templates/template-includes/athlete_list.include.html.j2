@@ -1,0 +1,30 @@
+
+{% block athlete_list %}
+    <table id="athlete_table" class="display" data-order='[[ 0, "asc" ]]' data-page-length='100'>
+        <thead>
+            <tr>
+                <th>Athlete name</th>
+                <th>School</th>
+                <th>Division</th>
+                <th>Events</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for athlete in list %}
+                <tr>    
+                    <td data-order="{{ athlete.lname}}">
+                        <a href="/athletes/{{ athlete.id }}">
+                            {{ athlete.fname }} {{ athlete.lname }}
+                        </a>
+                    </td>
+                    <td>{{ athlete.school.name }}</td>
+                    <td>{{ athlete.division.longname() }}</td>
+                    <td>TBD</td>
+                    <td>TBD</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock athlete_list %}
+

@@ -1,47 +1,45 @@
 {% extends "base.html.j2" %}
-
-
 {% block content %}
-    <h1>{{ mde.event.name }}: {{ mde.division.longname() }}</h1>
-    {% block athlete_list %}
-        <table id="mde_table" class="display" data-order='[[ 0, "asc" ]]' data-page-length='100'>
-            <thead>
-                <tr>
-                    <th>Seed #</th>
-                    <th>Athlete name</th>
-                    <th>School</th>
-                    <th>Mark</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in mde.entries %}
-                    <tr> 
-                        <td>TBD</td>   
-                        <td>
-                            <a href="/athletes/{{ entry.athlete.id }}">
-                                {{ entry.athlete.fname }} {{ entry.athlete.lname }}
-                            </a>
-                        </td>
-                        <td>{{ entry.athlete.school.name }}</td>
-                        <td>{% if entry.mark %}
-                                {% if entry.mark_type == "seconds" %}
-                                    {{ entry.time_mark_to_string() }}
-                                {% elif entry.mark_type == "inches" %}
-                                    {{ entry.english_dist_mark_to_string() }}
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endblock %}
-
-{% endblock %}
-
+  <h1>{{ mde.meet.name }}: {{ mde.meet.date.strftime("%B %d, %Y") }}</h1>
+  <h2>{{ mde.event.name }}: {{ mde.division.longname() }}</h2>
+  <div class="card">
+    <div class="card-body">
+      <table id="mde_table" class="display"
+        data-order='[[ 0, "asc" ]]' data-paging='false'>
+        <thead>
+          <tr>
+            <th>Seed #<br>(pending)</th>
+            <th>Athlete name</th>
+            <th>School</th>
+            <th>Seed Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in mde.entries %}
+            <tr>
+              <td>TBD</td>
+              <td>
+                <a href="/athletes/{{ entry.athlete.id }}">
+                  {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+                </a>
+              </td>
+              <td>{{ entry.athlete.school.name }}</td>
+              <td>{% if entry.mark %}
+                {% if entry.mark_type == "seconds" %}
+                  {{ entry.time_mark_to_string() }}
+                  {% elif entry.mark_type == "inches" %}
+                  {{ entry.english_dist_mark_to_string() }}
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
 
 {% block my_javascripts %}
-   <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
-{% endblock %}
-
+  <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+{% endblock my_javascripts %}

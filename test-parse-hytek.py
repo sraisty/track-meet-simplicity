@@ -122,9 +122,12 @@ class testCreateMeet(unittest.TestCase):
         veronica = q.filter_by(fname="Veronica", lname="Rodriguez").one()
         self.assertEqual(len(veronica.entries), 2)
 
-    def test_parse_whole_file(self):
-        parse_hytek_file("seed_data/MiddleSchool_HyTekEntry_45_FIXED.txt",
+    def test_parse_lots_big_files(self):
+        parse_hytek_file("seed_data/MiddleSchool_HyTekEntry_45_FIXED.txt", 
                          self.meet1)
+        self.meet2 = start_tms_and_get_meet(EXAMPLE_MEETS[1])
+        # parse_hytek_file("seed_data/MS_HtMeetEntries_53.txt", self.meet2)
+
         # import pdb; pdb.set_trace()
 
 # ############## HELPER FUNCTIONS ###############

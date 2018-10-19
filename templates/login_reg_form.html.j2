@@ -3,37 +3,53 @@
     State info I need to pass between pages? -->
 
 {# The NAV BAR doesn't appear on the login or registration form pages #}
-{% block nav_not_on_login_reg_pages %}
-{% endblock %}
+{% block navbar_optional %}
+    {# Some spacing at top of page#}
+    <div class="row mb-5">
+    </div>
+{% endblock navbar_optional %}
 
 {% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>TrackMeetSimplicity</h2>
+                </div>
+                <div class="card-body">
+                    {% block ask_user_to %}
+                        PLACEHOLDER DIRECTIONS
+                    {% endblock ask_user_to %}
 
-    {% block directions %}PLACEHOLDER DIRECTIONS{% endblock %}
+                    {% block post_route %}
+                    <form action="/do-login" method="POST">
+                    {% endblock post_route %}  
 
-        {% block post_route %}
-        <form action="/do-login" method="POST">
-        {% endblock %}  {# post_route #}
+                    {# {% block get_school %} #}
+                        {# PLACE HOLDER FOR OPTIONAL FORM-GROUP THAT COLLECTS SCHOOL NAME #}
+                    {# {% endblock %} #}
+                        <div class="form-group">
+                            <label for="name">Email:</label>
+                            <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Password:</label>
+                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form> 
+                    <p>
+                        {% block refer_user %}
+                            PLACEHOLDER TO ASK USER IF NEED OTHER REG/LOGIN PAGE
+                        {% endblock refer_user %}  
+                    </p>
 
-        {# {% block get_school %} #}
-            {# PLACE HOLDER FOR OPTIONAL FORM-GROUP THAT COLLECTS SCHOOL NAME #}
-        {# {% endblock %} #}
-            <div class="form-group">
-                <label for="name">Email:</label>
-                <input type="text" class="form-control" name="email" placeholder="Enter your email" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="name">Password:</label>
-                <input type="password" class="form-control" name="password" placeholder="Password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form> 
+        </div>
+    </div>
+{% endblock content %}  
 
-        <row>
-            <p>
-            {% block refer_user %}
-                PLACEHOLDER TO ASK USER IF NEED OTHER REG/LOGIN PAGE
-            {% endblock %}  {# refer_user #}
-            </p>
-        </row>
-
-{% endblock %}   {# content #}
+{% block my_javascripts %}
+    <script type="text/javascript" src="/static/js/login-register-pages.js"></script>
+{% endblock my_javascripts %}
