@@ -7,7 +7,7 @@ separated format.  Details on this file format follow:
 
 from model import (Athlete, School, Entry, Division, Event_Definition,
                    MeetDivisionEvent,
-                   db, connect_to_db, GENDERS, GRADES)
+                   db, connect_to_db, GENDERS, GRADES, EVENT_DEFS)
 from util import warning, error, info
 
 # Translate HyTek's codes for events into our codes

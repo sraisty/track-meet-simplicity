@@ -90,9 +90,13 @@ class Meet(db.Model):
     host_school = db.relationship("School", uselist=False)
     mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
     events = db.relationship("Event_Definition",
-                             secondary="meet_division_events")
+                             secondary="meet_division_events", 
+                             # back_populates="meet"
+                             )
     divisions = db.relationship("Division",
-                                secondary="meet_division_events")
+                                secondary="meet_division_events", 
+                                # back_populates="meet"
+                                )
     entries = db.relationship("Entry", secondary="meet_division_events",
                               back_populates="meet")
 
@@ -183,7 +187,7 @@ class Athlete(db.Model):
 
     @classmethod
     def get_athlete(cls, fname, middle, lname, gender, school_code):
-        """ The HyTek file format requires that the first 7 fields of an 
+        """ The HyTek file format requires that the first 7 fields of an
         athlete's entry record be the same as the first 8 fields of any
         athlete info record.  This method makes the test. If the athlete is
         alaredy in the database, returns that athlete's object.
@@ -200,9 +204,16 @@ class Athlete(db.Model):
         # database doesn't contain an athlete matching the parameteres specified
         return None
 
+    def meets(self):
+        meets = set()
+        for mde in self.mdes:
+            meets.add(mde.meet)
+        return list(meets)
+
 
 
 mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
+
 
 class Entry(db.Model):
     """
@@ -278,6 +289,17 @@ class Entry(db.Model):
             secs += float(t_list[i]) * 60**i
         return secs
 
+    def mark_to_string(self):
+        if self.mark is None:
+            return None
+
+        if self.mark_type == "seconds":
+            return self.time_mark_to_string()
+        elif self.mark_type == "inches":
+            return self.english_dist_mark_to_string()
+        else:
+            raise Exception("UNIMPLEMENTED: metric field distance marks")
+
 
     def time_mark_to_string(self):
         total_seconds= self.mark
@@ -305,7 +327,10 @@ class Entry(db.Model):
             # less than a minute
             return '{:.2f}'.format(seconds)
 
+    @staticmethod
     def field_english_mark_to_inches(distance_str):
+        # TODO this function is poorly named and easily confused with the 
+        # english_dist_mark_to_string
         """
         Convert a string that represents an English distance, in inches,
         for a field distance mark.
@@ -349,16 +374,28 @@ class MeetDivisionEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
     meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
-    event_code = db.Column(db.ForeignKey("event_defs.code"),
-                           nullable=False)
+    event_code = db.Column(db.ForeignKey("event_defs.code"), nullable=False)
 
-    meet = db.relationship("Meet", uselist=False)
-    host_school = db.relationship("School", secondary="meets", uselist=False)
-    division = db.relationship("Division", uselist=False)
-    event = db.relationship("Event_Definition", uselist=False)
+    meet = db.relationship("Meet", back_populates="mdes",
+                           uselist=False)
+    host_school = db.relationship(
+            "School", secondary="meets",
+            # back_populates="meet_division_events", 
+            uselist=False)
+    division = db.relationship(
+            "Division", 
+            back_populates="mdes", 
+            uselist=False)
+    event = db.relationship(
+            "Event_Definition", 
+            back_populates="mdes",
+            uselist=False)
 
-    entries = db.relationship("Entry", lazy="joined")
-    athletes = db.relationship("Athlete", secondary="entries", lazy="joined")
+    entries = db.relationship(
+            "Entry", back_populates="mde", lazy="joined")
+    athletes = db.relationship(
+            "Athlete", secondary="entries", lazy="joined", 
+            back_populates="mdes")
     # school = 
     # editor_users = db.relationship("User", secondary="schools")
 
@@ -439,9 +476,12 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
-    athletes = db.relationship("Athlete")
+    athletes = db.relationship("Athlete", back_populates="school")
     divisions = db.relationship("Division", secondary="athletes")
-    entries = db.relationship("Entry", secondary="athletes")
+    entries = db.relationship(
+            "Entry", 
+            back_populates="school", 
+            secondary="athletes")
     coaches = db.relationship("User")
     # editor_users = coaches
 
@@ -481,18 +521,11 @@ class School(db.Model):
 
         # Don't initialize the unattached school if it already exists.
         unattached_school = School.query.filter_by(abbrev="UNA").one_or_none()
-        # import pdb; pdb.set_trace()
         if unattached_school is None:
             new_unattached_school = cls()
             db.session.add(new_unattached_school)
             db.session.commit()
-        # return unattached_school
 
-
-    # @classmethod
-    # def get_unattached(cls):
-    #     """ TODO - This seems redundant with the init_unattached_school """
-    #     return School.query.filter_by(abbrev="UNA").one()
 
     def meets(self):
         meets = set()
@@ -592,6 +625,7 @@ class Division(db.Model):
         return f"{self.grade}{self.gender}"
 
     def longname(self):
+        # TO DO - change this to just "name" - It's too confusing.
         return (f"Grade {self.grade} " +
                 f"{DIV_NAME_DICT[self.adult_child][self.gender]}")
 

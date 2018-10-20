@@ -45,10 +45,12 @@
 {% block tab1_content %}
     <p>This lists the upcoming Meets the athlete is entered into</p>
     <ul>
-      {% for meet in athlete.meets %}
+      {% for meet in athlete.meets() %}
         <li>
-          <a href="{{ url_for('show_meet_details', meet.id) }}">
-            {meet.name} {meet.date}</a>
+          <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+            {{meet.name}}
+          </a>
+          {{meet.date}}
         </li>
       {% endfor %}
     </ul>
@@ -59,13 +61,33 @@
 {# The expandable event cards that are on the accordions on   #}
 {# MeetDetail > Schedule of events  #}
 {% block tab2_content %}
-  <p> This lists the Athlete's results at past meets.
+  <p> This lists the Athlete's results at past meets.</p>
 {% endblock tab2_content %} 
 
 
 {% block tab3_content %}
     <p>This lists the athletes performances by Event, sorted for either the 
     best mark or by date.</p>
+
+    <ul>
+      {% for entry in athlete.entries %}
+        <li>
+          <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id, 
+                              mde_id=entry.mde.id) }}">
+            {{ entry.event.name }}
+          </a>
+          <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id, 
+                              mde_id=entry.mde.id) }}">
+            {{ entry.division.longname() }}
+          </a>
+          ==
+          <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+            {{ entry.mde.meet.name }}
+          </a>
+          == Seed Mark: {{ entry.mark_to_string() }}
+        </li>
+      {% endfor %}
+    </ul>
 {% endblock tab3_content %}
               
 
