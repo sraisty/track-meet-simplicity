@@ -1,11 +1,70 @@
-{% extends "base.html.j2" %}
+{# Detail info about a particular athlete, at /athletes/<athlete-id> #}
+
+{% extends "secondary_nav.html.j2" %}
 
 
-{% block content %}
-  <h1>{{ item.fname }} {{ item.lname }}
+{% block secondary_nav_title %}
+    {{ athlete.fname }} {{ athlete.lname }}
+{% endblock secondary_nav_title %}
+
+{% block athlete_admin_url %}
+    href="{{ url_for('')}}athlete.id }}/admin"
+{% endblock athlete_admin_url %}>
+
+{% block nav2_subtitle %}
+  <div class="d-flex justify-content-md-between flex-wrap">
+    <div>Division: {{ athlete.division.longname() }}</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+    <div>
+      School: 
+      <a href="/schools/{{athlete.school.id}}">
+        {{ athlete.school.name }}
+      </a>
+    </div>
+  </div>
+{% endblock nav2_subtitle %}
+
+
+
+{% block tab1_name %}
+    Upcoming Meets
+{% endblock tab1_name %}
+
+{% block tab2_name %}
+    Past Meets
+{% endblock tab2_name %}
+
+ {% block tab3_name %}
+    Events
+{% endblock tab3_name %}
  
-{% endblock content %}
+{% block tab4_name %}
+    Athlete Profile
+{% endblock tab4_name %}
 
-{% block my_javascripts %}
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
-{% endblock %}
+{% block tab1_content %}
+    <p>This lists the upcoming Meets the athlete is entered into</p>
+{% endblock tab1_content %}
+                        
+
+
+{# The expandable event cards that are on the accordions on   #}
+{# MeetDetail > Schedule of events  #}
+{% block tab2_content %}
+  <p> This lists the Athlete's results at past meets.
+{% endblock tab2_content %} 
+
+
+{% block tab3_content %}
+    <p>This lists the athletes performances by Event, sorted for either the 
+    best mark or by date.</p>
+{% endblock tab3_content %}
+              
+
+{% block tab4_content %}
+    <p>On this tab, users can see other the details about this athlete, such 
+      as phone number, previous schools, etc.  In real life, this would not be 
+      viewable except by the coach and athlete.
+    </p>
+{% endblock tab4_content %}
+

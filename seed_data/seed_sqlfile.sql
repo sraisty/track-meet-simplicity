@@ -99,10 +99,12 @@ ALTER TYPE public.mark_type OWNER TO vagrant;
 --
 
 CREATE TYPE public.meet_status AS ENUM (
-    'accepting_entries',
-    'entries_closed',
-    'athletes_assigned',
-    'done'
+    'Not Published',
+    'Accepting Entries',
+    'Awaiting Assignment',
+    'Assignments Done',
+    'Meet In Progress',
+    'Completed'
 );
 
 
@@ -330,6 +332,8 @@ CREATE TABLE public.schools (
     id integer NOT NULL,
     abbrev character varying(8) NOT NULL,
     name character varying(50) NOT NULL,
+    league character varying(6),
+    section character varying(12),
     city character varying(30),
     state character varying(2)
 );
@@ -366,6 +370,7 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     email character varying(64),
     password character varying(64),
+    school_id integer,
     role public.user_roles NOT NULL
 );
 
@@ -904,6 +909,50 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 455	Adam	Shapiro		\N	15	2
 456	Washakie	Tibbetts		\N	15	3
 457	Jonathan	Zhao		\N	15	1
+458	Destiny	Hansen		\N	2	6
+459	Jasmin	Schulz		\N	4	4
+460	Leo	Ruiz		\N	5	3
+461	Angel	Vasquez		\N	5	3
+462	Rodrigo	Frias		\N	6	3
+463	Luis	Meza		\N	6	3
+464	Edward	Villagomez		\N	6	2
+465	Gage	Barmes		\N	7	1
+466	David	Black		\N	7	1
+467	Cesar	Chavez		\N	7	1
+468	Dominic	Conricode		\N	7	1
+469	Felipe	Cruz		\N	7	1
+470	Ricardo	Diaz		\N	7	1
+471	Ashton	Headley		\N	7	1
+472	Kyras	Headley		\N	7	1
+473	Bryce	McEwen		\N	7	1
+474	Luis	Morales		\N	7	1
+475	Angelyna	Ragsdale		\N	7	5
+476	Robert	Reyes		\N	7	3
+477	Allen	Rocha		\N	7	1
+478	Carson	Roylance		\N	7	2
+479	Xavier	Salone		\N	7	1
+480	Jose	Santos		\N	7	1
+481	Miguel	Zendejas		\N	7	2
+482	Hannia	Zuniga		\N	7	5
+483	Andrew	Perez		\N	8	3
+484	Ashley	Bruning		\N	9	4
+485	Taegan	Dunton		\N	10	1
+486	Lauren	Hubbell		\N	10	5
+487	Sahil	Patel		\N	10	1
+488	Eric	Arias		\N	11	1
+489	Thuy	Burshtein		\N	11	6
+490	Rebecca	Raschulewski		\N	11	4
+491	Tyler	Smithtro		\N	11	1
+492	Alicia	Rector		\N	12	5
+493	Iris	Ruiz		\N	13	5
+494	Belle	Kreitler		\N	14	5
+495	Francesco	Carriglio		\N	15	1
+496	Jaryd	Mercer		\N	15	2
+497	Genevieve	Roeder-Hensley		\N	15	6
+498	Natalie	Sanford		\N	15	5
+499	Jack	Whilden		\N	15	3
+500	Henry	Xiang		\N	15	2
+501	Zach	Davidson		\N	16	3
 \.
 
 
@@ -911,7 +960,7 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 -- Name: athletes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.athletes_id_seq', 457, true);
+SELECT pg_catalog.setval('public.athletes_id_seq', 501, true);
 
 
 --
@@ -1951,6 +2000,689 @@ COPY public.entries (id, athlete_id, mde_id, mark, mark_type) FROM stdin;
 1009	431	80	\N	\N
 1010	435	81	\N	\N
 1011	436	81	\N	\N
+1012	349	114	12.15	seconds
+1013	351	113	13.21	seconds
+1014	231	112	13.61	seconds
+1015	336	114	13.79	seconds
+1016	270	113	13.82	seconds
+1017	423	114	13.87	seconds
+1018	364	112	13.92	seconds
+1019	321	113	13.98	seconds
+1020	293	114	14.06	seconds
+1021	490	112	14.30	seconds
+1022	367	112	14.34	seconds
+1023	154	114	14.35	seconds
+1024	156	112	14.35	seconds
+1025	124	113	14.42	seconds
+1026	438	114	14.51	seconds
+1027	83	114	14.52	seconds
+1028	130	114	14.53	seconds
+1029	118	112	14.66	seconds
+1030	50	113	14.70	seconds
+1031	410	112	14.71	seconds
+1032	489	114	14.80	seconds
+1033	484	112	14.82	seconds
+1034	494	113	14.85	seconds
+1035	125	112	14.89	seconds
+1036	406	113	14.89	seconds
+1037	439	112	14.89	seconds
+1038	282	113	14.95	seconds
+1039	399	112	15.00	seconds
+1040	459	112	15.48	seconds
+1041	277	112	15.51	seconds
+1042	291	113	15.54	seconds
+1043	348	113	15.92	seconds
+1044	345	114	16.12	seconds
+1045	339	113	16.44	seconds
+1046	335	114	17.58	seconds
+1047	349	120	24.76	seconds
+1048	331	120	26.90	seconds
+1049	412	119	27.96	seconds
+1050	62	119	28.02	seconds
+1051	423	120	28.10	seconds
+1052	338	120	28.34	seconds
+1053	231	118	28.69	seconds
+1054	293	120	29.61	seconds
+1055	364	118	29.71	seconds
+1056	156	118	30.38	seconds
+1057	367	118	30.73	seconds
+1058	494	119	30.80	seconds
+1059	410	118	30.84	seconds
+1060	489	120	30.90	seconds
+1061	118	118	30.93	seconds
+1062	399	118	31.08	seconds
+1063	299	118	31.10	seconds
+1064	448	118	31.20	seconds
+1065	135	118	31.23	seconds
+1066	406	119	31.50	seconds
+1067	484	118	31.79	seconds
+1068	83	120	32.08	seconds
+1069	277	118	32.13	seconds
+1070	291	119	32.29	seconds
+1071	125	118	33.01	seconds
+1072	458	120	33.13	seconds
+1073	159	118	33.28	seconds
+1074	348	119	34.12	seconds
+1075	109	119	34.58	seconds
+1076	459	118	35.30	seconds
+1077	339	119	35.42	seconds
+1078	345	120	35.61	seconds
+1079	335	120	36.99	seconds
+1080	349	126	56.00	seconds
+1081	62	125	60.62	seconds
+1082	412	125	63.60	seconds
+1083	331	126	66.29	seconds
+1084	288	125	67.92	seconds
+1085	124	125	70.40	seconds
+1086	135	124	70.48	seconds
+1087	316	125	70.57	seconds
+1088	74	124	71.07	seconds
+1089	327	126	71.14	seconds
+1090	443	126	71.26	seconds
+1091	78	125	71.34	seconds
+1092	57	124	72.24	seconds
+1093	428	126	72.54	seconds
+1094	204	126	73.67	seconds
+1095	192	126	74.68	seconds
+1096	232	126	75.35	seconds
+1097	159	124	76.24	seconds
+1098	95	124	78.47	seconds
+1099	125	124	78.79	seconds
+1100	475	125	79.84	seconds
+1101	328	132	148.04	seconds
+1102	300	131	151.40	seconds
+1103	292	132	153.47	seconds
+1104	61	130	154.98	seconds
+1105	285	131	159.76	seconds
+1106	158	130	160.68	seconds
+1107	392	132	160.73	seconds
+1108	253	130	161.27	seconds
+1109	57	130	162.53	seconds
+1110	493	131	166.07	seconds
+1111	260	131	169.40	seconds
+1112	497	132	170.98	seconds
+1113	437	130	172.15	seconds
+1114	224	132	173.57	seconds
+1115	30	131	173.75	seconds
+1116	458	132	174.03	seconds
+1117	202	132	178.01	seconds
+1118	443	132	180.20	seconds
+1119	123	132	183.93	seconds
+1120	87	132	184.15	seconds
+1121	498	131	189.81	seconds
+1122	120	132	191.97	seconds
+1123	93	130	191.99	seconds
+1124	346	132	196.33	seconds
+1125	343	132	204.03	seconds
+1126	292	138	298.53	seconds
+1127	328	138	327.78	seconds
+1128	287	138	336.32	seconds
+1129	300	137	336.97	seconds
+1130	61	136	338.73	seconds
+1131	392	138	345.20	seconds
+1132	57	136	354.72	seconds
+1133	158	136	356.26	seconds
+1134	493	137	361.02	seconds
+1135	497	138	363.73	seconds
+1136	224	138	365.12	seconds
+1137	243	137	368.40	seconds
+1138	253	136	370.35	seconds
+1139	202	138	371.88	seconds
+1140	411	137	373.11	seconds
+1141	195	137	375.22	seconds
+1142	387	136	378.64	seconds
+1143	189	138	381.00	seconds
+1144	249	136	383.01	seconds
+1145	18	136	384.84	seconds
+1146	36	136	388.06	seconds
+1147	9	136	394.01	seconds
+1148	87	138	394.17	seconds
+1149	123	138	395.87	seconds
+1150	6	138	398.87	seconds
+1151	120	138	410.75	seconds
+1152	244	138	418.03	seconds
+1153	498	137	422.39	seconds
+1154	93	136	426.26	seconds
+1155	346	138	431.98	seconds
+1156	343	138	451.33	seconds
+1157	292	144	661.55	seconds
+1158	392	144	728.29	seconds
+1159	195	143	743.93	seconds
+1160	328	144	750.44	seconds
+1161	287	144	750.85	seconds
+1162	61	142	752.55	seconds
+1163	224	144	787.16	seconds
+1164	411	143	788.37	seconds
+1165	493	143	790.99	seconds
+1166	257	143	810.62	seconds
+1167	260	143	822.42	seconds
+1168	243	143	826.51	seconds
+1169	158	142	834.83	seconds
+1170	387	142	837.28	seconds
+1171	9	142	840.62	seconds
+1172	189	144	853.10	seconds
+1173	18	142	859.04	seconds
+1174	36	142	859.35	seconds
+1175	123	144	875.03	seconds
+1176	120	144	914.13	seconds
+1177	337	168	16.81	seconds
+1178	270	167	17.29	seconds
+1179	332	168	17.46	seconds
+1180	340	166	17.97	seconds
+1181	342	167	19.00	seconds
+1182	199	168	19.36	seconds
+1183	220	168	19.44	seconds
+1184	484	166	19.45	seconds
+1185	368	167	20.48	seconds
+1186	415	167	21.12	seconds
+1187	383	167	21.75	seconds
+1188	361	167	21.89	seconds
+1189	321	179	48.10	seconds
+1190	270	179	51.12	seconds
+1191	337	180	51.36	seconds
+1192	332	180	51.95	seconds
+1193	340	178	52.49	seconds
+1194	50	179	53.06	seconds
+1195	368	179	53.07	seconds
+1196	220	180	53.25	seconds
+1197	342	179	53.66	seconds
+1198	199	180	55.75	seconds
+1199	74	178	57.78	seconds
+1200	415	179	58.71	seconds
+1201	383	179	60.04	seconds
+1202	341	179	60.38	seconds
+1203	361	179	63.71	seconds
+1204	51	203	418.50	inches
+1205	142	203	357.00	inches
+1206	206	204	338.00	inches
+1207	226	204	333.00	inches
+1208	164	204	331.00	inches
+1209	150	202	330.50	inches
+1210	203	203	326.00	inches
+1211	354	203	316.00	inches
+1212	381	203	313.25	inches
+1213	490	202	309.50	inches
+1214	229	204	290.75	inches
+1215	306	204	289.00	inches
+1216	350	204	283.00	inches
+1217	492	203	274.00	inches
+1218	107	203	273.50	inches
+1219	414	202	267.75	inches
+1220	396	204	265.50	inches
+1221	29	202	262.50	inches
+1222	371	204	261.00	inches
+1223	91	204	257.00	inches
+1224	482	203	252.00	inches
+1225	52	203	248.00	inches
+1226	145	204	240.25	inches
+1227	434	204	201.25	inches
+1228	206	198	1136.00	inches
+1229	236	197	1136.00	inches
+1230	164	198	1063.00	inches
+1231	490	196	1053.00	inches
+1232	226	198	1045.00	inches
+1233	51	197	1018.00	inches
+1234	381	197	963.00	inches
+1235	142	197	926.00	inches
+1236	306	198	922.00	inches
+1237	229	198	912.00	inches
+1238	44	198	874.00	inches
+1239	228	198	865.00	inches
+1240	492	197	835.50	inches
+1241	428	198	802.00	inches
+1242	414	196	789.00	inches
+1243	396	198	776.00	inches
+1244	203	197	744.00	inches
+1245	150	196	730.00	inches
+1246	350	198	724.00	inches
+1247	107	197	713.00	inches
+1248	374	196	701.00	inches
+1249	354	197	694.00	inches
+1250	371	198	642.50	inches
+1251	29	196	633.50	inches
+1252	484	196	630.00	inches
+1253	417	197	567.00	inches
+1254	145	198	566.00	inches
+1255	91	198	520.00	inches
+1256	28	210	62.00	inches
+1257	45	210	58.00	inches
+1258	190	209	56.00	inches
+1259	218	208	54.00	inches
+1260	330	210	54.00	inches
+1261	337	210	54.00	inches
+1262	201	209	50.00	inches
+1263	437	208	50.00	inches
+1264	415	209	50.00	inches
+1265	444	210	50.00	inches
+1266	348	209	48.00	inches
+1267	368	209	48.00	inches
+1268	351	215	158.00	inches
+1269	281	216	146.00	inches
+1270	338	216	123.00	inches
+1271	306	216	108.00	inches
+1272	486	215	102.00	inches
+1273	204	216	90.00	inches
+1274	78	215	84.00	inches
+1275	37	214	78.00	inches
+1276	351	185	203.25	inches
+1277	331	186	194.00	inches
+1278	190	185	180.75	inches
+1279	218	184	178.00	inches
+1280	336	186	178.00	inches
+1281	42	184	176.00	inches
+1282	270	185	174.00	inches
+1283	83	186	172.00	inches
+1284	154	186	172.00	inches
+1285	201	185	169.00	inches
+1286	130	186	166.50	inches
+1287	17	186	164.00	inches
+1288	367	184	158.50	inches
+1289	125	184	158.00	inches
+1290	444	186	156.50	inches
+1291	424	184	155.00	inches
+1292	44	186	154.75	inches
+1293	494	185	151.00	inches
+1294	118	184	149.50	inches
+1295	239	186	148.00	inches
+1296	459	184	146.00	inches
+1297	434	186	141.50	inches
+1298	109	185	136.50	inches
+1299	338	192	434.50	inches
+1300	337	192	394.00	inches
+1301	336	192	385.75	inches
+1302	218	190	381.00	inches
+1303	330	192	370.00	inches
+1304	306	192	367.50	inches
+1305	236	191	359.50	inches
+1306	17	192	356.00	inches
+1307	83	192	353.00	inches
+1308	412	191	345.50	inches
+1309	130	192	343.00	inches
+1310	444	192	334.75	inches
+1311	239	192	332.50	inches
+1312	154	192	329.00	inches
+1313	367	190	322.00	inches
+1314	109	191	301.00	inches
+1315	414	190	297.00	inches
+1316	448	190	291.00	inches
+1317	424	190	290.75	inches
+1318	302	111	11.40	seconds
+1319	223	111	11.55	seconds
+1320	92	111	11.59	seconds
+1321	185	111	11.78	seconds
+1322	80	110	11.93	seconds
+1323	222	110	12.01	seconds
+1324	473	109	12.06	seconds
+1325	419	111	12.09	seconds
+1326	429	111	12.10	seconds
+1327	77	111	12.14	seconds
+1328	373	111	12.14	seconds
+1329	137	111	12.15	seconds
+1330	400	110	12.19	seconds
+1331	309	109	12.21	seconds
+1332	476	111	12.22	seconds
+1333	255	111	12.25	seconds
+1334	393	111	12.30	seconds
+1335	108	111	12.34	seconds
+1336	233	111	12.35	seconds
+1337	256	111	12.37	seconds
+1338	397	109	12.40	seconds
+1339	64	110	12.41	seconds
+1340	140	111	12.46	seconds
+1341	286	111	12.49	seconds
+1342	431	110	12.50	seconds
+1343	128	111	12.55	seconds
+1344	372	110	12.59	seconds
+1345	99	111	12.65	seconds
+1346	4	111	12.68	seconds
+1347	478	110	12.70	seconds
+1348	451	110	12.71	seconds
+1349	85	111	12.78	seconds
+1350	86	110	12.91	seconds
+1351	284	110	13.24	seconds
+1352	487	109	13.30	seconds
+1353	279	109	13.32	seconds
+1354	268	110	13.36	seconds
+1355	271	109	14.79	seconds
+1356	302	117	22.80	seconds
+1357	92	117	23.02	seconds
+1358	185	117	23.75	seconds
+1359	360	117	24.15	seconds
+1360	223	117	24.19	seconds
+1361	393	117	24.37	seconds
+1362	479	115	24.50	seconds
+1363	419	117	24.57	seconds
+1364	429	117	24.59	seconds
+1365	286	117	24.65	seconds
+1366	80	116	24.69	seconds
+1367	473	115	24.77	seconds
+1368	416	117	24.80	seconds
+1369	309	115	24.97	seconds
+1370	140	117	24.98	seconds
+1371	77	117	25.26	seconds
+1372	462	117	25.26	seconds
+1373	397	115	25.28	seconds
+1374	64	116	25.31	seconds
+1375	35	117	25.35	seconds
+1376	137	117	25.41	seconds
+1377	301	115	25.55	seconds
+1378	452	116	25.57	seconds
+1379	451	116	25.63	seconds
+1380	375	117	25.85	seconds
+1381	141	115	25.86	seconds
+1382	478	116	26.00	seconds
+1383	198	116	26.00	seconds
+1384	465	115	26.00	seconds
+1385	146	117	26.24	seconds
+1386	86	116	26.30	seconds
+1387	99	117	26.31	seconds
+1388	372	116	26.43	seconds
+1389	85	117	26.52	seconds
+1390	284	116	26.72	seconds
+1391	386	116	26.73	seconds
+1392	4	117	26.99	seconds
+1393	279	115	27.22	seconds
+1394	267	116	27.31	seconds
+1395	499	117	27.40	seconds
+1396	487	115	27.85	seconds
+1397	275	115	27.87	seconds
+1398	268	116	27.91	seconds
+1399	271	115	30.95	seconds
+1400	302	123	52.00	seconds
+1401	456	123	52.80	seconds
+1402	479	121	53.31	seconds
+1403	312	121	54.50	seconds
+1404	108	123	54.59	seconds
+1405	68	121	54.91	seconds
+1406	286	123	54.97	seconds
+1407	422	121	55.20	seconds
+1408	322	123	56.30	seconds
+1409	466	121	56.42	seconds
+1410	430	123	56.43	seconds
+1411	452	122	56.56	seconds
+1412	416	123	56.59	seconds
+1413	198	122	56.69	seconds
+1414	75	123	57.00	seconds
+1415	35	123	57.14	seconds
+1416	313	123	57.40	seconds
+1417	469	121	58.46	seconds
+1418	451	122	58.51	seconds
+1419	280	122	58.54	seconds
+1420	146	123	58.68	seconds
+1421	375	123	58.68	seconds
+1422	386	122	59.77	seconds
+1423	126	123	59.85	seconds
+1424	86	122	59.95	seconds
+1425	267	122	60.19	seconds
+1426	99	123	61.64	seconds
+1427	275	121	61.76	seconds
+1428	131	123	61.86	seconds
+1429	283	121	62.00	seconds
+1430	113	123	62.02	seconds
+1431	499	123	62.17	seconds
+1432	89	122	63.56	seconds
+1433	84	123	63.98	seconds
+1434	271	121	66.95	seconds
+1435	219	129	117.76	seconds
+1436	456	129	120.11	seconds
+1437	329	127	120.44	seconds
+1438	297	128	123.17	seconds
+1439	400	128	124.50	seconds
+1440	481	128	126.70	seconds
+1441	455	128	127.97	seconds
+1442	454	129	132.15	seconds
+1443	452	128	132.42	seconds
+1444	217	127	132.92	seconds
+1445	320	127	133.64	seconds
+1446	58	129	133.68	seconds
+1447	496	128	136.07	seconds
+1448	457	127	137.30	seconds
+1449	110	129	137.77	seconds
+1450	276	129	137.90	seconds
+1451	161	129	138.82	seconds
+1452	245	129	143.50	seconds
+1453	151	129	145.48	seconds
+1454	366	129	147.39	seconds
+1455	114	129	147.52	seconds
+1456	89	128	150.34	seconds
+1457	133	129	150.93	seconds
+1458	267	128	157.11	seconds
+1459	449	129	159.30	seconds
+1460	138	128	161.05	seconds
+1461	84	129	\N	\N
+1462	219	135	258.40	seconds
+1463	297	134	263.39	seconds
+1464	400	134	273.00	seconds
+1465	463	135	273.02	seconds
+1466	455	134	273.19	seconds
+1467	456	135	276.92	seconds
+1468	193	135	277.73	seconds
+1469	481	134	280.40	seconds
+1470	259	134	280.96	seconds
+1471	173	134	284.23	seconds
+1472	496	134	286.03	seconds
+1473	217	133	292.58	seconds
+1474	46	133	294.91	seconds
+1475	3	135	298.01	seconds
+1476	264	135	298.45	seconds
+1477	246	135	304.59	seconds
+1478	442	135	305.59	seconds
+1479	421	133	305.81	seconds
+1480	447	135	305.90	seconds
+1481	485	133	306.66	seconds
+1482	251	134	306.68	seconds
+1483	161	135	309.69	seconds
+1484	110	135	311.85	seconds
+1485	245	135	313.20	seconds
+1486	366	135	317.37	seconds
+1487	454	135	319.67	seconds
+1488	114	135	323.22	seconds
+1489	274	135	323.32	seconds
+1490	453	135	323.74	seconds
+1491	112	134	324.00	seconds
+1492	133	135	326.17	seconds
+1493	11	134	326.72	seconds
+1494	457	133	327.61	seconds
+1495	89	134	329.40	seconds
+1496	294	133	329.89	seconds
+1497	157	134	332.80	seconds
+1498	84	135	349.50	seconds
+1499	265	133	387.56	seconds
+1500	317	141	592.00	seconds
+1501	193	141	596.81	seconds
+1502	219	141	604.07	seconds
+1503	173	140	604.50	seconds
+1504	463	141	619.53	seconds
+1505	496	140	636.80	seconds
+1506	315	141	637.30	seconds
+1507	470	139	641.38	seconds
+1508	264	141	642.34	seconds
+1509	323	139	653.90	seconds
+1510	254	139	655.50	seconds
+1511	263	140	655.60	seconds
+1512	251	140	657.90	seconds
+1513	485	139	667.89	seconds
+1514	442	141	673.79	seconds
+1515	46	139	675.32	seconds
+1516	3	141	675.48	seconds
+1517	314	139	678.80	seconds
+1518	421	139	688.19	seconds
+1519	246	141	689.93	seconds
+1520	112	140	691.80	seconds
+1521	110	141	695.42	seconds
+1522	12	141	696.55	seconds
+1523	11	140	697.60	seconds
+1524	366	141	703.06	seconds
+1525	32	139	704.68	seconds
+1526	114	141	705.69	seconds
+1527	474	139	706.01	seconds
+1528	161	141	713.48	seconds
+1529	1	139	725.74	seconds
+1530	136	140	728.81	seconds
+1531	111	139	765.27	seconds
+1532	207	140	767.08	seconds
+1533	265	139	865.06	seconds
+1534	72	171	16.68	seconds
+1535	194	170	17.34	seconds
+1536	360	171	17.36	seconds
+1537	311	171	17.54	seconds
+1538	230	171	17.60	seconds
+1539	483	171	18.64	seconds
+1540	468	169	19.19	seconds
+1541	181	170	19.37	seconds
+1542	97	171	19.73	seconds
+1543	430	171	19.76	seconds
+1544	477	169	21.17	seconds
+1545	96	170	22.94	seconds
+1546	152	169	25.39	seconds
+1547	122	169	\N	\N
+1548	360	177	43.52	seconds
+1549	194	176	44.20	seconds
+1550	72	177	44.65	seconds
+1551	479	175	45.07	seconds
+1552	75	177	45.80	seconds
+1553	311	177	45.82	seconds
+1554	430	177	45.88	seconds
+1555	230	177	46.00	seconds
+1556	274	177	46.96	seconds
+1557	468	175	47.80	seconds
+1558	97	177	48.08	seconds
+1559	181	176	48.72	seconds
+1560	122	175	50.14	seconds
+1561	477	175	51.31	seconds
+1562	483	177	51.50	seconds
+1563	255	177	52.85	seconds
+1564	96	176	57.19	seconds
+1565	426	177	59.59	seconds
+1566	152	175	60.50	seconds
+1567	365	201	609.00	inches
+1568	163	200	557.00	inches
+1569	200	201	497.00	inches
+1570	432	201	481.25	inches
+1571	407	201	471.50	inches
+1572	373	201	471.00	inches
+1573	39	201	463.50	inches
+1574	440	201	461.50	inches
+1575	501	201	449.50	inches
+1576	215	201	449.00	inches
+1577	132	201	440.00	inches
+1578	16	201	432.75	inches
+1579	472	199	428.50	inches
+1580	471	199	425.50	inches
+1581	256	201	422.00	inches
+1582	22	200	421.00	inches
+1583	235	201	420.00	inches
+1584	209	201	393.50	inches
+1585	98	200	390.75	inches
+1586	322	201	390.00	inches
+1587	290	200	359.25	inches
+1588	86	200	312.50	inches
+1589	495	199	311.00	inches
+1590	85	201	290.00	inches
+1591	500	200	259.75	inches
+1592	365	195	1782.00	inches
+1593	163	194	1580.50	inches
+1594	200	195	1509.00	inches
+1595	235	195	1425.50	inches
+1596	440	195	1413.00	inches
+1597	39	195	1363.00	inches
+1598	472	193	1191.00	inches
+1599	407	195	1133.00	inches
+1600	215	195	1130.00	inches
+1601	322	195	1121.50	inches
+1602	132	195	1118.00	inches
+1603	252	194	1106.50	inches
+1604	98	194	1092.00	inches
+1605	22	194	1090.00	inches
+1606	209	195	1082.00	inches
+1607	191	194	1080.00	inches
+1608	471	193	1061.75	inches
+1609	432	195	1028.50	inches
+1610	404	194	1000.00	inches
+1611	290	194	991.50	inches
+1612	268	194	883.00	inches
+1613	72	207	72.00	inches
+1614	467	205	70.00	inches
+1615	436	207	70.00	inches
+1616	418	207	68.00	inches
+1617	82	207	67.00	inches
+1618	212	207	64.00	inches
+1619	334	206	64.00	inches
+1620	27	206	63.00	inches
+1621	40	205	62.00	inches
+1622	210	206	60.00	inches
+1623	153	206	58.00	inches
+1624	461	207	58.00	inches
+1625	274	207	58.00	inches
+1626	394	206	58.00	inches
+1627	397	205	56.00	inches
+1628	131	207	52.00	inches
+1629	70	213	138.00	inches
+1630	333	213	138.00	inches
+1631	230	213	126.00	inches
+1632	334	212	126.00	inches
+1633	82	213	120.00	inches
+1634	208	213	120.00	inches
+1635	59	211	108.00	inches
+1636	480	211	108.00	inches
+1637	295	212	108.00	inches
+1638	422	211	108.00	inches
+1639	394	212	102.00	inches
+1640	468	211	97.00	inches
+1641	491	211	96.00	inches
+1642	20	213	84.00	inches
+1643	436	183	236.00	inches
+1644	419	183	235.50	inches
+1645	72	183	232.00	inches
+1646	222	182	230.00	inches
+1647	194	182	227.75	inches
+1648	104	182	224.00	inches
+1649	393	183	223.50	inches
+1650	311	183	221.50	inches
+1651	418	183	218.00	inches
+1652	435	183	218.00	inches
+1653	223	183	216.00	inches
+1654	212	183	216.00	inches
+1655	77	183	213.50	inches
+1656	80	182	213.00	inches
+1657	27	182	212.00	inches
+1658	233	183	211.75	inches
+1659	181	182	210.50	inches
+1660	365	183	207.75	inches
+1661	467	181	207.00	inches
+1662	488	181	206.00	inches
+1663	464	182	205.25	inches
+1664	210	182	204.00	inches
+1665	425	183	201.00	inches
+1666	153	182	198.75	inches
+1667	131	183	194.25	inches
+1668	394	182	191.00	inches
+1669	113	183	188.75	inches
+1670	279	181	185.00	inches
+1671	460	183	182.50	inches
+1672	283	181	179.00	inches
+1673	134	182	178.00	inches
+1674	265	181	157.00	inches
+1675	222	188	501.00	inches
+1676	436	189	478.75	inches
+1677	104	188	475.75	inches
+1678	212	189	467.00	inches
+1679	435	189	467.00	inches
+1680	311	189	466.00	inches
+1681	70	189	463.00	inches
+1682	233	189	453.50	inches
+1683	467	187	442.00	inches
+1684	27	188	440.00	inches
+1685	418	189	433.00	inches
+1686	210	188	430.00	inches
+1687	131	189	424.00	inches
+1688	394	188	421.50	inches
+1689	431	188	412.00	inches
+1690	464	188	406.50	inches
+1691	153	188	395.25	inches
+1692	113	189	388.25	inches
+1693	460	189	377.00	inches
+1694	134	188	370.00	inches
 \.
 
 
@@ -1958,7 +2690,7 @@ COPY public.entries (id, athlete_id, mde_id, mark, mark_type) FROM stdin;
 -- Name: entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.entries_id_seq', 1011, true);
+SELECT pg_catalog.setval('public.entries_id_seq', 1694, true);
 
 
 --
@@ -2100,6 +2832,114 @@ COPY public.meet_division_events (id, div_id, meet_id, event_code) FROM stdin;
 106	4	1	PV
 107	5	1	PV
 108	6	1	PV
+109	1	2	100M
+110	2	2	100M
+111	3	2	100M
+112	4	2	100M
+113	5	2	100M
+114	6	2	100M
+115	1	2	200M
+116	2	2	200M
+117	3	2	200M
+118	4	2	200M
+119	5	2	200M
+120	6	2	200M
+121	1	2	400M
+122	2	2	400M
+123	3	2	400M
+124	4	2	400M
+125	5	2	400M
+126	6	2	400M
+127	1	2	800M
+128	2	2	800M
+129	3	2	800M
+130	4	2	800M
+131	5	2	800M
+132	6	2	800M
+133	1	2	1600M
+134	2	2	1600M
+135	3	2	1600M
+136	4	2	1600M
+137	5	2	1600M
+138	6	2	1600M
+139	1	2	3200M
+140	2	2	3200M
+141	3	2	3200M
+142	4	2	3200M
+143	5	2	3200M
+144	6	2	3200M
+145	1	2	4x100M
+146	2	2	4x100M
+147	3	2	4x100M
+148	4	2	4x100M
+149	5	2	4x100M
+150	6	2	4x100M
+151	1	2	4x400M
+152	2	2	4x400M
+153	3	2	4x400M
+154	4	2	4x400M
+155	5	2	4x400M
+156	6	2	4x400M
+157	1	2	65H
+158	2	2	65H
+159	3	2	65H
+160	4	2	65H
+161	5	2	65H
+162	6	2	65H
+163	1	2	100H
+164	2	2	100H
+165	3	2	100H
+166	4	2	100H
+167	5	2	100H
+168	6	2	100H
+169	1	2	110H
+170	2	2	110H
+171	3	2	110H
+172	4	2	110H
+173	5	2	110H
+174	6	2	110H
+175	1	2	300H
+176	2	2	300H
+177	3	2	300H
+178	4	2	300H
+179	5	2	300H
+180	6	2	300H
+181	1	2	LJ
+182	2	2	LJ
+183	3	2	LJ
+184	4	2	LJ
+185	5	2	LJ
+186	6	2	LJ
+187	1	2	TJ
+188	2	2	TJ
+189	3	2	TJ
+190	4	2	TJ
+191	5	2	TJ
+192	6	2	TJ
+193	1	2	DT
+194	2	2	DT
+195	3	2	DT
+196	4	2	DT
+197	5	2	DT
+198	6	2	DT
+199	1	2	SP
+200	2	2	SP
+201	3	2	SP
+202	4	2	SP
+203	5	2	SP
+204	6	2	SP
+205	1	2	HJ
+206	2	2	HJ
+207	3	2	HJ
+208	4	2	HJ
+209	5	2	HJ
+210	6	2	HJ
+211	1	2	PV
+212	2	2	PV
+213	3	2	PV
+214	4	2	PV
+215	5	2	PV
+216	6	2	PV
 \.
 
 
@@ -2107,7 +2947,7 @@ COPY public.meet_division_events (id, div_id, meet_id, event_code) FROM stdin;
 -- Name: meet_division_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.meet_division_events_id_seq', 108, true);
+SELECT pg_catalog.setval('public.meet_division_events_id_seq', 216, true);
 
 
 --
@@ -2115,7 +2955,8 @@ SELECT pg_catalog.setval('public.meet_division_events_id_seq', 108, true);
 --
 
 COPY public.meets (id, name, date, host_school_id, description, status, max_entries_per_athlete, max_team_entries_per_event) FROM stdin;
-1	WVAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	accepting_entries	\N	\N
+1	WVAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
+2	WVAL League Practice Meet #2	2019-04-25 00:00:00	\N		Accepting Entries	\N	\N
 \.
 
 
@@ -2123,29 +2964,30 @@ COPY public.meets (id, name, date, host_school_id, description, status, max_entr
 -- Name: meets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.meets_id_seq', 1, true);
+SELECT pg_catalog.setval('public.meets_id_seq', 2, true);
 
 
 --
 -- Data for Name: schools; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
-COPY public.schools (id, abbrev, name, city, state) FROM stdin;
-1	UNA	Unattached	\N	\N
-2	ANZR	Anzar (Aromas-San Juan)	\N	\N
-3	CARM	Carmel	\N	\N
-4	GBK	GB Kirby	\N	\N
-5	GONZ	Gonzales	\N	\N
-6	GRNF	Greenfield	\N	\N
-7	KICI	King City	\N	\N
-8	MaHS	Marina	\N	\N
-9	OAKW	Oakwood	\N	\N
-10	PCS	Pacific Collegiate	\N	\N
-11	PAGR	Pacific Grove	\N	\N
-12	SCAT	Santa Catalina	\N	\N
-13	SOLE	Soledad	\N	\N
-14	STEV	Stevenson	\N	\N
-15	YORK	The York School	\N	\N
+COPY public.schools (id, abbrev, name, league, section, city, state) FROM stdin;
+1	UNA	Unattached	\N	\N	\N	\N
+2	ANZR	Anzar (Aromas-San Juan)	\N	\N	\N	\N
+3	CARM	Carmel	\N	\N	\N	\N
+4	GBK	GB Kirby	\N	\N	\N	\N
+5	GONZ	Gonzales	\N	\N	\N	\N
+6	GRNF	Greenfield	\N	\N	\N	\N
+7	KICI	King City	\N	\N	\N	\N
+8	MaHS	Marina	\N	\N	\N	\N
+9	OAKW	Oakwood	\N	\N	\N	\N
+10	PCS	Pacific Collegiate	\N	\N	\N	\N
+11	PAGR	Pacific Grove	\N	\N	\N	\N
+12	SCAT	Santa Catalina	\N	\N	\N	\N
+13	SOLE	Soledad	\N	\N	\N	\N
+14	STEV	Stevenson	\N	\N	\N	\N
+15	YORK	The York School	\N	\N	\N	\N
+16	TCHS	Trinity Christian	\N	\N	\N	\N
 \.
 
 
@@ -2153,14 +2995,14 @@ COPY public.schools (id, abbrev, name, city, state) FROM stdin;
 -- Name: schools_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.schools_id_seq', 15, true);
+SELECT pg_catalog.setval('public.schools_id_seq', 16, true);
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: vagrant
 --
 
-COPY public.users (id, email, password, role) FROM stdin;
+COPY public.users (id, email, password, school_id, role) FROM stdin;
 \.
 
 
@@ -2321,6 +3163,14 @@ ALTER TABLE ONLY public.meet_division_events
 
 ALTER TABLE ONLY public.meets
     ADD CONSTRAINT meets_host_school_id_fkey FOREIGN KEY (host_school_id) REFERENCES public.schools(id);
+
+
+--
+-- Name: users_school_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vagrant
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_school_id_fkey FOREIGN KEY (school_id) REFERENCES public.schools(id);
 
 
 --

@@ -4,7 +4,8 @@ Some module docstring
 import os
 
 
-from flask import (Flask, render_template, redirect, request, flash, session)
+from flask import (Flask, render_template, redirect, request, flash,
+                   session, url_for)
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
 import requests
@@ -28,13 +29,15 @@ app.jinja_env.undefined = StrictUndefined
 
 
 @app.route('/')
+@app.route('/index')
 def index():
-    # Check if the user is already logged in by looking at the flask session
-    # if not, redirect to the login page.
-
+    """
+    Check if the user is already logged in by looking at the flask session
+    if not, redirect to the login page.
+    """
     if session.get('user_id'):
         return render_template('index.html.j2')
-    return redirect('/login')
+    return redirect(url_for('show_login_form'))
 
 
 @app.route('/login', methods=['GET'])
@@ -59,26 +62,30 @@ def do_login():
                 "ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
                 "danger"
             )
-        return redirect('/login')
+        return redirect(url_for('do_login'))
 
     # Successful login
     session['user_id'] = user.id
     session['user_email'] = user.email
+
+    ## TODO - TEST HACK
+    session['user_school_id'] = 2
+    session['admin_user'] = True
     # session['user_school'] = user.school
 
     flash("Successfully logged in. Welcome to TrackMeetSimplicity!", "success")
-    return redirect('/')
+    return redirect(url_for('index'))
 
 
 @app.route('/do-logout', methods=['GET'])
 def do_logout():
     session.pop('user_id', None)
     flash("You've successfully logged out.", "success")
-    return redirect('/register')
+    return redirect(url_for('show_register_form'))
 
 
 @app.route('/register', methods=['GET'])
-def register_form():
+def show_register_form():
     """Show form for user signup."""
     # Get the list of schools to populate the drop-down
     schools = School.query.all()
@@ -100,7 +107,7 @@ def register_process():
         flash(
             f"ERROR: A user with email {email} already exists!\nTry again, or <a href='/login'>log in</a> if you already have an account.", 
             "danger")
-        return redirect("/register")
+        return redirect(url_for('show_register_form'))
 
     # TODO GATHER THE SCHOOL IN THE FUTURE
     # new_user = User(email=email, password=password, school=None)
@@ -111,18 +118,12 @@ def register_process():
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
     flash("Welcome to TrackMeetSimplicity!", "success")
-    return redirect("/index")
-
-
-@app.route('/users/<int:user_id>')
-def show_user_profile(user_id):
-    user = User.query.filter_by(id=user_id).first_or_404()
-    return render_template('user_profile.html.j2', user=user)
+    return redirect(url_for("index"))
 
 
 @app.route('/profile')
-def show_user():
-    user_id=session.get('user_id')
+def show_user_profile():
+    user_id = session.get('user_id')
     user = User.query.get(user_id)
     return render_template('profile.html.j2', user=user)
 
@@ -130,8 +131,7 @@ def show_user():
 @app.route('/meets')
 def show_all_meets():
     meets = Meet.query.all()
-    return render_template(
-        'meets_list.html.j2', section="meets", list=meets)
+    return render_template('all_meets.html.j2', list=meets)
 
 
 @app.route('/meets/<int:meet_id>')
@@ -140,10 +140,31 @@ def show_meet_detail(meet_id):
     return render_template('meet_detail.html.j2', meet=meet)
 
 
-@app.route('/meets/<int:meet_id>/athletes/<int:school_id>')
-def show_meet_school_entries(meet_id, school_id):
+@app.route('/meets/new_meet')
+def new_meet():
+    return ('<p>Create New Meet</p>')
+
+
+@app.route('/meets/<int:meet_id>/edit_meet')
+def edit_meet(meet_id):
+    meet = Meet.query.filter_by(id=meet_id).first_or_404()
+    return '<p>Edit Meet {}</p>'.format(meet.id)
+    # return render_template('meet_detail.html.j2', meet=meet)
+
+
+@app.route('/meets/<int:meet_id>/enter_meet')
+def enter_meet(meet_id):
+    meet = Meet.query.filter_by(id=meet_id).first_or_404()
+    return '<p>Enter my school into Meet {}</p>'.format(meet.id)
+    # return render_template('meet_detail.html.j2', meet=meet)
+
+
+@app.route('/meets/<int:meet_id>/view_entries')
+def edit_meet_entries(meet_id):
     meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
-    pass
+    return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
+            meet.id)
+    # return render_template('meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
@@ -156,21 +177,26 @@ def show_meet_division_events(meet_id, mde_id):
 def show_all_athletes():
     # athletes = Athlete.query.order_by(fname).order_by(lname).all()
     athletes = Athlete.query.all()
-    return render_template(
-        'all_athletes.html.j2', list=athletes)
+    return render_template('all_athletes.html.j2', list=athletes)
 
 
 @app.route('/athletes/<int:athlete_id>')
 def show_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
-    return render_template('athlete_detail.html.j2', item=athlete)
+    return render_template('athlete_detail.html.j2', athlete=athlete)
+
+
+@app.route('/athletes/<int:athlete_id>/edit')
+def edit_athlete_detail(athlete_id):
+    athlete = Athlete.query.get(athlete_id)
+    # return render_template('athlete_detail.html.j2', athlete=athlete)
+    return '<p>Edit athlete {}</p>'.format(athlete.id)
 
 
 @app.route('/schools')
 def show_all_schools():
     schools = School.query.order_by(School.name).all()
-    return render_template(
-        'school_list.html.j2', list=schools)
+    return render_template('all_schools.html.j2', list=schools)
 
 
 @app.route('/schools/<int:school_id>')
@@ -178,14 +204,19 @@ def show_school_detail(school_id):
     school = School.query.get(school_id)
     return render_template('school_detail.html.j2', school=school)
 
+@app.route('/schools/<int:school_id>/edit')
+def edit_school_detail(school_id):
+    school = School.query.get(school_id)
+    return '<p>Edit athlete {}</p>'.format(school.id)
 
-@app.route('/display-info-from-server.json')
-def example_json():
-    """ Gathers information about something and sends it to the browser as a
-    dictionary that is converted to a JSON
-    """
-    foo = {'bar': 30, 'baz': 'wow'}
-    return requests.jsonify(foo)
+
+# @app.route('/display-info-from-server.json')
+# def example_json():
+#     """ Gathers information about something and sends it to the browser as a
+#     dictionary that is converted to a JSON
+#     """
+#     foo = {'bar': 30, 'baz': 'wow'}
+#     return requests.jsonify(foo)
 
 
 @app.errorhandler(404)

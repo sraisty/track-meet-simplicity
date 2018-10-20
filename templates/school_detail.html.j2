@@ -1,31 +1,85 @@
-{% extends "base.html.j2" %}
+{% extends "secondary_nav.html.j2" %}
 
 
-{% block content %}
-    <h1>{{school.name}}</h1>
-    <h4 class="mb-4">Code: {{ school.abbrev }}</h4>
+{% block secondary_nav_title %}
+    {{ school.name }}
+{% endblock secondary_nav_title %}
 
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-primary text-white">Meets</div>
-                <div class="card-body "></div>
-            </div>
+{% block school_admin_url %}
+    href="{{ url_for('edit_school_detail') }}"
+{% endblock school_admin_url %}>
+
+{% block nav2_subtitle %}
+    <div class="d-flex justify-content-md-between flex-wrap">
+        <div>
+            Code: {{ school.abbrev }} 
         </div>
+
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+    <div>Divisions: 
+        {% for division in school.divisions %}
+            {{division.abbrev()}},
+        {% endfor %}
     </div>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-primary text-white">Athletes</div>
-                <div class="card-body"></div>
-            </div>
-        </div>
-    </div>
-   
-{% endblock content %}
+{% endblock nav2_subtitle %}
 
 
 
-{% block my_javascripts %}
-  <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
-{% endblock my_javascripts %}
+{% block tab1_name %}
+    Upcoming Meets
+{% endblock tab1_name %}
+
+{% block tab2_name %}
+    Past Meets
+{% endblock tab2_name %}
+
+ {% block tab3_name %}
+    Athletes
+{% endblock tab3_name %}
+ 
+{% block tab4_name %}
+    School Detail
+{% endblock tab4_name %}
+
+
+{% block tab1_content %}
+    <p>Upcoming Meets for this school</p>
+    {% for meet in school.meets() %}
+        <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+            {{ meet.name }}
+        </a>
+    {% endfor %}
+{% endblock tab1_content %}
+                        
+
+{% block tab2_content %}
+    <p>Past Meets for this school</p>
+    {% for meet in school.meets() %}
+        <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+            {{ meet.name }}
+        </a>
+    {% endfor %}
+{% endblock tab2_content %} 
+
+
+{% block tab3_content %}
+    <p>Our school's athletes, sortable and filterable by event, gender, division </p>
+    <ul>
+        {% for athlete in school.athletes %}
+            <li>
+                <a href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
+                    {{ athlete.full_name() }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock tab3_content %}
+              
+
+{% block tab4_content %}
+    <p>School Detail here
+    </p>
+{% endblock tab4_content %}
+
+

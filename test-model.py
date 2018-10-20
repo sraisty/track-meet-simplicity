@@ -22,7 +22,7 @@ from server import app
 
 EXAMPLE_MEETS = ({"name": "A Meet from the Past",
                   "date": "August 5, 2018",
-                  "status": "done"},
+                  "status": "Completed"},
                  {"name": "WVAL League Practice Meet #1",
                   "date": "April 15, 2019"},
                  {"name": "WVAL League Practice Meet #2",
@@ -87,7 +87,7 @@ class testMeet(unittest.TestCase):
         m = Meet.query.get(id)
         self.assertTrue(m)
         self.assertEqual(m.name, "WVAL League Practice Meet #1")
-        self.assertEqual(m.status, "accepting_entries")
+        self.assertEqual(m.status, "Accepting Entries")
 
     def test_bad_create_just_name(self):
         meet1 = Meet(name="My Meet Name")
@@ -118,7 +118,7 @@ class testMeet(unittest.TestCase):
         db.session.commit()
 
         m = Meet.query.first()
-        self.assertEqual(m.status, "accepting_entries")
+        self.assertEqual(m.status, "Accepting Entries")
         # test relationship from meet to host_school
         self.assertEqual(m.host_school.abbrev, "RJFM")
 
@@ -150,7 +150,7 @@ class testMeet(unittest.TestCase):
         populate_example_meets(EXAMPLE_MEETS)
         self.assertEqual(3,
                          Meet.query.filter(Meet.name.like("%WVAL%")).count())
-        q = Meet.query.filter_by(status="done")
+        q = Meet.query.filter_by(status="Completed")
         self.assertEqual(q.count(), 1)
         self.assertEqual(q.first().name, "A Meet from the Past")
 
@@ -379,12 +379,12 @@ class testEntry(unittest.TestCase):
                                Entry.time_string_to_seconds('01:00:01.24'))
  
     def test_time_mark_to_string(self):
-        self.assertEqual("23:23:23.23", Entry.time_mark_to_string(84203.23))
-        self.assertEqual("1:01:01.01", Entry.time_mark_to_string(3661.01))
-        self.assertEqual("59:59.59", Entry.time_mark_to_string(3599.592))
-        self.assertEqual("4:04.04", Entry.time_mark_to_string(244.04))
-        self.assertEqual("58.90", Entry.time_mark_to_string(58.9))
-        self.assertEqual("9.93", Entry.time_mark_to_string(9.93))
+        self.assertEqual("23:23:23.23", Entry.seconds_to_time_string(84203.23))
+        self.assertEqual("1:01:01.01", Entry.seconds_to_time_string(3661.01))
+        self.assertEqual("59:59.59", Entry.seconds_to_time_string(3599.592))
+        self.assertEqual("4:04.04", Entry.seconds_to_time_string(244.04))
+        self.assertEqual("58.90", Entry.seconds_to_time_string(58.9))
+        self.assertEqual("9.93", Entry.seconds_to_time_string(9.93))
 
 
 ###################################
@@ -632,7 +632,7 @@ class testDivision(unittest.TestCase):
 def populate_example_meets(meet_list):
     for meet_dict in meet_list:
         meet = Meet(name=meet_dict['name'], date=meet_dict['date'],
-                    status=meet_dict.get('status', 'accepting_entries'))
+                    status=meet_dict.get('status', 'Accepting Entries'))
 
         db.session.add(meet)
         db.session.commit()

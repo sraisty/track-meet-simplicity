@@ -14,3 +14,6 @@ a.tms-tab {
     /*background-color: #444444;*/
 }
 
+a.dropdown-item.disabled {
+    color: #dddddd;
+}

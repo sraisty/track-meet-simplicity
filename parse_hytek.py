@@ -6,13 +6,13 @@ separated format.  Details on this file format follow:
 
 
 from model import (Athlete, School, Entry, Division, Event_Definition,
-                    MeetDivisionEvent,
+                   MeetDivisionEvent,
                    db, connect_to_db, GENDERS, GRADES)
 from util import warning, error, info
 
 # Translate HyTek's codes for events into our codes
 ht_event_translator = {'100': '100M', '200': '200M', '400': '400M',
-                      '800': '800M', '1600': '1600M', '3200': '3200M'}
+                       '800': '800M', '1600': '1600M', '3200': '3200M'}
 
 
 def parse_hytek_file(filename, meet):
@@ -63,7 +63,7 @@ def parse_athlete(tokens):
 
     """
     tokens = tokens[:]  # make a copy so we don't mutate the original list
-    info(f"Parsing I-Line: {tokens}")
+    # info(f"Parsing I-Line: {tokens}")
     if len(tokens) < 10:
         # TODO - one day, only require 7 fields. But for first release we
         # need files that have the School Year at tokens[9]
@@ -88,7 +88,6 @@ def parse_athlete(tokens):
         db.session.commit()
 
 
-
 def parse_entry(tokens, meet):
     """
     Data   MaxChar   Notes for the D Record
@@ -110,7 +109,7 @@ def parse_entry(tokens, meet):
     13   Event measure (required): M for Metric, E for English (Required)
     """
     tokens = tokens[:]  # make a copy so we don't mutate the original list
-    info(f"Parsing D-Line: {tokens}")
+    # info(f"Parsing D-Line: {tokens}")
     if len(tokens) < 10:
         # TODO - one day, only require 7 fields. But for first release we
         # need files that have the School Year at tokens[9]
@@ -121,7 +120,6 @@ def parse_entry(tokens, meet):
 
     athlete = add_athlete_to_db(first_name, middle, last_name, gender,
                                 grade, team_code, team_name)
-
 
     # Now, get the event the athlete is entering
     ht_event_code = tokens[10]
@@ -141,7 +139,7 @@ def parse_entry(tokens, meet):
         mark_string = tokens[11]
         mark_measure_type = tokens[12]
 
-        if mark_string and mark_measure_type:       #aren't the empty string
+        if mark_string and mark_measure_type:       # aren't the empty string
 
             if mark_measure_type == "E":
                 # TODO - fix this for field events that are measured in Metric.
@@ -154,9 +152,7 @@ def parse_entry(tokens, meet):
             entry.mark = mark
             entry.mark_type = mark_type
 
-
     db.session.commit()
-
 
 
 def parse_relay(tokens):
@@ -165,8 +161,9 @@ def parse_relay(tokens):
 
 ##### Helper Functions
 
+
 def add_athlete_to_db(first_name, middle, last_name, gender,
-                       grade, team_code, team_name):
+                      grade, team_code, team_name):
     """ If the Athlete is not already in the database, add him/her. Will
     also add the athlete's school if it is not already in the database as well.
 
@@ -183,7 +180,6 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     # Athlete is already in DB, so return it.
     if athlete:
         return athlete
-
 
     # The athlete is NOT already in the database, so let's add him/her.
 
@@ -207,8 +203,9 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     return athlete
 
 
-
 # ###############
+
+
 if __name__ == "__main__":
     from server import app
     connect_to_db(app, "tms-dev")
@@ -219,7 +216,6 @@ if __name__ == "__main__":
     School.init_unattached_school()
     Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
     Event_Definition.generate_event_defs(EVENT_DEFS)
-
 
     parse_hytek_file("seed_data/MiddleSchool_PCS_45.txt")
     # if len(sys.argv) > 1:

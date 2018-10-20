@@ -1,41 +1,44 @@
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark mb-4">
-  <a class="navbar-brand" href="/">TrackMeetSimplicity</a>
+<nav class="navbar navbar-expand-md navbar-dark sticky-top bg-dark mb-4">
+  <a class="navbar-brand" href="{{ url_for('index') }}">TrackMeetSimplicity</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/">
-          Home
-          <span class="sr-only">(current)</span>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('show_all_meets')}}">
+          My Meets
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/meets">
-          Meets
+        <a class="nav-link" href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
+          My School
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/athletes">
-          Athletes
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarExploreMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Explore
         </a>
+          <ul class="dropdown-menu" "aria-labelledby="navbarExploreMenuLink">
+            <li><a class="dropdown-item" href="{{ url_for('show_all_meets') }}">Meets</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('show_all_schools') }}">Schools</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
+            <li><a class="dropdown-item disabled href="#">Divisions</a></li>
+            <li><a class="dropdown-item disabled href="#">Events</a></li>
+          </ul>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/schools">
-          Schools
-        </a>
-      </li>
+
+
     </ul>
     <!-- The right-most profile menu -->
     <ul class="navbar-nav">
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarUserMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{session.user_email}}
+          {{ session.user_email }}
         </a>
-        <div class="dropdown-menu" "aria-labelledby="navbarUserMenuLink">
-          <a class="dropdown-item" href="/profile">Profile</a>
-          <a class="dropdown-item" href="/do-logout">Logout</a>
+        <div class="dropdown-menu" aria-labelledby="navbarUserMenuLink">
+          <a class="dropdown-item" href="{{ url_for('show_user_profile') }}">Profile</a>
+          <a class="dropdown-item" href="{{ url_for('do_logout') }} ">Logout</a>
         </div>
       </li>
     </ul>
