@@ -1,0 +1,53 @@
+{# Meet List #}
+
+{# <ul>
+{% for meet in list %}
+  <li>
+    <a href="/meets/{{ meet.id }}">
+        {{ meet.name }}
+    </a>
+  </li>
+{% endfor %}
+</ul>
+ #}
+
+  <table id="meet_table" class="display" data-order='[[ 1, "asc" ]]' data-page-length='100'>
+      <thead>
+          <tr>
+              <th>Meet Name</th>
+              <th>Date</th>
+              <th>Host School</th>
+              <th>Status</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for meet in list %}
+              <tr>    
+                  <td>
+                      <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                          {{ meet['name'] }}
+                      </a>
+                  </td>
+                  <td data-order="{{ meet.date }}">
+                      {{ meet.date.strftime("%B %d, %Y") }}
+                  </td>
+                  <td>
+                      {% if meet['host_school'] %}
+                          {{ meet.host_school.name }}
+                      {% endif %}
+                  </td>
+                  <td>
+                      {% if meet.status == 'accepting_entries' %}
+                          <a href="{{ url_for('enter_meet', meet_id=meet.id) }}">
+                              <button type="button" class="btn btn-warning">
+                                 Accepting Entries
+                              </button>
+                          </a>
+                      {% else %}
+                          {{ meet.status }}
+                      {% endif %}
+                  </td>
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>

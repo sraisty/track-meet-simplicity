@@ -1,0 +1,11 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  <h1 class="mb-5">Meets</h1>
+  {% include 'template-includes/meet_list.include.html.j2' %}
+{% endblock %}
+
+
+{% block my_javascripts %}
+   <script type="text/javascript" src="static/js/tms-datatable.js"></script>
+{% endblock %}
+
