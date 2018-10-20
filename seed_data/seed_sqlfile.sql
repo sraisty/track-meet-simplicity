@@ -953,6 +953,18 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 499	Jack	Whilden		\N	15	3
 500	Henry	Xiang		\N	15	2
 501	Zach	Davidson		\N	16	3
+502	Elijah	Alvarez		\N	17	2
+503	Ricky	Alvarez		\N	17	1
+504	Valerie	Barocio		\N	17	5
+505	Hazel	Batara		\N	17	4
+506	Daniel	Brathwaite		\N	17	2
+507	Jaydan	Brathwaite		\N	17	1
+508	Nerina	Campos		\N	17	6
+509	Gregorio	Castro		\N	17	2
+510	Mia	Corona		\N	17	5
+511	Tristan	Cortez		\N	17	1
+512	Jed	Dionisio		\N	17	2
+513	Ramiro	Garcia		\N	17	3
 \.
 
 
@@ -960,7 +972,7 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 -- Name: athletes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.athletes_id_seq', 501, true);
+SELECT pg_catalog.setval('public.athletes_id_seq', 513, true);
 
 
 --
@@ -2940,6 +2952,114 @@ COPY public.meet_division_events (id, div_id, meet_id, event_code) FROM stdin;
 214	4	2	PV
 215	5	2	PV
 216	6	2	PV
+217	1	3	100M
+218	2	3	100M
+219	3	3	100M
+220	4	3	100M
+221	5	3	100M
+222	6	3	100M
+223	1	3	200M
+224	2	3	200M
+225	3	3	200M
+226	4	3	200M
+227	5	3	200M
+228	6	3	200M
+229	1	3	400M
+230	2	3	400M
+231	3	3	400M
+232	4	3	400M
+233	5	3	400M
+234	6	3	400M
+235	1	3	800M
+236	2	3	800M
+237	3	3	800M
+238	4	3	800M
+239	5	3	800M
+240	6	3	800M
+241	1	3	1600M
+242	2	3	1600M
+243	3	3	1600M
+244	4	3	1600M
+245	5	3	1600M
+246	6	3	1600M
+247	1	3	3200M
+248	2	3	3200M
+249	3	3	3200M
+250	4	3	3200M
+251	5	3	3200M
+252	6	3	3200M
+253	1	3	4x100M
+254	2	3	4x100M
+255	3	3	4x100M
+256	4	3	4x100M
+257	5	3	4x100M
+258	6	3	4x100M
+259	1	3	4x400M
+260	2	3	4x400M
+261	3	3	4x400M
+262	4	3	4x400M
+263	5	3	4x400M
+264	6	3	4x400M
+265	1	3	65H
+266	2	3	65H
+267	3	3	65H
+268	4	3	65H
+269	5	3	65H
+270	6	3	65H
+271	1	3	100H
+272	2	3	100H
+273	3	3	100H
+274	4	3	100H
+275	5	3	100H
+276	6	3	100H
+277	1	3	110H
+278	2	3	110H
+279	3	3	110H
+280	4	3	110H
+281	5	3	110H
+282	6	3	110H
+283	1	3	300H
+284	2	3	300H
+285	3	3	300H
+286	4	3	300H
+287	5	3	300H
+288	6	3	300H
+289	1	3	LJ
+290	2	3	LJ
+291	3	3	LJ
+292	4	3	LJ
+293	5	3	LJ
+294	6	3	LJ
+295	1	3	TJ
+296	2	3	TJ
+297	3	3	TJ
+298	4	3	TJ
+299	5	3	TJ
+300	6	3	TJ
+301	1	3	DT
+302	2	3	DT
+303	3	3	DT
+304	4	3	DT
+305	5	3	DT
+306	6	3	DT
+307	1	3	SP
+308	2	3	SP
+309	3	3	SP
+310	4	3	SP
+311	5	3	SP
+312	6	3	SP
+313	1	3	HJ
+314	2	3	HJ
+315	3	3	HJ
+316	4	3	HJ
+317	5	3	HJ
+318	6	3	HJ
+319	1	3	PV
+320	2	3	PV
+321	3	3	PV
+322	4	3	PV
+323	5	3	PV
+324	6	3	PV
 \.
 
 
@@ -2947,7 +3067,7 @@ COPY public.meet_division_events (id, div_id, meet_id, event_code) FROM stdin;
 -- Name: meet_division_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.meet_division_events_id_seq', 216, true);
+SELECT pg_catalog.setval('public.meet_division_events_id_seq', 324, true);
 
 
 --
@@ -2957,6 +3077,7 @@ SELECT pg_catalog.setval('public.meet_division_events_id_seq', 216, true);
 COPY public.meets (id, name, date, host_school_id, description, status, max_entries_per_athlete, max_team_entries_per_event) FROM stdin;
 1	WVAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
 2	WVAL League Practice Meet #2	2019-04-25 00:00:00	\N		Accepting Entries	\N	\N
+3	WVAL League Practice Meet #3	2019-05-08 00:00:00	\N		Accepting Entries	\N	\N
 \.
 
 
@@ -2964,7 +3085,7 @@ COPY public.meets (id, name, date, host_school_id, description, status, max_entr
 -- Name: meets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.meets_id_seq', 2, true);
+SELECT pg_catalog.setval('public.meets_id_seq', 3, true);
 
 
 --
@@ -2988,6 +3109,7 @@ COPY public.schools (id, abbrev, name, league, section, city, state) FROM stdin;
 14	STEV	Stevenson	\N	\N	\N	\N
 15	YORK	The York School	\N	\N	\N	\N
 16	TCHS	Trinity Christian	\N	\N	\N	\N
+17	ALVA	Everett Alvarez	\N	\N	\N	\N
 \.
 
 
@@ -2995,7 +3117,7 @@ COPY public.schools (id, abbrev, name, league, section, city, state) FROM stdin;
 -- Name: schools_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.schools_id_seq', 16, true);
+SELECT pg_catalog.setval('public.schools_id_seq', 17, true);
 
 
 --

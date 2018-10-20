@@ -140,7 +140,7 @@ class testFillSeedDatabase(unittest.TestCase):
         self.events = events
 
     def tearDown(self):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         teardown_test_db_app()
 
     def test_parse_lots_big_files(self):
@@ -149,6 +149,9 @@ class testFillSeedDatabase(unittest.TestCase):
                          self.meet1)
         self.meet2 = init_meet(EXAMPLE_MEETS[1], self.divs, self.events)
         parse_hytek_file("seed_data/MS_HtMeetEntries_53.txt", self.meet2)
+
+        self.meet3 = init_meet(EXAMPLE_MEETS[2], self.divs, self.events)
+        parse_hytek_file("seed_data/MS_HtMeetEntries_43.txt", self.meet3)
 
 
 # ############## HELPER FUNCTIONS ###############

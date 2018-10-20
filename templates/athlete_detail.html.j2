@@ -44,6 +44,14 @@
 
 {% block tab1_content %}
     <p>This lists the upcoming Meets the athlete is entered into</p>
+    <ul>
+      {% for meet in athlete.meets %}
+        <li>
+          <a href="{{ url_for('show_meet_details', meet.id) }}">
+            {meet.name} {meet.date}</a>
+        </li>
+      {% endfor %}
+    </ul>
 {% endblock tab1_content %}
                         
 
