@@ -6,7 +6,7 @@ by Sue Raisty
 from decimal import *
 import unittest
 
-from sqlalchemy.exc import IntegrityError, DataError
+from sqlalchemy.exc import IntegrityError, DataError 
 
 from model import (db, reset_database, Division, School, Event_Definition,
                    Meet, MeetDivisionEvent, Athlete, Entry,

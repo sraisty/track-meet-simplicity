@@ -4,6 +4,7 @@ separated format.  Details on this file format follow:
 
 # import sys
 
+from sqlalchemy.orm.exc import MultipleResultsFound
 
 from model import (Athlete, School, Entry, Division, Event_Definition,
                    MeetDivisionEvent,
@@ -196,10 +197,16 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
         warning(f"Added new school): {team_name}, code:{team_code}")
 
     # create a new athlete, and add it to the database.
-    athlete = Athlete(first_name, middle, last_name, gender, grade,
-                      team_code)
+    
+    athlete = Athlete(first_name, middle, last_name, gender, grade, team_code)
     db.session.add(athlete)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except MultipleResultsFound as error:
+        print("Duplicate athlete & DB error: {}, {}, {}, {}, {}, {}, {}".format(
+            first_name, middle, last_name, gender, grade, team_code))
+        return
     return athlete
 
 

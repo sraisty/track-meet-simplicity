@@ -103,7 +103,7 @@ class Meet(db.Model):
     editor_users = db.relationship("User", secondary="schools")
     # heats
     # athletes
-    # schools
+
 
     def __repr__(self):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
@@ -260,8 +260,10 @@ class Entry(db.Model):
                             secondary="meet_division_events",
                             uselist=False,
                             back_populates="entries")
-
-    # schools =
+    school = db.relationship("School",
+                             secondary="athletes",
+                             uselist=False,
+                             back_populates="entries")
     # editor_users = db.relationship("User", secondary="schools")
 
 
@@ -480,7 +482,7 @@ class School(db.Model):
     divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship(
             "Entry", 
-            back_populates="school", 
+            back_populates="school",
             secondary="athletes")
     coaches = db.relationship("User")
     # editor_users = coaches

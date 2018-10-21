@@ -14,15 +14,15 @@ from model import (
 
 from server import app
 
-EXAMPLE_MEETS = ({"name": "WVAL League Practice Meet #1",
+EXAMPLE_MEETS = ({"name": "PCAL League Practice Meet #1",
                   "date": "April 15, 2019",
                   "description": """ Meet starts at 3pm, at Los Gatos High School.
                         """,
                   "status": "Accepting Entries"
                   },
-                 {"name": "WVAL League Practice Meet #2",
+                 {"name": "PCAL League Practice Meet #2",
                   "date": "April 25, 2019"},
-                 {"name": "WVAL League Practice Meet #3",
+                 {"name": "PCAL League Practice Meet #3",
                   "date": "May 8, 2019"},
                  {"name": "Santa Clara County Middle School Championships",
                   "date": "May 15, 2019"},
@@ -130,6 +130,19 @@ class testCreateMeet(unittest.TestCase):
         veronica = q.filter_by(fname="Veronica", lname="Rodriguez").one()
         self.assertEqual(len(veronica.entries), 2)
 
+class test_bad_file(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+        (divs, events) = init_tms()
+        self.meet1 = init_meet(EXAMPLE_MEETS[0], divs, events)
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_athlete_missing_grade(self):
+        parse_hytek_file("seed_data/HT_test-no-grade.txt", self.meet1)
+        # TODO later
 
 class testFillSeedDatabase(unittest.TestCase):
     def setUp(self):
@@ -142,6 +155,11 @@ class testFillSeedDatabase(unittest.TestCase):
     def tearDown(self):
         import pdb; pdb.set_trace()
         teardown_test_db_app()
+
+    def test_parse_meet3_file(self):
+        self.meet3 = init_meet(EXAMPLE_MEETS[2], self.divs, self.events)
+        parse_hytek_file("seed_data/MS_HtMeetEntries_43.txt", self.meet3)
+
 
     def test_parse_lots_big_files(self):
         self.meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
