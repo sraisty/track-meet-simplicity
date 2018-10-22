@@ -1,7 +1,5 @@
 {# Detail info about a particular meet, at /meets/<meet-id> #}
 {% extends "secondary_nav.html.j2" %}
-
-
 {% block secondary_nav_title %}
     {{ meet.name }}
 {% endblock secondary_nav_title %}
@@ -15,94 +13,82 @@
 {% endblock nav2_subtitle %}
 
 
-
 {% block tab1_name %}
-    Meet Information
+    Event Schedule
 {% endblock tab1_name %}
 
 {% block tab2_name %}
-    Event Schedule
+    Schools
 {% endblock tab2_name %}
 
- {% block tab3_name %}
-    Schools
-{% endblock tab3_name %}
- 
-{% block tab4_name %}
+{% block tab3_name %}
     Athletes
+{% endblock tab3_name %}
+
+{% block tab4_name %}
+    Meet Information
 {% endblock tab4_name %}
-
-{% block tab1_content %}
-    <p>{{meet.description}}</p>
-{% endblock tab1_content %}
-                        
-
 
 {# The expandable event cards that are on the accordions on   #}
 {# MeetDetail > Schedule of events  #}
-{% block tab2_content %}
-
-
-{# {% include "/templates/template-includes/event-card.include.html.j2" %} #}
+{% block tab1_content %}
     <div class="row">
         <div id="track-event-accordion" class="col-lg-6 col">
             <h5 class="card-header bg-info text-white">TrackEvents</h5>
             {% for event in meet.events %}
                 {% if event.is_track() %}
-                    {{ show_event_card("track", event) }}
-                 {% endif %}
+                    {{ show_event_card(meet, "track", event) }}
+                {% endif %}
             {% endfor %}
         </div>    {# track-event-accordion #}
-
         <div id="field-event-accordion" class="col-lg-6 col">
             <h5 class="card-header bg-info text-white">FieldEvents</h5>
             {% for event in meet.events %}
                 {% if event.is_field() %}
-                    {{ show_event_card("field", event) }}
-                 {% endif %}
+                    {{ show_event_card(meet, "field", event) }}
+                {% endif %}
             {% endfor %}
         </div>    {# field-event-accordion #}
+    </div>
+{% endblock tab1_content %}
 
-    </div> 
-{% endblock tab2_content %} 
-
+{% block tab2_content %}
+    <p>This lists the schools in the meet</p>
+{% endblock tab2_content %}
 
 {% block tab3_content %}
-    <p>This lists the schools in the meet</p>
+    <p>This lists the athletes in the meet</p>
 {% endblock tab3_content %}
-              
 
 {% block tab4_content %}
-    <p>This lists the athletes in the meet</p>
+    <p>{{meet.description}}</p>
 {% endblock tab4_content %}
 
 
 {#  MACROS DEFINITION TO HANDLE THE EVENT ACCORDIONS #}
-
-{% macro show_event_card(ev_type, event) %}
-    <div class="card">
-        <div class="card-header" id="{{ event.name }}">
-            <h5 class="mb-0">
-                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
-                    <h6>{{ event.name }}</h6>
-                </button>
-            </h5>
+{% macro show_event_card(meet, ev_type, event) %}
+<div class="card">
+    <div class="card-header" id="{{ event.name }}">
+        <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
+            <span class="mr-auto">{{ event.name }} :&nbsp;</span>
+            <span class-"badge badge-secondary">
+                {{ meet.get_event_athlete_count(event) }} athletes
+            </span>
+        </button>
+    </div>
+    <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
+        <div class="card-body">
+            <ul class="list-group">
+                {% for mde in meet.get_event_mdes(event) %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
+                            {{ mde.division.longname() }}
+                        </a>
+                        <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
-
-        <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
-            <div class="card-body">
-                <ul class="list-group">
-                    {% for mde in meet.mdes %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
-                                {{ mde.division.longname() }}
-                            </a>
-                            <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>     
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>     
+    </div>
+</div>
 {% endmacro %}
-

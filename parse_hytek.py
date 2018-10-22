@@ -6,7 +6,7 @@ separated format.  Details on this file format follow:
 
 from sqlalchemy.orm.exc import MultipleResultsFound
 
-from model import (Athlete, School, Entry, Division, Event_Definition,
+from model import (Athlete, School, Entry, Division, EventDefinition,
                    MeetDivisionEvent,
                    db, connect_to_db, GENDERS, GRADES, EVENT_DEFS)
 from util import warning, error, info
@@ -197,7 +197,7 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
         warning(f"Added new school): {team_name}, code:{team_code}")
 
     # create a new athlete, and add it to the database.
-    
+
     athlete = Athlete(first_name, middle, last_name, gender, grade, team_code)
     db.session.add(athlete)
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
 
     School.init_unattached_school()
     Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-    Event_Definition.generate_event_defs(EVENT_DEFS)
+    EventDefinition.generate_event_defs(EVENT_DEFS)
 
     parse_hytek_file("seed_data/MiddleSchool_PCS_45.txt")
     # if len(sys.argv) > 1:

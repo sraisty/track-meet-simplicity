@@ -16,11 +16,11 @@ $('#mde_table').DataTable({
 
 
 $(document).ready(function() {
-    $('#example').DataTable( {
+    $('#athlete_table').DataTable( {
         initComplete: function () {
             this.api().columns().every( function () {
-                var column = this;
-                var select = $('<select><option value=""></option></select>')
+                let column = this;
+                let select = $('<select><option value=""></option></select>')
                     .appendTo( $(column.footer()).empty() )
                     .on( 'change', function () {
                         var val = $.fn.dataTable.util.escapeRegex(

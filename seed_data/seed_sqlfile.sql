@@ -965,6 +965,299 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 511	Tristan	Cortez		\N	17	1
 512	Jed	Dionisio		\N	17	2
 513	Ramiro	Garcia		\N	17	3
+514	Steven	Garcia		\N	17	3
+515	Makiala	Gonzales		\N	17	5
+516	Lorena	Gonzalez		\N	17	6
+517	Manuel	Gonzalez		\N	17	2
+518	Michelle	Gonzalez		\N	17	4
+519	Sergio	Gonzalez		\N	17	2
+520	Jennifer	Guarneros		\N	17	4
+521	Paige	Gularte		\N	17	6
+522	Sabria	Henry-Hunter		\N	17	5
+523	Irving	Hermosillo		\N	17	3
+524	Angel	Hernandez		\N	17	3
+525	Claudia	Hernandez		\N	17	5
+526	Jenning De'Amonte	Huntley		\N	17	3
+527	Deandre	Jaime		\N	17	3
+528	Brian	Jimenez		\N	17	3
+529	Brian	Jimenez H		\N	17	2
+530	Tayjak	Johnson		\N	17	6
+531	Tyshell	Johnson		\N	17	6
+532	Gladys	Jovel		\N	17	6
+533	Ricardo	Juan		\N	17	2
+534	Hector	Juarez		\N	17	3
+535	Jeyri	Leon		\N	17	5
+536	Sebastian	Lepe		\N	17	3
+537	Jordi	Lizaola		\N	17	2
+538	Alan	Llamas		\N	17	3
+539	Jose	Lomeli		\N	17	2
+540	Francisco	Maciel		\N	17	2
+541	Carlos	Madrigal		\N	17	3
+542	Fatima	Mandujano		\N	17	6
+543	Andres	Martinez		\N	17	3
+544	Antonio	Martinez		\N	17	2
+545	Illiana	Martinez		\N	17	4
+546	Kaymberlin	Mendoza		\N	17	6
+547	Luis	Mendoza		\N	17	2
+548	Andrei	Mina		\N	17	3
+549	Joshua	Monctezuma		\N	17	2
+550	Jared	Montalvo		\N	17	3
+551	Jose	Morado		\N	17	3
+552	Alexis	Morales		\N	17	1
+553	Juan	Morales		\N	17	2
+554	Sarah	Muradas		\N	17	5
+555	Juan	Murillo		\N	17	3
+556	Nathan	Nagata		\N	17	3
+557	Darshana	Nahnd		\N	17	5
+558	Esmeralda	Navarro		\N	17	5
+559	Sophia	Nunez		\N	17	6
+560	Xavier	Ortiz		\N	17	3
+561	Nancy	Oviedo		\N	17	5
+562	Koby	Pearson		\N	17	1
+563	Efrain	Perez		\N	17	2
+564	Gabriel	Perez		\N	17	1
+565	Gerardo	Perez		\N	17	3
+566	Frank	Pinedo		\N	17	3
+567	Valerie	Quinonez		\N	17	6
+568	Eleazar	Rico		\N	17	3
+569	Aliyah	Robles		\N	17	5
+570	Jonathan	Rodriguez		\N	17	2
+571	Jonny	Rodriguez		\N	17	2
+572	Michael	Sanchez		\N	17	2
+573	Rigoberto	Sanchez		\N	17	3
+574	Keighon	Serrano		\N	17	3
+575	Jennie	Tang		\N	17	4
+576	Cristian	Tonalixco		\N	17	2
+577	Xavier	Torres		\N	17	2
+578	Emmanuel	Valdez		\N	17	2
+579	Nayeli	Valencia		\N	17	4
+580	Vicentejordan	Vanderlipe		\N	17	1
+581	Brian	Vasquez		\N	17	2
+582	Kimberly	Yanez		\N	17	5
+583	Colby	Aalgaard		\N	18	2
+584	Cooper	Aiello		\N	18	3
+585	Yanira	Alvarez Munoz		\N	18	5
+586	Ashlyn	Archibeque		\N	18	6
+587	Julian	Arreola		\N	18	2
+588	Samuel	Arreola		\N	18	1
+589	Richardo	Arreola Padilla		\N	18	3
+590	John	Ash		\N	18	3
+591	Adrian	Avila		\N	18	3
+592	Adrian	Avila Hurtado		\N	18	3
+593	Raul	Azcona		\N	18	3
+594	Kenna	Barrett		\N	18	6
+595	Cesar	Bedolla		\N	18	2
+596	Ivan	Benitez		\N	18	2
+597	Johnathan	Betz		\N	18	3
+598	Chloe	Blackwood		\N	18	5
+599	Annie	Breger		\N	18	6
+600	Jack	Breger		\N	18	3
+601	Kami	Brewer Pozzi		\N	18	5
+602	Jenette	Cabrera		\N	18	6
+603	Tristan	Camacho		\N	18	1
+604	Chelsey	Cameron		\N	18	5
+605	Michael	Campos		\N	18	1
+606	Nancy	Campos		\N	18	6
+607	Christina	Carvalho		\N	18	6
+608	Christian	Casarez		\N	18	2
+609	William	Castellanos		\N	18	2
+610	Gustavo	Castillo		\N	18	1
+611	Stephanie	Castillo		\N	18	5
+612	Marianna	Castro		\N	18	5
+613	Angel	Cesareo		\N	18	3
+614	Mariah	Changco		\N	18	5
+615	Robert	Chapa		\N	18	3
+616	Arturo	Chavez		\N	18	3
+617	Christian	Chavez		\N	18	1
+618	Nezly	Chavez		\N	18	5
+619	Mario Alfonso	Chavez Escobar		\N	18	2
+620	Karina	Collins		\N	18	6
+621	Shelbey	Conley		\N	18	6
+622	Jose	Contreras Rodriguez		\N	18	2
+623	Clarissa	Corona		\N	18	5
+624	Angel	Cortes		\N	18	3
+625	Samantha	Cortez		\N	18	6
+626	Gabrielle	Cross		\N	18	6
+627	Hailey	Cross		\N	18	5
+628	Natalia	Del Moral		\N	18	4
+629	Anthony	Delgado		\N	18	2
+630	Brandon	Dell		\N	18	3
+631	Evan	Duran		\N	18	1
+632	Christian	Elizarraras		\N	18	3
+633	Dillon	Engler		\N	18	2
+634	Ariana	Espinoza		\N	18	4
+635	Ryan	Evans		\N	18	1
+636	Elian	Fileto		\N	18	3
+637	Jordan	Finister		\N	18	3
+638	Camille	Finley		\N	18	6
+639	Lauren	Flaherty		\N	18	6
+640	Ruben	Flores		\N	18	1
+641	Ulices	Flores		\N	18	3
+642	Hunter	Fu		\N	18	2
+643	Marco	Gaitan		\N	18	3
+644	Guadalupe	Galvan		\N	18	5
+645	Oliver	Garcia		\N	18	3
+646	Vanessa	Garcia		\N	18	5
+647	Francesca	Giannotta		\N	18	4
+648	Caitlyn	Gonzalez		\N	18	6
+649	Jonathan	Gonzalez		\N	18	3
+650	Yasmin	Gonzalez		\N	18	5
+651	Eric	Green		\N	18	1
+652	Abigail	Greene		\N	18	6
+653	Ray	Guerrero		\N	18	3
+654	Antonio	Guerrero Magdaleno		\N	18	1
+655	Isaac	Gutierrez		\N	18	1
+656	Jasmine	Gutierrez		\N	18	6
+657	Niko	Gutierrez		\N	18	1
+658	Romaldo	Gutierrez		\N	18	1
+659	Benjamin	Hagan		\N	18	2
+660	Nevaeh	Henry		\N	18	4
+661	Fernando	Hernandez		\N	18	2
+662	Jacob	Hernandez		\N	18	1
+663	Kelvyn	Hernandez		\N	18	2
+664	Vivian	Hernandez		\N	18	6
+665	Sonya	Hervey		\N	18	5
+666	McKenzie	Hoff		\N	18	5
+667	Andre	Holder		\N	18	2
+668	Trent	Hurtado		\N	18	2
+669	Elizabeth	Jacuinde		\N	18	5
+670	Adam	Jimenez		\N	18	1
+671	Chris	Johst		\N	18	3
+672	Cristal	Juarez Farfan		\N	18	5
+673	Richard	Justo		\N	18	3
+674	Ethan	Kimber		\N	18	3
+675	Megan	Kistner		\N	18	6
+676	Elli	Kliewer		\N	18	6
+677	Mateo	Koch		\N	18	2
+678	Pedro	Laguna		\N	18	2
+679	Adrianna	Ledesma		\N	18	6
+680	Sarah	Lima		\N	18	4
+681	Holly	Lompa		\N	18	6
+682	Dennys	Lopez		\N	18	5
+683	Leslie	Lopez		\N	18	6
+684	Marc	Lopez		\N	18	3
+685	Joseph	Loredo		\N	18	2
+686	Alexis	Lozano		\N	18	4
+687	Samantha	Lucatero		\N	18	4
+688	Che	Luevano		\N	18	1
+689	Christopher	Maes		\N	18	3
+690	Kyle	Manley		\N	18	3
+691	Matthew	Manley		\N	18	3
+692	Johana	Manzo		\N	18	5
+693	Yazmin	Manzo		\N	18	4
+694	Abraham	Manzo Hernandez		\N	18	1
+695	Gerald	Maresh		\N	18	2
+696	Brianna	Martin		\N	18	6
+697	Edgar	Martinez		\N	18	1
+698	Mia	Martinez		\N	18	6
+699	Oscar	Martinez		\N	18	3
+700	Badiana	Martinez Garcia		\N	18	5
+701	Melissa	McGinnis		\N	18	6
+702	Andres	Medina		\N	18	3
+703	Christian	Medina		\N	18	3
+704	Galilea	Medina Ruiz		\N	18	5
+705	Nayeli	Medina Ruiz		\N	18	5
+706	Joseph	Medrano		\N	18	2
+707	Michelle	Medrano Sanchez		\N	18	6
+708	Luis	Melo		\N	18	3
+709	Adam	Mendoza		\N	18	3
+710	Ivan	Mendoza		\N	18	1
+711	Luis	Mendoza		\N	18	3
+712	Robert	Mendoza		\N	18	2
+713	Taryn	Mills		\N	18	4
+714	Rafael	Miramontes		\N	18	2
+715	Maritza	Molina		\N	18	6
+716	Brittany	Moore		\N	18	4
+717	Raighan	Mooshabad		\N	18	4
+718	Manuel	Mora		\N	18	1
+719	Axel	Mora Bravo		\N	18	1
+720	Kimberly	Morales		\N	18	6
+721	Samantha	Moran		\N	18	4
+722	Brandon	Morgan		\N	18	2
+723	Nathan	Morioka		\N	18	3
+724	Anai	Murillo Gonzalez		\N	18	5
+725	Brittany	Navarro		\N	18	6
+726	Jessica	Neff		\N	18	5
+727	Lisa	Nguyen		\N	18	6
+728	Colby	Noble		\N	18	3
+729	Ricardo	Nunez		\N	18	1
+730	Hunter	Nye		\N	18	3
+731	Trey	Oldakowski		\N	18	1
+732	Sebastian	Orozco		\N	18	3
+733	Chris	Outman		\N	18	3
+734	Leah	Overman		\N	18	6
+735	Carlos	Paniagua		\N	18	3
+736	Chris	Parga		\N	18	3
+737	Makenna	Parks		\N	18	6
+738	Ella Shara	Pascua		\N	18	4
+739	Daniel	Pasillas		\N	18	3
+740	Julia	Pearson		\N	18	5
+741	Steven	Pedersen		\N	18	2
+742	Cheyenne	Peebles		\N	18	5
+743	Dakota	Peebles		\N	18	6
+744	Jimmy	Pelaiz		\N	18	2
+745	Jesus	Perez		\N	18	1
+746	Marcos	Perez		\N	18	2
+747	Jacqueline	Perez Archibeque		\N	18	5
+748	Aaliyah	Perillo		\N	18	4
+749	Maya	Peterson		\N	18	4
+750	Izia	Polanco		\N	18	2
+751	Sara	Power		\N	18	6
+752	Aiden	Pung		\N	18	2
+753	Emily	Quinby		\N	18	5
+754	Kathryn	Quinones		\N	18	6
+755	Emiliano	Quintero		\N	18	1
+756	Diego	Ramirez		\N	18	2
+757	Lisbeth	Ramirez		\N	18	5
+758	Lucero	Ramirez		\N	18	6
+759	Emily	Ramirez Lagunas		\N	18	6
+760	Jonathan	Ramos		\N	18	2
+761	Kristian	Reardon		\N	18	2
+762	Nolan	Redman		\N	18	2
+763	Isaac	Regalado		\N	18	3
+764	Peter	Reikowski		\N	18	3
+765	Amber	Rericha		\N	18	4
+766	Theodore	Rialson		\N	18	1
+767	Nathaniel	Robles		\N	18	1
+768	Brandon	Rodriguez		\N	18	3
+769	James	Rodriguez		\N	18	2
+770	Michelle	Rodriguez		\N	18	6
+771	Rudy	Rodriguez		\N	18	1
+772	Yazmin	Rodriguez		\N	18	6
+773	Iris Yuliana	Roman Guzman		\N	18	6
+774	Joseph	Romero		\N	18	1
+775	Jasmine	Rosales Castillo		\N	18	5
+776	Elliot	Ruiz		\N	18	2
+777	Annie	Ruvalcaba		\N	18	5
+778	Emma	Saguindel		\N	18	4
+779	Michael	Sainz		\N	18	3
+780	Alexander	San Miguel		\N	18	2
+781	Bobby	Sanchez		\N	18	1
+782	Joseph	Sanchez		\N	18	3
+783	Katalina	Santiago		\N	18	5
+784	Hailey	Schleeter-Powell		\N	18	6
+785	Cameron	Schmuckle		\N	18	1
+786	Carson	Schmuckle		\N	18	3
+787	Erik	Servin		\N	18	1
+788	Tyler	Shelton		\N	18	2
+789	Ian	Sills		\N	18	2
+790	Ryan	Sims		\N	18	6
+791	Ashley	Smith		\N	18	6
+792	Shaelynne	Smith		\N	18	6
+793	Cloey	Stiers		\N	18	4
+794	Mackenzie	Stoner		\N	18	5
+795	Nicole	Taluban		\N	18	6
+796	Cesar	Tapia		\N	18	2
+797	Jada	Taylor		\N	18	5
+798	Kaitlyn	Tedesco		\N	18	5
+799	Ray	Tiscareno		\N	18	3
+800	Grace	Tomasini		\N	18	4
+801	Jerry	Torres		\N	18	3
+802	Hannah	Trimble		\N	18	5
+803	Jose	Velarde-Ruiz		\N	18	2
+804	Summer	Vowinkle		\N	18	4
+805	Hailee	Westrick		\N	18	4
+806	Anna	Williams		\N	18	6
 \.
 
 
@@ -972,7 +1265,7 @@ COPY public.athletes (id, fname, lname, minitial, phone, school_id, div_id) FROM
 -- Name: athletes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.athletes_id_seq', 513, true);
+SELECT pg_catalog.setval('public.athletes_id_seq', 806, true);
 
 
 --
@@ -2695,6 +2988,663 @@ COPY public.entries (id, athlete_id, mde_id, mark, mark_type) FROM stdin;
 1692	113	189	388.25	inches
 1693	460	189	377.00	inches
 1694	134	188	370.00	inches
+1695	569	221	13.47	seconds
+1696	602	222	13.74	seconds
+1697	599	222	13.90	seconds
+1698	772	222	14.00	seconds
+1699	795	222	14.00	seconds
+1700	611	221	14.00	seconds
+1701	679	222	14.20	seconds
+1702	652	222	14.50	seconds
+1703	626	222	14.50	seconds
+1704	734	222	14.50	seconds
+1705	516	222	14.58	seconds
+1706	754	222	15.10	seconds
+1707	639	222	15.50	seconds
+1708	515	221	15.65	seconds
+1709	532	222	16.07	seconds
+1710	806	222	16.20	seconds
+1711	582	221	16.38	seconds
+1712	727	222	16.60	seconds
+1713	681	222	\N	\N
+1714	530	222	\N	\N
+1715	773	222	\N	\N
+1716	623	221	14.20	seconds
+1717	716	220	14.20	seconds
+1718	604	221	14.50	seconds
+1719	665	221	14.50	seconds
+1720	798	221	15.00	seconds
+1721	669	221	15.10	seconds
+1722	748	220	15.10	seconds
+1723	802	221	15.20	seconds
+1724	585	221	15.24	seconds
+1725	618	221	15.30	seconds
+1726	783	221	15.40	seconds
+1727	700	221	15.50	seconds
+1728	612	221	15.60	seconds
+1729	650	221	16.30	seconds
+1730	575	220	16.44	seconds
+1731	672	221	16.60	seconds
+1732	692	221	16.70	seconds
+1733	598	221	\N	\N
+1734	646	221	\N	\N
+1735	647	220	\N	\N
+1736	705	221	\N	\N
+1737	738	220	\N	\N
+1738	749	220	\N	\N
+1739	797	221	\N	\N
+1740	805	220	\N	\N
+1741	740	221	\N	\N
+1742	660	220	\N	\N
+1743	757	221	\N	\N
+1744	567	228	27.74	seconds
+1745	602	228	28.74	seconds
+1746	611	227	29.00	seconds
+1747	626	228	29.19	seconds
+1748	715	228	29.40	seconds
+1749	772	228	30.00	seconds
+1750	734	228	30.66	seconds
+1751	795	228	31.00	seconds
+1752	681	228	31.12	seconds
+1753	754	228	31.40	seconds
+1754	639	228	32.00	seconds
+1755	620	228	32.00	seconds
+1756	532	228	34.35	seconds
+1757	806	228	35.53	seconds
+1758	558	227	\N	\N
+1759	530	228	\N	\N
+1760	679	228	\N	\N
+1761	773	228	\N	\N
+1762	623	227	30.00	seconds
+1763	604	227	31.00	seconds
+1764	665	227	31.00	seconds
+1765	716	226	31.00	seconds
+1766	798	227	31.40	seconds
+1767	669	227	31.60	seconds
+1768	748	226	31.66	seconds
+1769	585	227	32.70	seconds
+1770	802	227	33.20	seconds
+1771	618	227	33.40	seconds
+1772	700	227	33.50	seconds
+1773	672	227	35.64	seconds
+1774	692	227	\N	\N
+1775	575	226	\N	\N
+1776	598	227	\N	\N
+1777	646	227	\N	\N
+1778	647	226	\N	\N
+1779	749	226	\N	\N
+1780	783	227	\N	\N
+1781	797	227	\N	\N
+1782	805	226	\N	\N
+1783	660	226	\N	\N
+1784	757	227	\N	\N
+1785	753	233	63.86	seconds
+1786	627	233	64.00	seconds
+1787	715	234	65.00	seconds
+1788	558	233	65.08	seconds
+1789	620	234	70.00	seconds
+1790	753	239	156.70	seconds
+1791	737	240	157.00	seconds
+1792	676	240	157.70	seconds
+1793	508	240	167.18	seconds
+1794	554	239	181.31	seconds
+1795	542	240	\N	\N
+1796	535	239	\N	\N
+1797	627	239	\N	\N
+1798	634	238	178.44	seconds
+1799	557	239	187.79	seconds
+1800	800	238	194.45	seconds
+1801	644	239	197.81	seconds
+1802	628	238	\N	\N
+1803	693	238	\N	\N
+1804	804	238	\N	\N
+1805	676	246	340.28	seconds
+1806	696	246	352.09	seconds
+1807	737	246	354.52	seconds
+1808	625	246	359.98	seconds
+1809	614	245	370.55	seconds
+1810	508	246	370.80	seconds
+1811	510	245	385.03	seconds
+1812	518	244	386.27	seconds
+1813	554	245	399.87	seconds
+1814	545	244	408.19	seconds
+1815	525	245	455.42	seconds
+1816	542	246	\N	\N
+1817	535	245	\N	\N
+1818	559	246	\N	\N
+1819	634	244	408.38	seconds
+1820	557	245	413.51	seconds
+1821	693	244	416.74	seconds
+1822	561	245	428.03	seconds
+1823	765	244	432.88	seconds
+1824	644	245	435.57	seconds
+1825	777	245	442.39	seconds
+1826	504	245	458.93	seconds
+1827	804	244	499.51	seconds
+1828	628	244	503.49	seconds
+1829	520	244	\N	\N
+1830	579	244	\N	\N
+1831	505	244	\N	\N
+1832	800	244	\N	\N
+1833	696	252	760.39	seconds
+1834	625	252	763.21	seconds
+1835	614	251	793.41	seconds
+1836	510	251	797.56	seconds
+1837	518	250	845.25	seconds
+1838	545	250	900.90	seconds
+1839	559	252	\N	\N
+1840	561	251	951.90	seconds
+1841	765	250	1089.70	seconds
+1842	777	251	\N	\N
+1843	504	251	\N	\N
+1844	520	250	\N	\N
+1845	579	250	\N	\N
+1846	505	250	\N	\N
+1847	792	276	18.21	seconds
+1848	720	276	20.83	seconds
+1849	652	276	20.96	seconds
+1850	758	276	20.99	seconds
+1851	521	276	\N	\N
+1852	727	276	\N	\N
+1853	770	276	\N	\N
+1854	742	275	18.87	seconds
+1855	775	275	\N	\N
+1856	612	275	\N	\N
+1857	743	288	53.44	seconds
+1858	720	288	58.04	seconds
+1859	758	288	58.04	seconds
+1860	652	288	58.74	seconds
+1861	727	288	66.64	seconds
+1862	675	288	\N	\N
+1863	770	288	\N	\N
+1864	742	287	56.44	seconds
+1865	775	287	\N	\N
+1866	612	287	\N	\N
+1867	705	287	\N	\N
+1868	791	312	321.00	inches
+1869	569	311	313.00	inches
+1870	701	312	309.00	inches
+1871	515	311	279.00	inches
+1872	522	311	259.50	inches
+1873	698	312	245.00	inches
+1874	725	312	225.50	inches
+1875	656	312	225.00	inches
+1876	707	312	219.00	inches
+1877	759	312	217.50	inches
+1878	607	312	211.00	inches
+1879	531	312	\N	\N
+1880	648	312	\N	\N
+1881	751	312	\N	\N
+1882	664	312	\N	\N
+1883	586	312	\N	\N
+1884	738	310	283.00	inches
+1885	726	311	252.00	inches
+1886	601	311	250.50	inches
+1887	778	310	212.00	inches
+1888	682	311	195.00	inches
+1889	713	310	192.00	inches
+1890	793	310	165.50	inches
+1891	724	311	\N	\N
+1892	666	311	\N	\N
+1893	680	310	\N	\N
+1894	687	310	\N	\N
+1895	704	311	\N	\N
+1896	794	311	\N	\N
+1897	747	311	\N	\N
+1898	751	306	968.00	inches
+1899	569	305	905.00	inches
+1900	515	305	857.00	inches
+1901	791	306	801.00	inches
+1902	759	306	695.00	inches
+1903	701	306	693.00	inches
+1904	522	305	679.00	inches
+1905	707	306	637.00	inches
+1906	607	306	631.00	inches
+1907	656	306	625.00	inches
+1908	698	306	560.00	inches
+1909	725	306	478.00	inches
+1910	531	306	\N	\N
+1911	648	306	\N	\N
+1912	664	306	\N	\N
+1913	586	306	\N	\N
+1914	726	305	784.00	inches
+1915	738	304	688.00	inches
+1916	682	305	584.00	inches
+1917	601	305	553.00	inches
+1918	778	304	546.00	inches
+1919	713	304	530.00	inches
+1920	793	304	477.00	inches
+1921	724	305	\N	\N
+1922	666	305	\N	\N
+1923	680	304	\N	\N
+1924	687	304	\N	\N
+1925	704	305	\N	\N
+1926	794	305	\N	\N
+1927	747	305	\N	\N
+1928	638	318	62.00	inches
+1929	599	318	56.00	inches
+1930	530	318	\N	\N
+1931	721	316	54.00	inches
+1932	650	317	\N	\N
+1933	740	317	\N	\N
+1934	681	324	102.00	inches
+1935	546	324	78.00	inches
+1936	582	323	72.00	inches
+1937	675	324	72.00	inches
+1938	683	324	72.00	inches
+1939	790	324	\N	\N
+1940	720	324	\N	\N
+1941	727	324	\N	\N
+1942	783	323	\N	\N
+1943	599	294	179.00	inches
+1944	638	294	177.00	inches
+1945	525	293	132.50	inches
+1946	567	294	\N	\N
+1947	606	294	\N	\N
+1948	621	294	\N	\N
+1949	594	294	\N	\N
+1950	734	294	\N	\N
+1951	784	294	\N	\N
+1952	721	292	154.00	inches
+1953	742	293	152.00	inches
+1954	717	292	139.00	inches
+1955	686	292	98.00	inches
+1956	647	292	\N	\N
+1957	650	293	\N	\N
+1958	740	293	\N	\N
+1959	599	300	402.50	inches
+1960	638	300	399.00	inches
+1961	606	300	\N	\N
+1962	621	300	\N	\N
+1963	784	300	\N	\N
+1964	742	299	304.00	inches
+1965	721	298	293.50	inches
+1966	717	298	273.50	inches
+1967	594	300	\N	\N
+1968	686	298	\N	\N
+1969	600	219	11.33	seconds
+1970	609	218	11.80	seconds
+1971	649	219	11.90	seconds
+1972	786	219	12.00	seconds
+1973	590	219	12.02	seconds
+1974	709	219	12.04	seconds
+1975	691	219	12.18	seconds
+1976	730	219	12.20	seconds
+1977	690	219	12.29	seconds
+1978	507	217	12.31	seconds
+1979	566	219	12.33	seconds
+1980	562	217	12.84	seconds
+1981	632	219	13.00	seconds
+1982	613	219	13.20	seconds
+1983	527	219	13.46	seconds
+1984	703	219	13.64	seconds
+1985	684	219	13.80	seconds
+1986	735	219	13.80	seconds
+1987	674	219	14.10	seconds
+1988	526	219	\N	\N
+1989	548	219	\N	\N
+1990	580	217	\N	\N
+1991	551	219	\N	\N
+1992	799	219	\N	\N
+1993	637	219	\N	\N
+1994	584	219	\N	\N
+1995	755	217	12.00	seconds
+1996	603	217	12.30	seconds
+1997	670	217	12.40	seconds
+1998	710	217	12.40	seconds
+1999	512	218	12.96	seconds
+2000	745	217	13.10	seconds
+2001	651	217	13.20	seconds
+2002	502	218	13.21	seconds
+2003	571	218	13.27	seconds
+2004	553	218	13.31	seconds
+2005	762	218	13.40	seconds
+2006	631	217	13.40	seconds
+2007	635	217	13.40	seconds
+2008	503	217	13.48	seconds
+2009	668	218	13.60	seconds
+2010	714	218	13.60	seconds
+2011	581	218	13.68	seconds
+2012	576	218	13.75	seconds
+2013	539	218	13.91	seconds
+2014	667	218	14.00	seconds
+2015	719	217	14.10	seconds
+2016	605	217	14.50	seconds
+2017	564	217	14.90	seconds
+2018	572	218	15.46	seconds
+2019	544	218	\N	\N
+2020	570	218	\N	\N
+2021	552	217	\N	\N
+2022	511	217	\N	\N
+2023	588	217	\N	\N
+2024	610	217	\N	\N
+2025	640	217	\N	\N
+2026	658	217	\N	\N
+2027	718	217	\N	\N
+2028	731	217	\N	\N
+2029	760	218	\N	\N
+2030	774	217	\N	\N
+2031	781	217	\N	\N
+2032	688	217	\N	\N
+2033	595	218	\N	\N
+2034	600	225	23.00	seconds
+2035	609	224	23.50	seconds
+2036	709	225	24.50	seconds
+2037	645	225	25.00	seconds
+2038	730	225	25.00	seconds
+2039	786	225	25.00	seconds
+2040	538	225	25.02	seconds
+2041	649	225	25.40	seconds
+2042	507	223	25.52	seconds
+2043	590	225	25.58	seconds
+2044	690	225	25.73	seconds
+2045	528	225	26.12	seconds
+2046	506	224	26.22	seconds
+2047	632	225	26.29	seconds
+2048	548	225	26.49	seconds
+2049	613	225	27.00	seconds
+2050	703	225	27.50	seconds
+2051	536	225	27.64	seconds
+2052	735	225	28.60	seconds
+2053	674	225	28.74	seconds
+2054	523	225	\N	\N
+2055	524	225	\N	\N
+2056	526	225	\N	\N
+2057	566	225	\N	\N
+2058	513	225	\N	\N
+2059	540	224	\N	\N
+2060	551	225	\N	\N
+2061	527	225	\N	\N
+2062	543	225	\N	\N
+2063	684	225	\N	\N
+2064	799	225	\N	\N
+2065	584	225	\N	\N
+2066	603	223	25.00	seconds
+2067	710	223	25.00	seconds
+2068	712	224	25.00	seconds
+2069	642	224	25.50	seconds
+2070	785	223	25.70	seconds
+2071	766	223	26.00	seconds
+2072	553	224	26.78	seconds
+2073	780	224	27.00	seconds
+2074	571	224	27.12	seconds
+2075	503	223	27.31	seconds
+2076	512	224	27.52	seconds
+2077	635	223	27.60	seconds
+2078	651	223	27.80	seconds
+2079	745	223	27.80	seconds
+2080	762	224	28.00	seconds
+2081	667	224	28.20	seconds
+2082	539	224	28.23	seconds
+2083	581	224	28.53	seconds
+2084	631	223	28.70	seconds
+2085	731	223	29.74	seconds
+2086	564	223	\N	\N
+2087	544	224	\N	\N
+2088	502	224	\N	\N
+2089	570	224	\N	\N
+2090	552	223	\N	\N
+2091	511	223	\N	\N
+2092	576	224	\N	\N
+2093	668	224	\N	\N
+2094	714	224	\N	\N
+2095	787	223	\N	\N
+2096	610	223	\N	\N
+2097	640	223	\N	\N
+2098	662	223	\N	\N
+2099	719	223	\N	\N
+2100	718	223	\N	\N
+2101	760	224	\N	\N
+2102	774	223	\N	\N
+2103	781	223	\N	\N
+2104	688	223	\N	\N
+2105	645	231	55.00	seconds
+2106	524	231	55.56	seconds
+2107	538	231	56.04	seconds
+2108	543	231	57.44	seconds
+2109	536	231	65.79	seconds
+2110	523	231	\N	\N
+2111	513	231	\N	\N
+2112	642	230	57.00	seconds
+2113	712	230	57.00	seconds
+2114	785	229	60.00	seconds
+2115	780	230	\N	\N
+2116	533	230	\N	\N
+2117	766	229	\N	\N
+2118	787	229	\N	\N
+2119	662	229	\N	\N
+2120	723	237	131.73	seconds
+2121	776	236	131.73	seconds
+2122	540	236	133.94	seconds
+2123	702	237	143.34	seconds
+2124	616	237	143.73	seconds
+2125	630	237	144.55	seconds
+2126	733	237	146.32	seconds
+2127	514	237	146.90	seconds
+2128	591	237	159.44	seconds
+2129	573	237	\N	\N
+2130	547	236	\N	\N
+2131	549	236	\N	\N
+2132	708	237	\N	\N
+2133	589	237	\N	\N
+2134	771	235	143.90	seconds
+2135	593	237	\N	\N
+2136	663	236	\N	\N
+2137	746	236	\N	\N
+2138	622	236	\N	\N
+2139	678	236	\N	\N
+2140	706	236	\N	\N
+2141	657	235	\N	\N
+2142	767	235	\N	\N
+2143	694	235	\N	\N
+2144	776	242	293.29	seconds
+2145	711	243	293.87	seconds
+2146	685	242	299.81	seconds
+2147	624	243	303.54	seconds
+2148	695	242	305.57	seconds
+2149	537	242	306.20	seconds
+2150	514	243	306.52	seconds
+2151	517	242	320.59	seconds
+2152	708	243	323.36	seconds
+2153	549	242	323.45	seconds
+2154	702	243	328.55	seconds
+2155	578	242	337.52	seconds
+2156	733	243	344.31	seconds
+2157	591	243	345.30	seconds
+2158	519	242	\N	\N
+2159	573	243	\N	\N
+2160	547	242	\N	\N
+2161	723	243	\N	\N
+2162	608	242	\N	\N
+2163	589	243	\N	\N
+2164	617	241	312.92	seconds
+2165	616	243	314.45	seconds
+2166	655	241	319.78	seconds
+2167	771	241	319.83	seconds
+2168	630	243	326.13	seconds
+2169	622	242	332.45	seconds
+2170	746	242	335.46	seconds
+2171	803	242	336.78	seconds
+2172	587	242	337.08	seconds
+2173	663	242	338.69	seconds
+2174	593	243	381.26	seconds
+2175	529	242	\N	\N
+2176	677	242	\N	\N
+2177	678	242	\N	\N
+2178	706	242	\N	\N
+2179	657	241	\N	\N
+2180	729	241	\N	\N
+2181	767	241	\N	\N
+2182	694	241	\N	\N
+2183	624	249	643.80	seconds
+2184	711	249	647.20	seconds
+2185	517	248	\N	\N
+2186	578	248	\N	\N
+2187	537	248	\N	\N
+2188	519	248	\N	\N
+2189	695	248	\N	\N
+2190	608	248	\N	\N
+2191	617	247	690.80	seconds
+2192	655	247	699.80	seconds
+2193	587	248	733.10	seconds
+2194	529	248	\N	\N
+2195	622	248	\N	\N
+2196	677	248	\N	\N
+2197	729	247	\N	\N
+2198	803	248	\N	\N
+2199	761	266	11.58	seconds
+2200	633	266	12.14	seconds
+2201	789	266	12.67	seconds
+2202	796	266	12.90	seconds
+2203	588	265	\N	\N
+2204	605	265	\N	\N
+2205	763	279	15.40	seconds
+2206	629	278	15.80	seconds
+2207	597	279	18.17	seconds
+2208	555	279	18.22	seconds
+2209	768	279	18.50	seconds
+2210	671	279	20.22	seconds
+2211	764	279	22.01	seconds
+2212	509	278	\N	\N
+2213	629	284	43.92	seconds
+2214	768	285	45.01	seconds
+2215	555	285	46.53	seconds
+2216	597	285	47.38	seconds
+2217	671	285	51.23	seconds
+2218	509	284	53.23	seconds
+2219	674	285	\N	\N
+2220	761	284	47.50	seconds
+2221	750	284	52.12	seconds
+2222	789	284	54.04	seconds
+2223	588	283	\N	\N
+2224	605	283	\N	\N
+2225	796	284	\N	\N
+2226	739	309	492.00	inches
+2227	728	309	473.00	inches
+2228	577	308	447.00	inches
+2229	736	309	395.50	inches
+2230	551	309	367.00	inches
+2231	534	309	364.00	inches
+2232	568	309	347.50	inches
+2233	565	309	347.00	inches
+2234	641	309	344.00	inches
+2235	689	309	328.00	inches
+2236	556	309	303.00	inches
+2237	560	309	\N	\N
+2238	673	309	\N	\N
+2239	615	309	\N	\N
+2240	596	308	429.50	inches
+2241	722	308	393.00	inches
+2242	619	308	383.00	inches
+2243	752	308	373.50	inches
+2244	741	308	362.00	inches
+2245	744	308	343.50	inches
+2246	697	307	335.00	inches
+2247	756	308	333.00	inches
+2248	581	308	\N	\N
+2249	583	308	\N	\N
+2250	651	307	\N	\N
+2251	595	308	\N	\N
+2252	739	303	1128.50	inches
+2253	728	303	1126.00	inches
+2254	534	303	1103.00	inches
+2255	568	303	1061.00	inches
+2256	551	303	1054.00	inches
+2257	577	302	1048.00	inches
+2258	736	303	1027.00	inches
+2259	565	303	959.00	inches
+2260	641	303	876.00	inches
+2261	689	303	837.00	inches
+2262	556	303	816.00	inches
+2263	560	303	\N	\N
+2264	673	303	\N	\N
+2265	615	303	\N	\N
+2266	752	302	1208.00	inches
+2267	722	302	1128.00	inches
+2268	619	302	1096.00	inches
+2269	596	302	1050.00	inches
+2270	697	301	870.00	inches
+2271	756	302	789.00	inches
+2272	744	302	759.00	inches
+2273	741	302	721.00	inches
+2274	581	302	\N	\N
+2275	583	302	\N	\N
+2276	595	302	\N	\N
+2277	528	315	68.00	inches
+2278	763	315	68.00	inches
+2279	550	315	64.00	inches
+2280	643	315	62.00	inches
+2281	574	315	\N	\N
+2282	563	314	\N	\N
+2283	506	314	\N	\N
+2284	779	315	\N	\N
+2285	608	314	\N	\N
+2286	503	313	\N	\N
+2287	642	314	\N	\N
+2288	750	314	\N	\N
+2289	659	314	\N	\N
+2290	766	313	\N	\N
+2291	760	314	\N	\N
+2292	764	321	144.00	inches
+2293	768	321	126.00	inches
+2294	653	321	126.00	inches
+2295	684	321	120.00	inches
+2296	636	321	120.00	inches
+2297	592	321	108.00	inches
+2298	699	321	108.00	inches
+2299	562	319	102.00	inches
+2300	580	319	96.00	inches
+2301	541	321	\N	\N
+2302	550	321	\N	\N
+2303	528	321	\N	\N
+2304	574	321	\N	\N
+2305	572	320	84.00	inches
+2306	714	320	\N	\N
+2307	788	320	\N	\N
+2308	603	319	\N	\N
+2309	654	319	\N	\N
+2310	763	291	218.00	inches
+2311	801	291	210.00	inches
+2312	550	291	195.25	inches
+2313	524	291	178.00	inches
+2314	691	291	167.00	inches
+2315	613	291	159.00	inches
+2316	732	291	158.00	inches
+2317	514	291	136.75	inches
+2318	526	291	\N	\N
+2319	574	291	\N	\N
+2320	563	290	\N	\N
+2321	782	291	\N	\N
+2322	779	291	\N	\N
+2323	643	291	\N	\N
+2324	637	291	\N	\N
+2325	633	290	223.00	inches
+2326	766	289	209.00	inches
+2327	670	289	209.00	inches
+2328	755	289	204.00	inches
+2329	750	290	183.00	inches
+2330	667	290	183.00	inches
+2331	631	289	174.00	inches
+2332	769	290	134.00	inches
+2333	659	290	\N	\N
+2334	658	289	\N	\N
+2335	760	290	\N	\N
+2336	600	297	470.50	inches
+2337	763	297	468.50	inches
+2338	801	297	466.00	inches
+2339	643	297	456.00	inches
+2340	732	297	408.50	inches
+2341	653	297	\N	\N
+2342	637	297	\N	\N
+2343	755	295	462.50	inches
+2344	670	295	435.00	inches
+2345	663	296	399.50	inches
+2346	661	296	399.00	inches
+2347	750	296	397.50	inches
+2348	769	296	388.00	inches
+2349	631	295	373.00	inches
+2350	597	297	\N	\N
+2351	659	296	\N	\N
 \.
 
 
@@ -2702,7 +3652,7 @@ COPY public.entries (id, athlete_id, mde_id, mark, mark_type) FROM stdin;
 -- Name: entries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.entries_id_seq', 1694, true);
+SELECT pg_catalog.setval('public.entries_id_seq', 2351, true);
 
 
 --
@@ -3075,9 +4025,9 @@ SELECT pg_catalog.setval('public.meet_division_events_id_seq', 324, true);
 --
 
 COPY public.meets (id, name, date, host_school_id, description, status, max_entries_per_athlete, max_team_entries_per_event) FROM stdin;
-1	WVAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
-2	WVAL League Practice Meet #2	2019-04-25 00:00:00	\N		Accepting Entries	\N	\N
-3	WVAL League Practice Meet #3	2019-05-08 00:00:00	\N		Accepting Entries	\N	\N
+1	PCAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
+2	PCAL League Practice Meet #2	2019-04-25 00:00:00	\N		Accepting Entries	\N	\N
+3	PCAL League Practice Meet #3	2019-05-08 00:00:00	\N		Accepting Entries	\N	\N
 \.
 
 
@@ -3110,6 +4060,7 @@ COPY public.schools (id, abbrev, name, league, section, city, state) FROM stdin;
 15	YORK	The York School	\N	\N	\N	\N
 16	TCHS	Trinity Christian	\N	\N	\N	\N
 17	ALVA	Everett Alvarez	\N	\N	\N	\N
+18	SABE	San Benito (Hollister)	\N	\N	\N	\N
 \.
 
 
@@ -3117,7 +4068,7 @@ COPY public.schools (id, abbrev, name, league, section, city, state) FROM stdin;
 -- Name: schools_id_seq; Type: SEQUENCE SET; Schema: public; Owner: vagrant
 --
 
-SELECT pg_catalog.setval('public.schools_id_seq', 17, true);
+SELECT pg_catalog.setval('public.schools_id_seq', 18, true);
 
 
 --

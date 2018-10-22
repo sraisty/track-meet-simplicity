@@ -8,7 +8,7 @@ import unittest
 
 from model import (
     db, reset_database, Meet, Athlete, Entry,
-    Division, School, EventDefinition, MeetDivisionEvent,
+    Division, School, Event_Definition, MeetDivisionEvent,
     GENDERS, GRADES, EVENT_DEFS)
 
 
@@ -49,7 +49,7 @@ class testVerifyEmptyDatabase(unittest.TestCase):
         self.assertEqual(Athlete.query.count(), 0)
         self.assertEqual(School.query.one().name, "Unattached")
         self.assertEqual(6, Division.query.count())
-        self.assertEqual(18, EventDefinition.query.count())
+        self.assertEqual(18, Event_Definition.query.count())
         self.assertEqual(1, Meet.query.count())
         self.assertEqual(18 * 6, MeetDivisionEvent.query.count())
         self.assertEqual(0, Athlete.query.count())
@@ -190,7 +190,7 @@ def init_tms():
     print("init_tms")
     School.init_unattached_school()
     divs = Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-    events = EventDefinition.generate_event_defs(EVENT_DEFS)
+    events = Event_Definition.generate_event_defs(EVENT_DEFS)
     return (divs, events)
 
 

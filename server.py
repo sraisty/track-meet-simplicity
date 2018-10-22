@@ -11,7 +11,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 import requests
 
 from model import (connect_to_db, db, User, Meet, Athlete, Entry,
-                   Division, School, Event_Definition, MeetDivisionEvent)
+                   Division, School, MeetDivisionEvent)
 
 
 # from model import more stuff

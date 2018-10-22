@@ -62,7 +62,7 @@ db = SQLAlchemy()
 #         self.schools = []
 #         School.init_unattached_school()
 #         Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-#         Event_Definition.generate_event_defs(EVENT_DEFS)
+#         EventDefinition.generate_event_defs(EVENT_DEFS)
 
 # def get_all_meets(self):
 """ returns a list of all meets, inactive, active, and whatever status """
@@ -89,7 +89,7 @@ class Meet(db.Model):
 
     host_school = db.relationship("School", uselist=False)
     mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
-    events = db.relationship("Event_Definition",
+    events = db.relationship("EventDefinition",
                              secondary="meet_division_events", 
                              # back_populates="meet"
                              )
@@ -109,6 +109,23 @@ class Meet(db.Model):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
 
 
+    def get_event_mdes(self, ev):
+        q = MeetDivisionEvent.query.filter(
+                MeetDivisionEvent.meet==self,
+                MeetDivisionEvent.event==ev)
+        # TODO - sort them  q = q.order_by(XX)
+        mdes = q.all()
+        return mdes
+
+    def get_event_athlete_count(self, ev):
+        mde_q = MeetDivisionEvent.query.filter(
+                MeetDivisionEvent.meet==self,
+                MeetDivisionEvent.event==ev)
+        # TODO - sort them  q = q.order_by(XX)
+        count = 0
+        for mde in mde_q:
+            count += len(mde.entries)
+        return count
 
 class Athlete(db.Model):
     """ """
@@ -256,7 +273,7 @@ class Entry(db.Model):
                                secondary="athletes",
                                uselist=False,
                                back_populates="entries")
-    event = db.relationship("Event_Definition",
+    event = db.relationship("EventDefinition",
                             secondary="meet_division_events",
                             uselist=False,
                             back_populates="entries")
@@ -389,7 +406,7 @@ class MeetDivisionEvent(db.Model):
             back_populates="mdes", 
             uselist=False)
     event = db.relationship(
-            "Event_Definition", 
+            "EventDefinition", 
             back_populates="mdes",
             uselist=False)
 
@@ -543,7 +560,7 @@ class School(db.Model):
 event_type_enum = Enum(*EVENT_TYPES, name="event_types")
 
 
-class Event_Definition(db.Model):
+class EventDefinition(db.Model):
     """
     """
     __tablename__ = "event_defs"
@@ -560,7 +577,7 @@ class Event_Definition(db.Model):
 
     def __repr__(self):
         """
-        Returns human-readable repr of the Event_Definition object
+        Returns human-readable repr of the EventDefinition object
         """
         return "\n<EVENT_DEF {}, Name: {}, Type: {}>".format(
                 self.code,
@@ -613,7 +630,7 @@ class Division(db.Model):
 
     mdes = db.relationship("MeetDivisionEvent")
     meets = db.relationship("Meet", secondary="meet_division_events")
-    events = db.relationship("Event_Definition",
+    events = db.relationship("EventDefinition",
                              secondary="meet_division_events")
     athletes = db.relationship("Athlete")
     schools = db.relationship("School", secondary="athletes")
@@ -722,7 +739,7 @@ def reset_database():
 if __name__ == "__main__":
     from server import app
     connect_to_db(app, "tms-dev")
-    db.session.remove()
-    db.drop_all()
+    # db.session.remove()
+    # db.drop_all()
 
-    db.create_all()
+    # db.create_all()
