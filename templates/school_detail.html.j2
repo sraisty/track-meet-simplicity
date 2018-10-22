@@ -1,6 +1,5 @@
 {% extends "secondary_nav.html.j2" %}
 
-
 {% block secondary_nav_title %}
     {{ school.name }}
 {% endblock secondary_nav_title %}
@@ -27,11 +26,11 @@
 
 
 {% block tab1_name %}
-    Upcoming Meets
+    Meets we Host
 {% endblock tab1_name %}
 
 {% block tab2_name %}
-    Past Meets
+    Meets we Entered
 {% endblock tab2_name %}
 
  {% block tab3_name %}
@@ -44,22 +43,43 @@
 
 
 {% block tab1_content %}
-    <p>Upcoming Meets for this school</p>
-    {% for meet in school.meets() %}
-        <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
-            {{ meet.name }}
-        </a>
-    {% endfor %}
+    {% if school.hosted_meets %}
+        <p>Meets this school is hosting</p>
+        {% set list = school.hosted_meets %}
+{#         {% for meet in list %}
+            <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                {{ meet.name }}
+            </a>
+        {% endfor %} #}
+
+        {% include 'template-includes/meet_list.include.html.j2' %}
+    {% else %}
+        <p>We didn't find any meets hosted by this school.</p>
+    {% endif %}
 {% endblock tab1_content %}
                         
 
 {% block tab2_content %}
-    <p>Past Meets for this school</p>
-    {% for meet in school.meets() %}
-        <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
-            {{ meet.name }}
-        </a>
-    {% endfor %}
+    {# <p>Meets this schools has entered</p> #}
+    {# {% for meet in school.meets() %} #}
+        {# <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}"> #}
+            {# {{ meet.name }} #}
+        {# </a> #}
+    {# {% endfor %} #}
+
+    {% if school.meets() %}
+        <p>Meets this school has entered</p>
+        {% set list = school.meets() %}
+  {#       {% for meet in list %}
+            <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                {{ meet.name }}
+            </a>
+        {% endfor %} #}
+
+        {% include 'template-includes/meet_list.include.html.j2' %}
+    {% else %}
+        <p>We didn't find any meets entered this school.</p>
+    {% endif %}
 {% endblock tab2_content %} 
 
 
@@ -82,4 +102,8 @@
     </p>
 {% endblock tab4_content %}
 
+
+{% block my_javascripts %}
+   <script type="text/javascript" src="static/js/tms-datatable.js"></script>
+{% endblock %}
 

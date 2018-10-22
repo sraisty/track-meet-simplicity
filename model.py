@@ -82,27 +82,27 @@ class Meet(db.Model):
                        default="Accepting Entries",
                        nullable=False)
 
-    # order_of_events at meet
-    # order_of_divs_in_event
     max_entries_per_athlete = db.Column(db.Integer, nullable=True)
+    # max_relays_per_athlete = db.Column(db.Integer, nullable=True)
     max_team_entries_per_event = db.Column(db.Integer, nullable=True)
+    # max_athletes_per_heat = db.Column(db.Integer, nullable=True)
+    # max_heats_per_mde = db.Column(db.Integer, nullable=True)
+
+    # order_of_events at meet 
+    # order_of_divs_in_event
 
     host_school = db.relationship("School", uselist=False)
     mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
     events = db.relationship("EventDefinition",
                              secondary="meet_division_events", 
-                             # back_populates="meet"
                              )
     divisions = db.relationship("Division",
                                 secondary="meet_division_events", 
-                                # back_populates="meet"
                                 )
     entries = db.relationship("Entry", secondary="meet_division_events",
                               back_populates="meet")
 
     editor_users = db.relationship("User", secondary="schools")
-    # heats
-    # athletes
 
 
     def __repr__(self):
@@ -504,6 +504,8 @@ class School(db.Model):
     coaches = db.relationship("User")
     # editor_users = coaches
 
+    hosted_meets = db.relationship("Meet")
+
     def __init__(
             self, name="Unattached", abbrev="UNA", city=None, state=None, 
             league=None, section=None):
@@ -709,8 +711,8 @@ class User(db.Model):
         # CHANGE TO ONE DAY STORE SCHOOL
         # return "<USER #{}, {}, school={}, role={}".format(
         #     self.user_id, self.email, self.school, self.role)
-        return "<USER #{}, {}, role={}".format(
-            self.user_id, self.email, self.role)
+        return "<USER #{}, {}, school={}, role={}".format(
+            self.id, self.email, self.school, self.role)
 
 
 ###############

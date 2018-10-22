@@ -8,7 +8,7 @@ import unittest
 
 from model import (
     db, reset_database, Meet, Athlete, Entry,
-    Division, School, Event_Definition, MeetDivisionEvent,
+    Division, School, EventDefinition, MeetDivisionEvent,
     GENDERS, GRADES, EVENT_DEFS)
 
 
@@ -49,7 +49,7 @@ class testVerifyEmptyDatabase(unittest.TestCase):
         self.assertEqual(Athlete.query.count(), 0)
         self.assertEqual(School.query.one().name, "Unattached")
         self.assertEqual(6, Division.query.count())
-        self.assertEqual(18, Event_Definition.query.count())
+        self.assertEqual(18, EventDefinition.query.count())
         self.assertEqual(1, Meet.query.count())
         self.assertEqual(18 * 6, MeetDivisionEvent.query.count())
         self.assertEqual(0, Athlete.query.count())
@@ -160,26 +160,31 @@ class testFillSeedDatabase(unittest.TestCase):
         self.meet3 = init_meet(EXAMPLE_MEETS[2], self.divs, self.events)
         parse_hytek_file("seed_data/MS_HtMeetEntries_43.txt", self.meet3)
 
-
     def test_parse_lots_big_files(self):
         self.meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
         parse_hytek_file("seed_data/MiddleSchool_HyTekEntry_45_FIXED.txt",
                          self.meet1)
+        self.meet1.host_school_id = 5
         self.meet2 = init_meet(EXAMPLE_MEETS[1], self.divs, self.events)
-        parse_hytek_file("seed_data/MS_HtMeetEntries_53.txt", self.meet2)
+        parse_hytek_file("seed_data/MS_HtMeetEntries_53.txt",
+                         self.meet2)
+        self.meet1.host_school_id = 6
 
         self.meet3 = init_meet(EXAMPLE_MEETS[2], self.divs, self.events)
-        parse_hytek_file("seed_data/MS_HtMeetEntries_43.txt", self.meet3)
+        parse_hytek_file("seed_data/MS_HtMeetEntries_43.txt",
+                         self.meet3)
+        self.meet1.host_school_id = 7
 
 
 # ############## HELPER FUNCTIONS ###############
 
-def init_meet(meet_info_dict, divs, events):
+def init_meet(meet_info_dict, divs, events, host_school_id=None):
     print("init_meet")
     meet = Meet(name=meet_info_dict['name'],
                 date=meet_info_dict['date'],
                 description=meet_info_dict.get('description', ''),
                 status=meet_info_dict.get('status', 'Accepting Entries'))
+    meet.host_school_id = host_school_id
     db.session.add(meet)
     db.session.commit()
     MeetDivisionEvent.generate_mdes(meet, divs, events)
@@ -190,7 +195,7 @@ def init_tms():
     print("init_tms")
     School.init_unattached_school()
     divs = Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-    events = Event_Definition.generate_event_defs(EVENT_DEFS)
+    events = EventDefinition.generate_event_defs(EVENT_DEFS)
     return (divs, events)
 
 

@@ -25,16 +25,19 @@
                     <form action="/do-login" method="POST">
                     {% endblock post_route %}  
 
-                    {# {% block get_school %} #}
+                    {% block get_school %}
                         {# PLACE HOLDER FOR OPTIONAL FORM-GROUP THAT COLLECTS SCHOOL NAME #}
-                    {# {% endblock %} #}
+                    {% endblock get_school %}
                         <div class="form-group">
                             <label for="name">Email:</label>
-                            <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                            <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter your email" required>
+                            <small id="emailHelp" class="form-text text-muted">
+                                We'll never share your email with anyone else.
+                            </small>
                         </div>
                         <div class="form-group">
                             <label for="name">Password:</label>
-                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                            <input type="password" class="form-control" name="password" placeholder="Password" required />
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form> 

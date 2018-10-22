@@ -4025,8 +4025,8 @@ SELECT pg_catalog.setval('public.meet_division_events_id_seq', 324, true);
 --
 
 COPY public.meets (id, name, date, host_school_id, description, status, max_entries_per_athlete, max_team_entries_per_event) FROM stdin;
-1	PCAL League Practice Meet #1	2019-04-15 00:00:00	\N	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
 2	PCAL League Practice Meet #2	2019-04-25 00:00:00	\N		Accepting Entries	\N	\N
+1	PCAL League Practice Meet #1	2019-04-15 00:00:00	6	 Meet starts at 3pm, at Los Gatos High School.\n                        	Accepting Entries	\N	\N
 3	PCAL League Practice Meet #3	2019-05-08 00:00:00	\N		Accepting Entries	\N	\N
 \.
 

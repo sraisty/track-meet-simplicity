@@ -68,10 +68,9 @@ def do_login():
     session['user_id'] = user.id
     session['user_email'] = user.email
 
-    ## TODO - TEST HACK
-    session['user_school_id'] = 2
+    session['user_school_id'] = user.school.id
+    session['user_school_name'] = user.school.name
     session['admin_user'] = True
-    # session['user_school'] = user.school
 
     flash("Successfully logged in. Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for('index'))
@@ -93,13 +92,13 @@ def show_register_form():
 
 
 @app.route('/do-register', methods=['POST'])
-def register_process():
+def do_register():
     """Process user sign-up."""
 
     # Get form variables
     email = request.form["email"]
     password = request.form["password"]
-    # school = request.form.get('school')
+    school_id = request.form.get('school')
 
     # If user with the email already exists, don't allow registration
     user = User.query.filter_by(email=email).one_or_none()
@@ -109,14 +108,18 @@ def register_process():
             "danger")
         return redirect(url_for('show_register_form'))
 
-    # TODO GATHER THE SCHOOL IN THE FUTURE
-    # new_user = User(email=email, password=password, school=None)
-    new_user = User(email=email, password=password)
+    new_user = User(email=email, password=password, school_id=school_id)
+    import pdb; pdb.set_trace()
     db.session.add(new_user)
     db.session.commit()
 
+    # Save the coach user's info and school info on the Flask session
+    import pdb; pdb.set_trace()
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
+    session['user_school_id'] = user.school.id
+    session['user_school_name'] = user.school.name
+
     flash("Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for("index"))
 
@@ -140,9 +143,27 @@ def show_meet_detail(meet_id):
     return render_template('meet_detail.html.j2', meet=meet)
 
 
-@app.route('/meets/new_meet')
-def new_meet():
-    return ('<p>Create New Meet</p>')
+@app.route('/meets/new-meet')
+def show_new_meet_form():
+    return (render_template('new_meet.html.j2'))
+
+
+@app.route('/meets/do-new-meet', methods=['POST'])
+def do_new_meet_form():
+    # Get form variables
+    name = request.form["name"]
+    date = request.form["date"]
+    description = request.form["description"]
+    host_school = request.form["host_school"]
+    max_entries_per_athlete = request.form["max_entries_per_athlete"]
+    max_team_entries_per_event = request.form["max_team_entries_per_event"]
+    max_relays_per_athlete = request.form["max_relays_per_athlete"]
+
+    max_athletes_per_heat = 8
+    max_heats_per_mde = 3
+
+    flash("New meet created!", "success")
+    return (redirect(url_for('show_all_meets')))
 
 
 @app.route('/meets/<int:meet_id>/edit_meet')
@@ -205,6 +226,7 @@ def show_all_schools():
 def show_school_detail(school_id):
     school = School.query.get(school_id)
     return render_template('school_detail.html.j2', school=school)
+
 
 @app.route('/schools/<int:school_id>/edit')
 def edit_school_detail(school_id):

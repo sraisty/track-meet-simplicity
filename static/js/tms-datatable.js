@@ -2,9 +2,9 @@ $('#meet_table').DataTable({
     'ordering': true
 });
 
-$('#athlete_table').DataTable({
-    'ordering': true
-});
+// $('#all_athlete_table').DataTable({
+//     'ordering': true
+// });
 
 $('#school_table').DataTable({
     'ordering': true
