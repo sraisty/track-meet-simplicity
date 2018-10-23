@@ -39,8 +39,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if meet.status == 'accepting_entries' %}
-                            <a href="{{ url_for('enter_meet', meet_id=meet.id) }}">
+                        {% if meet.status == 'Accepting Entries' %}
+                            <a href="{{ url_for('show_enter_meet_form', meet_id=meet.id) }}">
                                 <button type="button" class="btn btn-warning">
                                    Accepting Entries
                                 </button>

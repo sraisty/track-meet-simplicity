@@ -8,12 +8,38 @@
 {% block get_school %}
     <div class="form-group">
         <label for="school">School:</label>
-        <select class="form-control" name="school">
+        <select class="form-control" name="school_id" id="school_selector">
+            <option value="" disabled selected="selected">
+                Click to select your school
+            </option>
+            <option value="False">
+                My school isn't listed
+            </option>
             {% for school in school_list %}
                 <option value="{{school.id}}">{{school.name}}</option>
             {% endfor %}
         </select>
     </div>
+
+    {# add d-none to the class of these form-groups to hide them by default. #}
+    {# we use jQuery to unhide them if  user selects "My school isn't listed" #}
+    {#  earlier, so we can now collect the school information #}
+    <h5 class="tms-get-school d-none">
+        Add your school to Track Meet Simplicity:
+    </h5>
+
+    <div class="form-group tms-get-school d-none">
+        <label for="new_school_name">School Name:</label>
+        <input type="text" id="new_school_name" name="new_school_name" class="form-control" placeholder="Enter the name of your school">
+    </div>
+
+    <div class="form-group tms-get-school d-none">     
+        <label for="new_school_abbrev">School Abbreviation:</label>
+        <input type="text" id="new_school_abbrev" name="new_school_abbrev" class="form-control" placeholder="Enter the official abbreviation for your school" aria-describedby="school_abbrev_help" />
+        <small id="school_abbrev_help" class="form-text text-muted">Don't know your school's 3 or 4-character abbreviation? <a href="#">Found out here.</a>
+        </small>
+    </div>
+
 {% endblock %}
         
 {% block refer_user %}

@@ -5,12 +5,14 @@ by Susan Raisty
 NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 """
 from decimal import *
+import math
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from util import warning, error, info
+
 
 GENDERS = ('M', 'F')
 GRADES = ('6', '7', '8')
@@ -133,6 +135,10 @@ class Meet(db.Model):
         for mde in mde_q:
             count += len(mde.entries)
         return count
+
+    def get_schools(self):
+ #       db.session.query(Meet.meet_id, Entry.entry_id, Athlete.athlete_id, School)
+        pass
 
 class Athlete(db.Model):
     """ """
@@ -300,6 +306,37 @@ class Entry(db.Model):
                     self.id, self.athlete.full_name(),
                     self.event.code, self.division.abbrev(), self.meet.name))
 
+
+    def set_mark(self, mark_string=None, mark_measure_type=None):
+        """ If mark_string is empty or null, treat it as if no mark was 
+        submitted for that athlete. That means that we'll treat this entry's mark 
+        as "0" if it's a field event, and as positive infinity if it's a track 
+        event.
+        """
+        if self.event.is_track():
+            self.mark_type = "seconds"
+            mark = Entry.time_string_to_seconds(mark_string)
+            if mark:
+                self.mark = mark
+            else:           # mark wasn't provided
+                self.mark = float("inf")
+
+
+        elif mark_measure_type == "E":
+                # TODO - fix this for field events that are measured in Metric.
+                # But for now it will work with california high school & ms meets
+                mark_type = "inches"
+                mark = Entry.field_english_mark_to_inches(mark_string)
+                if mark:
+                    self.mark = mark
+                else:       # mark wasn't provided
+                    self.mark = 0
+        else:
+            raise TmsError("Haven't implemented metric field measurements yet")
+
+
+
+
     @staticmethod
     def time_string_to_seconds(time_string):
         """ Takes a string like '1:23.44.55, 1:19.14, 58.83, 13.4' and
@@ -331,6 +368,8 @@ class Entry(db.Model):
 
     def time_mark_to_string(self):
         total_seconds= self.mark
+        if math.isinf(total_seconds):
+            return None
         return self.seconds_to_time_string(total_seconds)
 
     @staticmethod
@@ -376,9 +415,11 @@ class Entry(db.Model):
         feet = int(feet[0:-1])
         return float(inches) + (12 * feet)
 
-
     def english_dist_mark_to_string(self):
         inches = self.mark
+        if inches == 0:       # this is the same as no mark provided
+            return
+
         if inches >= 12:
             feet = int(inches // 12)
             inches = inches - feet * 12
@@ -504,16 +545,16 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
-    athletes = db.relationship("Athlete", back_populates="school")
+    athletes = db.relationship("Athlete", back_populates="school", lazy="joined")
     divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship(
             "Entry", 
             back_populates="school",
             secondary="athletes")
     coaches = db.relationship("User")
-    # editor_users = coaches
 
-    hosted_meets = db.relationship("Meet")
+    # hosted_meets = db.relationship("Meet")
+    hosted_meets = db.relationship("Meet", lazy="joined")
 
     def __init__(
             self, name="Unattached", abbrev="UNA", city=None, state=None, 

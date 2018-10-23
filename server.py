@@ -13,7 +13,7 @@ import requests
 from model import (connect_to_db, db, User, Meet, Athlete, Entry,
                    Division, School, MeetDivisionEvent)
 
-
+from util import error, warning, info
 # from model import more stuff
 
 
@@ -36,6 +36,9 @@ def index():
     if not, redirect to the login page.
     """
     if session.get('user_id'):
+        if session.get('user_school_id'):
+            return redirect(url_for(
+                    'show_school_detail', school_id=session['user_school_id']))
         return render_template('index.html.j2')
     return redirect(url_for('show_login_form'))
 
@@ -58,10 +61,8 @@ def do_login():
 
     if user is None:
         # bad login
-        flash(
-                "ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
-                "danger"
-            )
+        flash("ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
+              "danger"  )
         return redirect(url_for('do_login'))
 
     # Successful login
@@ -87,7 +88,7 @@ def do_logout():
 def show_register_form():
     """Show form for user signup."""
     # Get the list of schools to populate the drop-down
-    schools = School.query.all()
+    schools = School.query.order_by("name").all()
     return render_template("register.html.j2", school_list=schools)
 
 
@@ -98,7 +99,17 @@ def do_register():
     # Get form variables
     email = request.form["email"]
     password = request.form["password"]
-    school_id = request.form.get('school')
+    school_id = request.form.get('school_id')
+
+    if school_id == "False":
+        # user is entering a new school in the form
+        new_school_name = request.form.get('new_school_name')
+        new_school_abbrev = request.form.get('new_school_abbrev')
+        # Our form shouldn't allow illegal values for new_school_name or abbrev
+        new_school = School(name=new_school_name, abbrev=new_school_abbrev)
+        db.session.add(new_school)
+        db.session.commit()
+        school_id = new_school.id
 
     # If user with the email already exists, don't allow registration
     user = User.query.filter_by(email=email).one_or_none()
@@ -124,9 +135,33 @@ def do_register():
 
 @app.route('/profile')
 def show_user_profile():
+    school_list = School.query.order_by(School.name).all()
+
+    return render_template('profile.html.j2', school_list=school_list)
+
+
+@app.route('/do-change-profile', methods=['POST'])
+def do_change_profile():
+
+    school_id = request.form.get("school_id")
+    new_email = request.form.get("email")
+    new_password = request.form.get("password")
+    # TODO - Write new values to database
+
+    # get our user record from the database and update it.
     user_id = session.get('user_id')
     user = User.query.get(user_id)
-    return render_template('profile.html.j2', user=user)
+    user.school_id = school_id
+    user.email = new_email
+    if new_password:
+        user.password = new_password
+    db.session.commit()
+    session['user_school_id'] = user.school.id
+    session['user_school_name'] = user.school.name
+    session['user_email'] = user.email
+
+    flash("Your user profile has been updated.", "success")
+    return redirect((url_for("index")))
 
 
 @app.route('/meets')
@@ -180,7 +215,7 @@ def do_new_meet_form():
 
 
 @app.route('/meets/<int:meet_id>/edit_meet')
-def edit_meet(meet_id):
+def show_edit_meet_form(meet_id):
     meet = Meet.query.filter_by(id=meet_id).first_or_404()
     return '<p>Edit Meet {}</p>'.format(meet.id)
     # reuse the same form from do_new_meet_form
@@ -191,9 +226,8 @@ def edit_meet(meet_id):
 @app.route('/meets/<int:meet_id>/enter_meet')
 def show_enter_meet_form(meet_id):
     meet = Meet.query.filter_by(id=meet_id).first_or_404()
-    print ('<p>Enter my school {} into Meet {}</p>'.format(
-        session.school.name, meet.id))
-    meet
+    return'<p>Enter my school {} into Meet {}</p>'.format(
+        session['user_school_name'], meet.id)
     # return render_template('meet_detail.html.j2', meet=meet)
 
 

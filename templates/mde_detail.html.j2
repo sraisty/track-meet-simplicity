@@ -9,8 +9,8 @@
   <h2>{{ mde.event.name }}: {{ mde.division.longname() }}</h2>
   <div class="card">
     <div class="card-body">
-      <table id="mde_table" class="display"
-        data-order='[[ 0, "asc" ]]' data-paging='false'>
+      <table id="mde_table" class="display" data-paging='false'
+          data-order='[[ 3, "asc" ]]' >
         <thead>
           <tr>
             <th>Seed #<br>(pending)</th>
@@ -29,17 +29,18 @@
                 </a>
               </td>
               <td>{{ entry.athlete.school.name }}</td>
-              <td>{% if entry.mark %}
-                {% if entry.mark_type == "seconds" %}
-                  {{ entry.time_mark_to_string() }}
+              <td data-order="{{entry.mark}}">
+                {% if entry.mark %}
+                  {% if entry.mark_type == "seconds" %}
+                    {{ entry.time_mark_to_string() }}
                   {% elif entry.mark_type == "inches" %}
-                  {{ entry.english_dist_mark_to_string() }}
+                    {{ entry.english_dist_mark_to_string() }}
+                  {% endif %}
                 {% endif %}
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
     </table>
   </div>
 </div>
