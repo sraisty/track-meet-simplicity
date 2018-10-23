@@ -6,26 +6,25 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('show_all_meets')}}">
-          My Meets
+        <a class="nav-link" href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
+          {{session.user_school_name}} Home
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
-          My School
-        </a>
+        <a class="nav-link" href="{{ url_for('show_all_meets') }}">Meets</a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarExploreMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Explore
-        </a>
-          <ul class="dropdown-menu" "aria-labelledby="navbarExploreMenuLink">
-            <li><a class="dropdown-item" href="{{ url_for('show_all_meets') }}">Meets</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('show_all_schools') }}">Schools</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
-            <li><a class="dropdown-item disabled href="#">Divisions</a></li>
-            <li><a class="dropdown-item disabled href="#">Events</a></li>
-          </ul>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('show_all_schools') }}">Schools</a></li>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Divisions</a></li>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Events</a></li>
       </li>
 
 

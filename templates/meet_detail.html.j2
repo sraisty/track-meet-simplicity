@@ -9,7 +9,11 @@
 {% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
-    {{ meet.date.strftime("%B %d, %Y") }}
+    <div>
+        <a href="{{ url_for('show_school_detail', school_id=meet.host_school.id) }}">
+            Host School: {{ meet.host_school.name }}
+        </a>
+    <div>{{ meet.date.strftime("%B %d, %Y") }}</div>
 {% endblock nav2_subtitle %}
 
 

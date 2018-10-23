@@ -8,7 +8,7 @@ from decimal import *
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.exc import DataError
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from util import warning, error, info
 
@@ -66,6 +66,13 @@ db = SQLAlchemy()
 
 # def get_all_meets(self):
 """ returns a list of all meets, inactive, active, and whatever status """
+
+
+class TmsError(Exception):
+    """ Base class for exceptions in the TMS module """
+    def __init__(self, message):
+        self.message= message
+
 
 meet_status_enum = Enum(*MEET_STATUS, name="meet_status")
 
@@ -164,10 +171,14 @@ class Athlete(db.Model):
         div_q = Division.query.filter_by(gender=gender)
         if grade:
             div_q = div_q.filter_by(grade=grade)
+
         try:
             div = div_q.one()
-        except NoResultFound:
-            error(f"Athlete {fname} {lname}: No division for age/gender")
+        except (NoResultFound, MultipleResultsFound):
+            print(f"SKIPPING Athlete {fname} {lname}. no division match. Grade: {grade}, Gender:{gender}.")
+            raise TmsError(f"BadAthleteRecord: {fname}, {lname}, grade:{grade} gender:{gender}")
+
+
         self.division = div
 
         school = School.query.filter_by(abbrev=school_abbrev).one_or_none()
@@ -177,8 +188,6 @@ class Athlete(db.Model):
             school = School.query.filter_by(abbrev="UNA").one()
         self.school = school
 
-        ## TODO THIS IS A HACK CLEAN IT UP.
-        # self.name = get_full_name(self.fname, self.minitial, self.lname)
 
     def __repr__(self):
         return "\n<ATHL# {}: {}, {}, {}>".format(
@@ -197,7 +206,7 @@ class Athlete(db.Model):
         'Jane Doe'
         """
         if not (fname and lname):
-            raise Exception("Must provide first and last name.")
+            raise TmsError("Must provide first and last name.")
         if minitial:
             return f"{fname} {minitial[0]}. {lname}"
         return f"{fname} {lname}"
@@ -317,7 +326,7 @@ class Entry(db.Model):
         elif self.mark_type == "inches":
             return self.english_dist_mark_to_string()
         else:
-            raise Exception("UNIMPLEMENTED: metric field distance marks")
+            raise TmsError("UNIMPLEMENTED: metric field distance marks")
 
 
     def time_mark_to_string(self):

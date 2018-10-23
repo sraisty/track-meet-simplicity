@@ -109,16 +109,14 @@ def do_register():
         return redirect(url_for('show_register_form'))
 
     new_user = User(email=email, password=password, school_id=school_id)
-    import pdb; pdb.set_trace()
     db.session.add(new_user)
     db.session.commit()
 
     # Save the coach user's info and school info on the Flask session
-    import pdb; pdb.set_trace()
     session['user_id'] = new_user.id
     session['user_email'] = new_user.email
-    session['user_school_id'] = user.school.id
-    session['user_school_name'] = user.school.name
+    session['user_school_id'] = new_user.school.id
+    session['user_school_name'] = new_user.school.name
 
     flash("Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for("index"))
@@ -140,6 +138,14 @@ def show_all_meets():
 @app.route('/meets/<int:meet_id>')
 def show_meet_detail(meet_id):
     meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
+    # TODO if meet.status="Accepting Entries" and myschool not entered yet:
+    #   dispaly enter meet button
+    # else if accepting entries and my school has entered
+    #   buttton to display edit my meet roster / entries
+    # else if meet.status assigned or later, and my school entered:
+    #   button to see athlete assignments
+    # else if meet.status == "Finished":
+    # display the entries and the results to anyone
     return render_template('meet_detail.html.j2', meet=meet)
 
 
@@ -162,6 +168,13 @@ def do_new_meet_form():
     max_athletes_per_heat = 8
     max_heats_per_mde = 3
 
+    # allowed_divisions and  their order
+    # selected_events and their order
+    # seeding tiebreakers
+    # heat assignment method
+    # lane/position assignment method
+    # meet status = unpublished?
+
     flash("New meet created!", "success")
     return (redirect(url_for('show_all_meets')))
 
@@ -170,22 +183,30 @@ def do_new_meet_form():
 def edit_meet(meet_id):
     meet = Meet.query.filter_by(id=meet_id).first_or_404()
     return '<p>Edit Meet {}</p>'.format(meet.id)
+    # reuse the same form from do_new_meet_form
+    # add meet status field - they can now change it to the next stage?
     # return render_template('meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/<int:meet_id>/enter_meet')
-def enter_meet(meet_id):
+def show_enter_meet_form(meet_id):
     meet = Meet.query.filter_by(id=meet_id).first_or_404()
-    return '<p>Enter my school into Meet {}</p>'.format(meet.id)
+    print ('<p>Enter my school {} into Meet {}</p>'.format(
+        session.school.name, meet.id))
+    meet
     # return render_template('meet_detail.html.j2', meet=meet)
 
 
-@app.route('/meets/<int:meet_id>/view_entries')
-def edit_meet_entries(meet_id):
+@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit_entries')
+@app.route('/meets/<int:meet_id>/edit_entries')
+def edit_meet_entries(meet_id, school_id=None):
+    if school_id==None:
+        school_id = session['school.id']
+
     meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
     return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
             meet.id)
-    # return render_template('meet_detail.html.j2', meet=meet)
+    return render_template('meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')

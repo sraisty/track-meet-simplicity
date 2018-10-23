@@ -7,7 +7,7 @@ separated format.  Details on this file format follow:
 from sqlalchemy.orm.exc import MultipleResultsFound
 
 from model import (Athlete, School, Entry, Division, EventDefinition,
-                   MeetDivisionEvent,
+                   MeetDivisionEvent, TmsError,
                    db, connect_to_db, GENDERS, GRADES, EVENT_DEFS)
 from util import warning, error, info
 
@@ -75,7 +75,11 @@ def parse_athlete(tokens):
 
     athlete = add_athlete_to_db(first_name, middle, last_name, gender,
                                 grade, team_code, team_name)
-    assert(athlete)  # athlete should definitely be in the DB at this point.
+    if not athlete:
+        # athlete might be null because there were issues with the file's record
+        # if that's the case, just move on to the next record and 
+        # TODO - message user about problem with adding user
+        return
 
     # If present in this I-record, add the athlete's phone (for SMS) to db
     # Note that this will override any previous phone numbers for this athlete
@@ -121,6 +125,13 @@ def parse_entry(tokens, meet):
 
     athlete = add_athlete_to_db(first_name, middle, last_name, gender,
                                 grade, team_code, team_name)
+
+    # Athlete might be null if the athlete's record in file was bad.
+    # Just skip and go to the next record.
+    # TODO: Log this and display to user who is adding the entries to the meet.
+    if not athlete:
+        return
+
 
     # Now, get the event the athlete is entering
     ht_event_code = tokens[10]
@@ -198,15 +209,31 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
 
     # create a new athlete, and add it to the database.
 
-    athlete = Athlete(first_name, middle, last_name, gender, grade, team_code)
+    try:
+        athlete = Athlete(first_name, middle, last_name, gender, grade, team_code)
+    except TmsError as err:
+        # ValueError is raised with message BadAthleteRecord
+        error("Error parsing athlete record:" + err.message)
+        return
+
+
     db.session.add(athlete)
+
+    # Athlete constructor might return none if there was something wrong 
+    # with the athlete's gender or grade. Just skip if this is the case.
+    if not athlete:
+        return None
 
     try:
         db.session.commit()
-    except MultipleResultsFound as error:
-        print("Duplicate athlete & DB error: {}, {}, {}, {}, {}, {}, {}".format(
+    except MultipleResultsFound:
+        error("Duplicate athlete & DB error: {}, {}, {}, {}, {}, {}, {}".format(
             first_name, middle, last_name, gender, grade, team_code))
-        return
+        db.session.rollback()
+        # We return none beacause we are skipping this record and going on to 
+        # the next.
+        return None
+
     return athlete
 
 
