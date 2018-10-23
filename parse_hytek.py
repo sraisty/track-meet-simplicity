@@ -151,18 +151,11 @@ def parse_entry(tokens, meet):
         mark_string = tokens[11]
         mark_measure_type = tokens[12]
 
-        if mark_string and mark_measure_type:       # aren't the empty string
+    # t
+    entry.set_mark(
+            mark_string=mark_string, mark_measure_type=mark_measure_type)
+    
 
-            if mark_measure_type == "E":
-                # TODO - fix this for field events that are measured in Metric.
-                # But for now it will work with california high school & ms meets
-                mark_type = "inches"
-                mark = Entry.field_english_mark_to_inches(mark_string)
-            else:
-                mark_type = "seconds"
-                mark = Entry.time_string_to_seconds(mark_string)
-            entry.mark = mark
-            entry.mark_type = mark_type
 
     db.session.commit()
 
