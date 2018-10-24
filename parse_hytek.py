@@ -6,9 +6,8 @@ separated format.  Details on this file format follow:
 
 from sqlalchemy.orm.exc import MultipleResultsFound
 
-from model import (Athlete, School, Entry, Division, EventDefinition,
-                   MeetDivisionEvent, TmsError,
-                   db, connect_to_db, GENDERS, GRADES, EVENT_DEFS)
+from model import (Athlete, School, Entry, MeetDivisionEvent, TmsError, db)
+
 from util import warning, error, info
 
 # Translate HyTek's codes for events into our codes
@@ -20,7 +19,6 @@ def parse_hytek_file(filename, meet):
     """
     Opens a hytek entry file, parses it and writes the records to the database
     """
-
     with open(filename) as file:
 
         for line in file:
@@ -42,29 +40,30 @@ def parse_hytek_file(filename, meet):
 
 def parse_athlete(tokens):
     """
-    SIDE EFFECTS: might add an athlete and/or their school to the Database.
+    Parses an "I" line record from a Hytek meet entry file that contains
+    athlete information, and adds the athlete to our database.
 
-    Parses the "I" line in a hytek file.
+    SIDE EFFECTS: Adds athlete to the Database. Also adds the athlete's school
+    to the database if it isn't already in it.
+
     I LINE FORMAT:
-    <filed> <data> <numchars>  <notes>
-    1   I   1               Information Record
-    2   Last Name   20      (Required)
-    3   First Name   20     (Required)
-    4   Initial   1
-    5   Gender   1          M = Male, F = Female (Required)
-    6   Birth Date   10     MM/DD/YYYY (Optional)
-    7   Team Code   4       4 character max; use UNA if unknown (Required)
-    8   Team Name   30      Use Unattached if unknown (Required)
-    9   Age   3             Optional if birth date provided
-    10   School Year   2   (Optional)
-    18   Home Phone   20   (Optional)
+    <token #> <data> <numchars>  <notes>
+    1   I           1   Information Record
+    2   Last Name   20  (Required)
+    3   First Name  20  (Required)
+    4   Initial     1
+    5   Gender      1   M = Male, F = Female (Required)
+    6   Birth Date  10  MM/DD/YYYY (Optional)
+    7   Team Code   4   4 character max; use UNA if unknown (Required)
+    8   Team Name   30  Use Unattached if unknown (Required)
+    9   Age         3   Optional if birth date provided
+    10  School Year 2   (Optional according to HyTek, but TMS requires it)
+    18  Home Phone  20  (Optional)
 
-    More specific detail about the file format and its rules are at bottom o
-    of this file
-
+    NOTE: We REQUIRE School Year, even though valid HyTek files might not.
     """
+
     tokens = tokens[:]  # make a copy so we don't mutate the original list
-    # info(f"Parsing I-Line: {tokens}")
     if len(tokens) < 10:
         # TODO - one day, only require 7 fields. But for first release we
         # need files that have the School Year at tokens[9]
@@ -76,8 +75,9 @@ def parse_athlete(tokens):
     athlete = add_athlete_to_db(first_name, middle, last_name, gender,
                                 grade, team_code, team_name)
     if not athlete:
-        # athlete might be null because there were issues with the file's record
-        # if that's the case, just move on to the next record and 
+        # athlete might be null because there were issues with the file's
+        # record (such as no matching division. if that's the case, just move
+        # on to the next record
         # TODO - message user about problem with adding user
         return
 
@@ -89,32 +89,39 @@ def parse_athlete(tokens):
 
     if athlete.phone and phone:
         athlete.phone = phone
-        # db.session.add(athlete)
         db.session.commit()
 
 
 def parse_entry(tokens, meet):
     """
-    Data   MaxChar   Notes for the D Record
-    1   D   1               Individual Entry Record
-    2   Last Name   20      (Required)
-    3   First Name  20      (Required)
-    4   Initial     1       (Optional)
-    5   Athlete Gender   1   M = Male, F = Female (Required)
-    6   Birth Date   10     MM/DD/YYYY (Optional)
-    7   Team Code   4       4 characters max; use UNA if unknown (Required)
-    8   Team Name   30      Use Unattached if unknown (Required)
-    9   Age   3             Age is optional if birth date provided
-    10   School Year   2    (Optional)
-    11   Event Code   10    Examples: 100, 5000S, 10000W, SP, HJ, DEC
-    12   Entry Mark   11    Time: hh:mm:ss.tt (1:23.44.55, 1:19.14, 58.83, 13.4h)
-            Field Metric: 12.33, 1233;
-            English: 12-10.25", 12', 121025, 12' 10
-            Combined-event: 3020 (points)
-    13   Event measure (required): M for Metric, E for English (Required)
+    Parses a "D-Line" in a Hytek entry file that corresponds to an athlete's
+    entry into a particular event within a meet.
+
+    TODO: Don't currently handle Marks: hand-timed marks (with 'h' suffix),
+    combined events or Field Metric marks
+
+    D-Line format
+    <Token#> <Data> <MaxChar>  <Description>
+    1   D           1   Individual Entry Record
+    2   Last Name   20  (Required)
+    3   First Name  20  (Required)
+    4   Initial     1   (Optional)
+    5   Gender      1   M = Male, F = Female (Required)
+    6   Birth Date  10  MM/DD/YYYY (Optional)
+    7   Team Code   4   4 characters max; use UNA if unknown (Required)
+    8   Team Name   30  Use Unattached if unknown (Required)
+    9   Age         3   Age is optional if birth date provided
+    10  School Year 2   (Optional for HyTek, but not for TMS)
+    11  Event Code  10  Examples: 100, 5000S, 10000W, SP, HJ, DEC
+    12  Entry Mark  11  Time: hh:mm:ss.tt (1:23.44.55, 1:19.14, 58.83, 13.4h)
+                        Field Metric: 12.33, 1233;
+                        Field English: 12-10.25", 12', 121025, 12' 10
+                        Combined-event: 3020 (points)
+    13  Event measure (required): M for Metric, E for English (Required)
     """
+
     tokens = tokens[:]  # make a copy so we don't mutate the original list
-    # info(f"Parsing D-Line: {tokens}")
+
     if len(tokens) < 10:
         # TODO - one day, only require 7 fields. But for first release we
         # need files that have the School Year at tokens[9]
@@ -128,12 +135,12 @@ def parse_entry(tokens, meet):
 
     # Athlete might be null if the athlete's record in file was bad.
     # Just skip and go to the next record.
-    # TODO: Log this and display to user who is adding the entries to the meet.
     if not athlete:
+        warning(f"Skipping athlete {first_name} {last_name}")
         return
 
-
-    # Now, get the event the athlete is entering
+    # Now, get the event the athlete is entering, and translate the HyTek event
+    # names into TMS codes
     ht_event_code = tokens[10]
     tms_event_code = ht_event_translator.get(ht_event_code, ht_event_code)
 
@@ -142,20 +149,32 @@ def parse_entry(tokens, meet):
     mde = q.filter_by(meet_id=meet.id,
                       event_code=tms_event_code,
                       div_id=athlete.division.id).one()
-    entry = Entry()
-    entry.athlete = athlete
-    mde.entries.append(entry)  # shouldn't have to do a db.session cuz of this
+    entry = Entry(athlete=athlete, mde=mde)
+
+    # I don't understand why, but at this point the entry thinks its "event"
+    # attribute is "None", even after I setup the relationship with the mde,
+    # which should also get me the event. I believe this shoudl be possible
+    # without adding the entry to the session and commiting. Seems to have
+    # something to do with the lazy="joined" settings I put on the relationship
+    # between entry-athlete and entry-mde
+    db.session.add(entry)
+    db.session.commit()
+
+    # TODO - add this stuff to a test
+    assert(entry.mde)
+    assert(entry.athlete)
+    assert(mde.entries)
+    assert(athlete.entries)
+    assert(entry.event == entry.mde.event)
 
     # If the athlete has a previous mark for this event, get it.
     if len(tokens[11:13]) == 2:
         mark_string = tokens[11]
         mark_measure_type = tokens[12]
 
-    # t
+    # It's okay to pass null to either argument to set_mark
     entry.set_mark(
             mark_string=mark_string, mark_measure_type=mark_measure_type)
-    
-
 
     db.session.commit()
 
@@ -164,13 +183,15 @@ def parse_relay(tokens):
     pass
 
 
-##### Helper Functions
+# #### Helper Functions
 
 
 def add_athlete_to_db(first_name, middle, last_name, gender,
                       grade, team_code, team_name):
     """ If the Athlete is not already in the database, add him/her. Will
     also add the athlete's school if it is not already in the database as well.
+    Returns None if the athlete did not get added to db because of a problem
+    with the record (grade/gender) or if the athlete was already added.
 
     Fields 2-8 of any record uniquely identify an athlete and must be the
     same across all entry records and athlete info records
@@ -186,10 +207,10 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     if athlete:
         return athlete
 
-    # The athlete is NOT already in the database, so let's add him/her.
+    # OK, the athlete is NOT already in the database, so let's add him/her.
 
     # First check if this athlete's school is already in the database. If not,
-    # add the school to the database. Note: the school must be committed to the 
+    # add the school to the database. Note: the school must be committed to the
     # database before adding the athlete, or an Exception will result.
     school = School.query.filter_by(name=team_name,
                                     abbrev=team_code).one_or_none()
@@ -203,16 +224,15 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     # create a new athlete, and add it to the database.
 
     try:
-        athlete = Athlete(first_name, middle, last_name, gender, grade, team_code)
+        athlete = Athlete(
+                first_name, middle, last_name, gender, grade, team_code)
     except TmsError as err:
-        # ValueError is raised with message BadAthleteRecord
-        error("Error parsing athlete record:" + err.message)
+        error("Error parsing athlete record: " + err.message)
         return
-
 
     db.session.add(athlete)
 
-    # Athlete constructor might return none if there was something wrong 
+    # Athlete constructor might return none if there was something wrong
     # with the athlete's gender or grade. Just skip if this is the case.
     if not athlete:
         return None
@@ -220,37 +240,18 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     try:
         db.session.commit()
     except MultipleResultsFound:
-        error("Duplicate athlete & DB error: {}, {}, {}, {}, {}, {}, {}".format(
-            first_name, middle, last_name, gender, grade, team_code))
+        # TODO . In theory this should never happen if the first query, to
+        # see if athlete was already in the db.  Consolidate that query with
+        # the following and figure out why the below sometimes still happens.
+        error("Tried adding duplicate athlete: {},  {}, {}, {}, {}, {}".format(
+                first_name, last_name, gender, grade, team_code))
+        error("For some reason we didn't detect previous athlete was a \
+               duplicate prior to add attempt. Investigate!\
+               Skipping athlete add & rolling back database")
         db.session.rollback()
-        # We return none beacause we are skipping this record and going on to 
-        # the next.
         return None
 
     return athlete
-
-
-# ###############
-
-
-if __name__ == "__main__":
-    from server import app
-    connect_to_db(app, "tms-dev")
-    db.session.remove()
-    db.drop_all()
-    db.create_all()
-
-    School.init_unattached_school()
-    Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-    EventDefinition.generate_event_defs(EVENT_DEFS)
-
-    parse_hytek_file("seed_data/MiddleSchool_PCS_45.txt")
-    # if len(sys.argv) > 1:
-    #     open_hytek_file(sys.argv[1])
-    # else:
-    #     print "Please provide the filename that contains athelete and event entry information."
-
-
 
 
 """
@@ -358,10 +359,11 @@ Example: I; Doe; John; P; M; 09/07/1947; USA; United States; ; ;3395 West Street
         English: 12-10.25", 12', 121025
         Combined-event: 3020 (points)
 13   Event measure   1   M for Metric, E for English (Required)
-14   Event Division   2   A Division number; Optional; For JV, Varsity, Bantam, etc.
+14   Event Division   2   A Division number; Optional; For JV, Varsity, 6G, etc
 15   Competitor #   5   Optional
 16   Finish Place   2   Place from prior round if an advancer (optional)
-17   Declaration Status   1   D = Declared, S = Scratched, A = Alive, blank = Undeclared (optional)
+17   Declaration Status   1   D = Declared, S = Scratched, A = Alive,
+                              blank = Undeclared (optional)
 18   Entry Note   60   Optional
 20   Alternate 1 Optional Y=Is Alternate
 
@@ -390,7 +392,7 @@ Example: D;Doe;John;P;M;09/07/1947;HURR;Hurricane High School;;;SP;21.23;M;;304;
         Finish Place or can be the finish place from prior round of advancers
 15  Alternate 1 Optional Y=Is Alternate
 
-Example: E;Doe;John;P;M;09/07/1947;HURR;Hurricane High School;;;SP;21.23;M;[CRLF]
+Ex: E;Doe;John;P;M;09/07/1947;HURR;Hurricane High School;;;SP;21.23;M;[CRLF]
 
 
 

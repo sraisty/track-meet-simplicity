@@ -50,6 +50,19 @@ MARK_TYPES = ("seconds", "inches", "meters")
 
 USER_ROLES = ("meet_director", "coach", "athlete", "other")
 
+
+START_TYPE = ("allies", "lanes", "waterfall")
+
+HEAT_FLIGHT_ASSIGNMENT_METHOD = ("best-to-worst", "worst-to-best", "random")
+
+TRACK_LANE_POS_ASSIGNMENT_METHOD = ("serpentine", "random")
+FIELD_POS_ASSIGNMENT_METHOD = ("best-to-worst", "worst-to-best")
+
+# this is a hack. It's a number of seconds that is greater than any track meeet
+# event would possibly take, so I can get the database to do sorting of marks
+# without special handling.  Equal to the number of seconds in a year.
+INFINITY_SECONDS = 99999999
+
 db = SQLAlchemy()
 
 # #############
@@ -94,8 +107,8 @@ class Meet(db.Model):
     max_entries_per_athlete = db.Column(db.Integer, nullable=True)
     # max_relays_per_athlete = db.Column(db.Integer, nullable=True)
     max_team_entries_per_event = db.Column(db.Integer, nullable=True)
-    # max_athletes_per_heat = db.Column(db.Integer, nullable=True)
-    # max_heats_per_mde = db.Column(db.Integer, nullable=True)
+    max_athletes_per_heat = db.Column(db.Integer, nullable=True)
+    max_heats_per_mde = db.Column(db.Integer, nullable=True)
 
     # order_of_events at meet 
     # order_of_divs_in_event
@@ -152,6 +165,7 @@ class Athlete(db.Model):
 
     school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
+    coach_notes = db.Column(db.String(256), nullable=True)
 
     school = db.relationship("School", back_populates="athletes")
     division = db.relationship("Division", back_populates="athletes")
@@ -164,11 +178,6 @@ class Athlete(db.Model):
 
     def __init__(self, fname, minitial, lname, gender, grade,
                  school_abbrev="UNA", phone=None):
-        """ You actually CAN have a __init__ method for a class mapped to
-        SQLAlchemy!!!  You just have to map the  columns
-        via self.<dbColumn Name> =  foo
-        Note that the athlete hasn't been added to the db session or committed
-        """
         self.fname = fname
         self.minitial = minitial
         self.lname = lname
@@ -269,8 +278,10 @@ class Entry(db.Model):
     # time or distance thrown/jumped or height jumped (in inches) for field 
     # events. We store in seconds or inches, with precision to the hundredth of 
     # a second and up to 1/4 inch.
-    mark = db.Column(db.Numeric(7, 2), nullable=True)
+    mark = db.Column(db.Numeric(12, 2), nullable=True)
     mark_type = db.Column(mark_type_enum, nullable=True)
+    # describes a problem with the athlete's entry that a user needs to resolve
+    problem = db.Column(db.String(64), nullable=True)
 
     # # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
@@ -315,25 +326,29 @@ class Entry(db.Model):
         """
         if self.event.is_track():
             self.mark_type = "seconds"
-            mark = Entry.time_string_to_seconds(mark_string)
-            if mark:
-                self.mark = mark
-            else:           # mark wasn't provided
-                self.mark = float("inf")
+            if not mark_string:  # could be "" or None
+                self.mark = INFINITY_SECONDS
+                return
+            self.mark = Entry.time_string_to_seconds(mark_string)
+            return
 
-
+        # field events
         elif mark_measure_type == "E":
-                # TODO - fix this for field events that are measured in Metric.
-                # But for now it will work with california high school & ms meets
-                mark_type = "inches"
-                mark = Entry.field_english_mark_to_inches(mark_string)
-                if mark:
-                    self.mark = mark
-                else:       # mark wasn't provided
-                    self.mark = 0
-        else:
-            raise TmsError("Haven't implemented metric field measurements yet")
+            self.mark_type = "inches"
+            if mark_string is None:
+                # assume 0 inches mark not provided
+                self.mark = 0
+                return
+            self.mark = Entry.field_english_mark_to_inches(mark_string)
 
+        else:     
+            # mark_measure_type == "M"
+            # TODO - fix this for field events that are measured in Metric.
+            # But for now it will work with california high school & ms meets
+            self.mark_type ="meters"
+            if mark_string is None:
+                self.mark = 0 
+            raise TmsError("Haven't implemented metric field measurements yet")
 
 
 
@@ -366,11 +381,10 @@ class Entry(db.Model):
             raise TmsError("UNIMPLEMENTED: metric field distance marks")
 
 
-    def time_mark_to_string(self):
-        total_seconds= self.mark
-        if math.isinf(total_seconds):
+    def _time_mark_to_string(self):
+        if self.mark == INFINITY_SECONDS:
             return None
-        return self.seconds_to_time_string(total_seconds)
+        return self.seconds_to_time_string(self.mark)
 
     @staticmethod
     def seconds_to_time_string(total_seconds):
@@ -407,7 +421,10 @@ class Entry(db.Model):
         Returns distance_str converted to inches. If it can't be converted,
         returns None.
         """
-        [feet, inches] = distance_str.split()
+        dist_parts = distance_str.split()
+        if len(dist_parts) != 2:
+            return None
+        (feet, inches) = dist_parts
 
         # verify feet has the ' character at the end, and remove it.
         if feet[-1] != "'":
@@ -416,15 +433,15 @@ class Entry(db.Model):
         return float(inches) + (12 * feet)
 
     def english_dist_mark_to_string(self):
-        inches = self.mark
-        if inches == 0:       # this is the same as no mark provided
-            return
+        if self.mark == 0:       # this is the same as no mark provided
+            return None
 
+        inches = self.mark
         if inches >= 12:
             feet = int(inches // 12)
             inches = inches - feet * 12
 
-        return "{:d}".format(feet) + "' " + "{:.2f}".format(inches)
+        return "{:d}".format(feet) + "' " + "{:.2f}".format(inches) + '"'
         # TODO - Need to fix this so it will only retur 10' 6" instead of
         # 10' 6.00" for events like the high jump that aren't measured so the
         # fraction of an inch
@@ -444,7 +461,9 @@ class MeetDivisionEvent(db.Model):
     div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
     meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
     event_code = db.Column(db.ForeignKey("event_defs.code"), nullable=False)
-
+    qualifying_mark = db.Column(db.Integer, nullable=True)
+    # notes about opening height, etc.
+    mde_notes = db.Column(db.String(256), nullable=True)
     meet = db.relationship("Meet", back_populates="mdes",
                            uselist=False)
     host_school = db.relationship(

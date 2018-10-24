@@ -3,15 +3,18 @@ TESTS on data model in model.py
 by Sue Raisty
 
 """
-from decimal import *
+# from decimal import *
 import unittest
 
-from sqlalchemy.exc import IntegrityError, DataError 
+from sqlalchemy.exc import IntegrityError, DataError
 
-from model import (db, reset_database, Division, School, EventDefinition,
-                   Meet, MeetDivisionEvent, Athlete, Entry,
-                   GENDERS, GRADES, EVENT_DEFS)
+from model import (
+        db, Division, School, EventDefinition, Meet, MeetDivisionEvent,
+        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS)
 from server import app
+
+from test_utils import (
+    teardown_test_db_app, setup_test_app_db, init_tms, init_meet)
 
 
 # We are not importing the following 'constants' from init_data because
@@ -187,7 +190,8 @@ class testMeetDivisionEvent(unittest.TestCase):
         events = EventDefinition.query.all()
         MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
         num_mdes = MeetDivisionEvent.query.count()
-        self.assertEqual(num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
+        self.assertEqual(
+                num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
 
     def test_mde_generate_mdes_with_returned_divs_and_events(self):
         divs = Division.generate_divisions(gender_list=GENDERS,
@@ -195,10 +199,11 @@ class testMeetDivisionEvent(unittest.TestCase):
         events = EventDefinition.generate_event_defs(EVENT_DEFS)
         MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
         num_mdes = MeetDivisionEvent.query.count()
-        self.assertEqual(num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
+        self.assertEqual(
+                num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
 
     def test_mde_meet_division_event_relationships(self):
-        divs = Division.generate_divisions(gender_list=GENDERS, 
+        divs = Division.generate_divisions(gender_list=GENDERS,
                                            grade_list=GRADES)
         events = EventDefinition.generate_event_defs(EVENT_DEFS)
         MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
@@ -368,15 +373,14 @@ class testEntry(unittest.TestCase):
     def test_one_entry_one_meet(self):
         pass
 
-
     def test_time_mark_conversion(self):
         self.assertAlmostEqual(11.45, Entry.time_string_to_seconds('11.45'))
         self.assertAlmostEqual(61.34, Entry.time_string_to_seconds('1:01.34'))
-        self.assertAlmostEqual(7201.24, 
+        self.assertAlmostEqual(7201.24,
                                Entry.time_string_to_seconds('2:00:01.24'))
         self.assertAlmostEqual(3601.24,
                                Entry.time_string_to_seconds('01:00:01.24'))
- 
+
     def test_time_mark_to_string(self):
         self.assertEqual("23:23:23.23", Entry.seconds_to_time_string(84203.23))
         self.assertEqual("1:01:01.01", Entry.seconds_to_time_string(3661.01))
@@ -384,6 +388,44 @@ class testEntry(unittest.TestCase):
         self.assertEqual("4:04.04", Entry.seconds_to_time_string(244.04))
         self.assertEqual("58.90", Entry.seconds_to_time_string(58.9))
         self.assertEqual("9.93", Entry.seconds_to_time_string(9.93))
+
+
+class TestEntryToEventRelationships(unittest.TestCase):
+    # TODO = Move this to the test-model file
+    def setUp(self):
+        setup_test_app_db()
+        self.client = app.test_client()
+        (divs, events) = init_tms()
+        self.meet1 = init_meet(EXAMPLE_MEETS[0], divs, events)
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_entry_to_event_relationship(self):
+        veronica = Athlete("Veronica", "", "Rodriguez", "F", "6")
+        self.assertIsNotNone(veronica)
+        self.assertEqual(veronica.division.abbrev(), "6F")
+        db.session.add(veronica)
+        db.session.commit()
+
+        e_code = "DT"
+        mde = MeetDivisionEvent.query.filter_by(
+                meet=self.meet1,
+                event_code=e_code,
+                div_id=veronica.division.id).one()
+        entry = Entry(athlete=veronica, mde=mde)
+        db.session.add(entry)
+        db.session.commit()
+
+        self.assertIsNotNone(entry.mde)
+        self.assertIsNotNone(entry.athlete)
+        self.assertIsNotNone(mde.entries)
+        self.assertIsNotNone(veronica.entries)
+
+        # This is the line that used to error
+        self.assertEqual(entry.event, entry.mde.event)
+
+        self.assertEqual(mde.entries[0].athlete.fname, "Veronica")
 
 
 ###################################
@@ -626,7 +668,6 @@ class testDivision(unittest.TestCase):
         self.assertEqual(num_divs_for_grade, len(GENDERS))
 
 
-
 # ############## HELPER FUNCTIONS ###############
 def populate_example_meets(meet_list):
     for meet_dict in meet_list:
@@ -634,23 +675,7 @@ def populate_example_meets(meet_list):
                     status=meet_dict.get('status', 'Accepting Entries'))
 
         db.session.add(meet)
-        db.session.commit()
-
-def setup_test_app_db():
-    """
-    """
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///tms-test"
-    app.config["TESTING"] = True
-    app.config["SQLALCHEMY_ECHO"] = False
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["DEBUG"] = False
-    db.app = app
-    db.init_app(app)
-    db.create_all()
-
-
-def teardown_test_db_app():
-    reset_database()
+    db.session.commit()
 
 
 if __name__ == "__main__":

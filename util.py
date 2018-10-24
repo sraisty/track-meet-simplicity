@@ -6,6 +6,9 @@ Author: Sue Raisty
 
 """
 
+INFO_LEVEL = 'all'
+# valid values: 'errors-only', 'warn-and-errors-only', 'all', 'none'
+
 
 def print_and_log(level, message, repr_string):
     """ prints and logs warning/error/info messages """
@@ -17,14 +20,17 @@ def print_and_log(level, message, repr_string):
 
 def error(message, repr_string=""):
     """ prints and logs the message with "ERROR" prefix """
-    print_and_log("error", message, repr_string)
-    raise Exception(f"{message} {repr_string}")
+    if INFO_LEVEL != "none":
+        print_and_log("error", message, repr_string)
+    # raise Exception(f"{message} {repr_string}")
 
 
 def warning(message, repr_string=""):
     """ prints and logs the message with "WARNING" prefix """
-    print_and_log("warning", message, repr_string)
+    if INFO_LEVEL == "warn-and-errors-only" or INFO_LEVEL == "all":
+        print_and_log("warning", message, repr_string)
 
 
 def info(message, repr_string=""):
-    print_and_log("info", message, repr_string)
+    if INFO_LEVEL == "all":
+        print_and_log("info", message, repr_string)
