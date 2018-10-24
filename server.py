@@ -62,7 +62,7 @@ def do_login():
     if user is None:
         # bad login
         flash("ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
-              "danger"  )
+              "danger")
         return redirect(url_for('do_login'))
 
     # Successful login

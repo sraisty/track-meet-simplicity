@@ -442,14 +442,9 @@ class Entry(db.Model):
             inches = inches - feet * 12
 
         return "{:d}".format(feet) + "' " + "{:.2f}".format(inches) + '"'
-        # TODO - Need to fix this so it will only retur 10' 6" instead of
+        # TODO - Need to fix this so it will only return 10' 6" instead of
         # 10' 6.00" for events like the high jump that aren't measured so the
         # fraction of an inch
-
-
-# class Mark(db.Model):
-# TODO - Eventually pull the Mark out of the Entry class into its own class.
-
 
 class MeetDivisionEvent(db.Model):
     """
@@ -464,11 +459,11 @@ class MeetDivisionEvent(db.Model):
     qualifying_mark = db.Column(db.Integer, nullable=True)
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
-    meet = db.relationship("Meet", back_populates="mdes",
-                           uselist=False)
+
+    meet = db.relationship("Meet", back_populates="mdes", uselist=False)
     host_school = db.relationship(
             "School", secondary="meets",
-            # back_populates="meet_division_events", 
+            backref="hosted_mdes", 
             uselist=False)
     division = db.relationship(
             "Division", 
@@ -484,7 +479,7 @@ class MeetDivisionEvent(db.Model):
     athletes = db.relationship(
             "Athlete", secondary="entries", lazy="joined", 
             back_populates="mdes")
-    # school = 
+
     # editor_users = db.relationship("User", secondary="schools")
 
     def __repr__(self):
@@ -569,11 +564,13 @@ class School(db.Model):
     entries = db.relationship(
             "Entry", 
             back_populates="school",
+            lazy="joined",
             secondary="athletes")
     coaches = db.relationship("User")
 
     # hosted_meets = db.relationship("Meet")
     hosted_meets = db.relationship("Meet", lazy="joined")
+
 
     def __init__(
             self, name="Unattached", abbrev="UNA", city=None, state=None, 
@@ -617,14 +614,23 @@ class School(db.Model):
             db.session.commit()
 
 
-    def meets(self):
+    def meets_entered(self):
         meets = set()
         for entry in self.entries:
             meets.add(entry.meet)
         print(meets)
         return list(meets)
 
-
+"""
+>>> for u, a in session.query(User, Address).\
+...                     filter(User.id==Address.user_id).\
+...                     filter(Address.email_address=='jack@google.com').\
+...                     all():
+...     print(u)
+...     print(a)
+<User(name='jack', fullname='Jack Bean', password='gjffdd')>
+<Address(email_address='jack@google.com')>
+"""
 # # ###### THESE TABLES ARE INITIALIZED BUT NOT MODIFIED GOING FORWARD
 # # ###### CONTAIN "Constant" Data or are used for referential integrity
 

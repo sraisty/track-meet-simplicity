@@ -67,9 +67,9 @@
         {# </a> #}
     {# {% endfor %} #}
 
-    {% if school.meets() %}
+    {% if school.meets_entered() %}
         <p>Meets this school has entered</p>
-        {% set list = school.meets() %}
+        {% set list = school.meets_entered() %}
   {#       {% for meet in list %}
             <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
                 {{ meet.name }}

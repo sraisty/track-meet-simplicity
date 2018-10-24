@@ -8,5 +8,6 @@
 {# {% block get_school %}{% endblock %} #}
 
 {% block refer_user %}
-    Don't have an account?  <a href="/register">Sign up!</a>
+    Don't have an account?  
+    <a href="{{ url_for('show_register_form') }}">Sign up!</a>
 {% endblock refer_user %}
