@@ -6,7 +6,7 @@ Author: Sue Raisty
 
 """
 
-INFO_LEVEL = 'all'
+INFO_LEVEL = 'warn-and-errors-only'
 # valid values: 'errors-only', 'warn-and-errors-only', 'all', 'none'
 
 

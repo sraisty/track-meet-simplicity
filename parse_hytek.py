@@ -159,7 +159,7 @@ def parse_entry(tokens, meet):
     # between entry-athlete and entry-mde
     db.session.add(entry)
     db.session.commit()
-
+    info(f"Added entry: {entry}")
     # TODO - add this stuff to a test
     assert(entry.mde)
     assert(entry.athlete)
@@ -219,7 +219,7 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
         school = School(name=team_name, abbrev=team_code)
         db.session.add(school)
         db.session.commit()
-        warning(f"Added new school): {team_name}, code:{team_code}")
+        warning(f"Added new school: {team_name}, code:{team_code}")
 
     # create a new athlete, and add it to the database.
 
@@ -251,6 +251,7 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
         db.session.rollback()
         return None
 
+    info(f"Added athlete: {athlete}")
     return athlete
 
 

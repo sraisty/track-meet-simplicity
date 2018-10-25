@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from model import (
         db, Division, School, EventDefinition, Meet, MeetDivisionEvent,
-        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS)
+        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS, TmsError)
 from server import app
 
 from test_utils import (
@@ -219,12 +219,7 @@ class testMeetDivisionEvent(unittest.TestCase):
         self.assertEqual(meet1_g7_hj.event.name, "High Jump")
         self.assertEqual(meet1_g7_hj.meet.name, "Meet #1")
 
-        # Within Grade7 Girls, how many events are there within the whole meet
-        # TODOS
-        # import pdb; pdb.set_trace()
-        # self.assertEqual(len(meet1_g7_hj.division.mdes), len(EVENT_DEFS))
 
-        # self.assertIs(meet1_g7_hj.division.mdes[0], meet1_g7_hj)
 
 
 class TestRelationships(unittest.TestCase):
@@ -362,7 +357,7 @@ class testAthlete(unittest.TestCase):
         self.assertEqual(str(err), "Must provide first and last name.")
 
 
-class testEntry(unittest.TestCase):
+class testEntryMarks(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
         self.client = app.test_client()
@@ -380,6 +375,8 @@ class testEntry(unittest.TestCase):
                                Entry.time_string_to_seconds('2:00:01.24'))
         self.assertAlmostEqual(3601.24,
                                Entry.time_string_to_seconds('01:00:01.24'))
+        with self.assertRaises(TmsError):
+            Entry.time_string_to_seconds('17.4h')
 
     def test_time_mark_to_string(self):
         self.assertEqual("23:23:23.23", Entry.seconds_to_time_string(84203.23))
@@ -388,6 +385,8 @@ class testEntry(unittest.TestCase):
         self.assertEqual("4:04.04", Entry.seconds_to_time_string(244.04))
         self.assertEqual("58.90", Entry.seconds_to_time_string(58.9))
         self.assertEqual("9.93", Entry.seconds_to_time_string(9.93))
+
+
 
 
 class TestEntryToEventRelationships(unittest.TestCase):

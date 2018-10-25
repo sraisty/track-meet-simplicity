@@ -108,7 +108,8 @@ EXAMPLE_MEETS = (
         "filename": "MS_HtMeetEntries_53.txt"
     })
 
-NUM_SEED_MEETS = len(EXAMPLE_MEETS)
+# NUM_SEED_MEETS = len(EXAMPLE_MEETS)
+NUM_SEED_MEETS = 1
 
 
 class TestVerifyEmptyDatabase(unittest.TestCase):
@@ -259,13 +260,41 @@ class TestEntryFilesOneByOne(unittest.TestCase):
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_parse_one_full_file(self):
-        self.meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
+    def test_parse_file0(self):
+        meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
         parse_hytek_file(
                 f"seed_data/{EXAMPLE_MEETS[0]['filename']}",
-                self.meet1)
-        # TODO  Test host_school is set
-        # meet1.host_school_id = EXAMPLE_MEETS[0]['host_school_id']
+                meet1)
+
+    def test_parse_file1(self):
+        helper_file_to_meet(1, self.divs, self.events)
+
+    def test_parse_file2(self):
+        helper_file_to_meet(2, self.divs, self.events)
+
+    def test_parse_file3(self):
+        helper_file_to_meet(3, self.divs, self.events)
+
+    def test_parse_file4(self):
+        helper_file_to_meet(4, self.divs, self.events)
+
+    def test_parse_file5(self):
+        helper_file_to_meet(5, self.divs, self.events)
+
+    def test_parse_file6(self):
+        helper_file_to_meet(6, self.divs, self.events)
+
+    def test_parse_file7(self):
+        helper_file_to_meet(7, self.divs, self.events)
+
+    def test_parse_file8(self):
+        helper_file_to_meet(8, self.divs, self.events)
+
+    def test_parse_file9(self):
+        helper_file_to_meet(9, self.divs, self.events)
+
+    def test_parse_file10(self):
+        helper_file_to_meet(10, self.divs, self.events)
 
 
 class TestFillSeedDatabase(unittest.TestCase):
@@ -291,6 +320,14 @@ class TestFillSeedDatabase(unittest.TestCase):
             parse_hytek_file(f"seed_data/{meet_info['filename']}", meet)
             meet.host_school_id = meet_info['host_school_id']
         self.assertEqual(Meet.query.count(), num_meets)
+
+
+def helper_file_to_meet(example_meet_idx, divs, events):
+    meet_init_info = EXAMPLE_MEETS[example_meet_idx]
+
+    meet = init_meet(meet_init_info, divs, events)
+    parse_hytek_file(f"seed_data/{meet_init_info['filename']}", meet)
+    meet.host_school_id = meet_init_info['host_school_id']
 
 
 if __name__ == "__main__":

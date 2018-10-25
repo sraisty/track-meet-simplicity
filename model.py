@@ -4,8 +4,7 @@ by Susan Raisty
 
 NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 """
-from decimal import *
-import math
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.exc import DataError
@@ -165,7 +164,7 @@ class Athlete(db.Model):
 
     school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
-    coach_notes = db.Column(db.String(256), nullable=True)
+    coach_notes = db.Column(db.String(64), nullable=True)
 
     school = db.relationship("School", back_populates="athletes")
     division = db.relationship("Division", back_populates="athletes")
@@ -202,7 +201,6 @@ class Athlete(db.Model):
             warning(f"\nAssigning {fname} {lname} to 'Unattached' school.")
             school = School.query.filter_by(abbrev="UNA").one()
         self.school = school
-
 
     def __repr__(self):
         return "\n<ATHL# {}: {}, {}, {}>".format(
@@ -242,7 +240,7 @@ class Athlete(db.Model):
                     ath.division.gender == gender):
                 return ath
 
-        # database doesn't contain an athlete matching the parameteres specified
+        # DB doesn't contain a matching athlete
         return None
 
     def meets(self):
@@ -250,7 +248,6 @@ class Athlete(db.Model):
         for mde in self.mdes:
             meets.add(mde.meet)
         return list(meets)
-
 
 
 mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
@@ -274,9 +271,9 @@ class Entry(db.Model):
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
 
-    # In track, an athlete's "mark" for a parituclar event is either his/her 
-    # time or distance thrown/jumped or height jumped (in inches) for field 
-    # events. We store in seconds or inches, with precision to the hundredth of 
+    # In track, an athlete's "mark" for a parituclar event is either his/her
+    # time or distance thrown/jumped or height jumped (in inches) for field
+    # events. We store in seconds or inches, with precision to the hundredth of
     # a second and up to 1/4 inch.
     mark = db.Column(db.Numeric(12, 2), nullable=True)
     mark_type = db.Column(mark_type_enum, nullable=True)
@@ -309,20 +306,18 @@ class Entry(db.Model):
                              back_populates="entries")
     # editor_users = db.relationship("User", secondary="schools")
 
-
     # assigned_heat = db.relationship("Heat")
     def __repr__(self):
-        return ("\n<ENTRY #{}, Ath: TODO {}, Event: {}, Div: {}, Meet: {}>"
+        return ("\n<ENTRY #{}, Ath: {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
                     self.id, self.athlete.full_name(),
                     self.event.code, self.division.abbrev(), self.meet.name))
 
-
     def set_mark(self, mark_string=None, mark_measure_type=None):
-        """ If mark_string is empty or null, treat it as if no mark was 
-        submitted for that athlete. That means that we'll treat this entry's mark 
-        as "0" if it's a field event, and as positive infinity if it's a track 
-        event.
+        """ If mark_string is empty or null, treat it as if no mark was
+        submitted for that athlete. That means that we'll treat this entry's
+        mark as "0" if it's a field event, and as positive infinity if it's a
+        track event.
         """
         if self.event.is_track():
             self.mark_type = "seconds"
@@ -341,7 +336,7 @@ class Entry(db.Model):
                 return
             self.mark = Entry.field_english_mark_to_inches(mark_string)
 
-        else:     
+        else:
             # mark_measure_type == "M"
             # TODO - fix this for field events that are measured in Metric.
             # But for now it will work with california high school & ms meets
@@ -350,19 +345,19 @@ class Entry(db.Model):
                 self.mark = 0 
             raise TmsError("Haven't implemented metric field measurements yet")
 
-
-
     @staticmethod
     def time_string_to_seconds(time_string):
         """ Takes a string like '1:23.44.55, 1:19.14, 58.83, 13.4' and
         returns it in seconds, with resolution to the tenth or hundreth of a
         second
 
-        TODO - deal with hand-timed marks, which have a 'h' at the end and
-        are only recorded in tenths of seconds instead of hundredths
+        TODO - deal with hand-timed marks, which have a 'h' at are measured to
+        tenths of seconds (not hundredths):  eg.  12:34.3h
         """
         # turn the time string into a [seconds, minutes, hours] list
         t_list = time_string.split(':')[::-1]
+        if t_list[-1][-1] == "h":
+            raise TmsError("UNIMPLEMENTED: hand-timed marks")
 
         secs = 0
         for i in range(0, len(t_list)):
@@ -379,7 +374,6 @@ class Entry(db.Model):
             return self.english_dist_mark_to_string()
         else:
             raise TmsError("UNIMPLEMENTED: metric field distance marks")
-
 
     def _time_mark_to_string(self):
         if self.mark == INFINITY_SECONDS:
@@ -463,21 +457,24 @@ class MeetDivisionEvent(db.Model):
     meet = db.relationship("Meet", back_populates="mdes", uselist=False)
     host_school = db.relationship(
             "School", secondary="meets",
-            backref="hosted_mdes", 
+            backref="hosted_mdes",
             uselist=False)
     division = db.relationship(
-            "Division", 
-            back_populates="mdes", 
+            "Division",
+            back_populates="mdes",
             uselist=False)
     event = db.relationship(
-            "EventDefinition", 
+            "EventDefinition",
             back_populates="mdes",
             uselist=False)
 
     entries = db.relationship(
-            "Entry", back_populates="mde", lazy="joined")
+            "Entry", back_populates="mde",
+            # lazy="joined"
+            )
     athletes = db.relationship(
-            "Athlete", secondary="entries", lazy="joined", 
+            "Athlete", secondary="entries",
+            # lazy="joined",
             back_populates="mdes")
 
     # editor_users = db.relationship("User", secondary="schools")
@@ -559,21 +556,27 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
-    athletes = db.relationship("Athlete", back_populates="school", lazy="joined")
+    athletes = db.relationship(
+        "Athlete", 
+        back_populates="school",
+        # lazy="joined"
+        )
     divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship(
             "Entry", 
             back_populates="school",
-            lazy="joined",
+            # lazy="joined",
             secondary="athletes")
     coaches = db.relationship("User")
 
     # hosted_meets = db.relationship("Meet")
-    hosted_meets = db.relationship("Meet", lazy="joined")
-
+    hosted_meets = db.relationship(
+                                    "Meet",
+                                    # lazy="joined"
+                                    )
 
     def __init__(
-            self, name="Unattached", abbrev="UNA", city=None, state=None, 
+            self, name="Unattached", abbrev="UNA", city=None, state=None,
             league=None, section=None):
         self.name = name
         self.abbrev = abbrev

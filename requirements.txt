@@ -4,6 +4,7 @@ blinker==1.4
 certifi==2018.10.15
 chardet==3.0.4
 Click==7.0
+coverage==4.5.1
 decorator==4.3.0
 Flask==1.0.2
 Flask-DebugToolbar==0.10.1
