@@ -7,7 +7,6 @@ NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
-from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from util import warning, error, info
@@ -28,9 +27,11 @@ EVENT_DEFS = ({"code": "100M", "name": "100 Meter", "type": "sprint"},
               {"code": "4x100M", "name": "4x100 Meter Relay", "type": "relay"},
               {"code": "4x400M", "name": "4x400 Meter Relay", "type": "relay"},
               {"code": "65H", "name": "65 Meter Hurdles", "type": "sprint"},
-              {"code": "100H", "name": "100 Meter Hurdles (Girls Only)", "type": "sprint"},
-              {"code": "110H", "name": "110 Meter Hurdles (Boys Only)", "type": "sprint"},
-              {"code": "300H", "name": "300 Meter Hurdles", "type": "sprint"},  
+              {"code": "100H", "name": "100 Meter Hurdles (Girls Only)",
+               "type": "sprint"},
+              {"code": "110H", "name": "110 Meter Hurdles (Boys Only)",
+               "type": "sprint"},
+              {"code": "300H", "name": "300 Meter Hurdles", "type": "sprint"},
               {"code": "LJ", "name": "Long Jump", "type": "horzjump"},
               {"code": "TJ", "name": "Triple Jump", "type": "horzjump"},
               {"code": "DT", "name": "Discus Throw", "type": "throw"},
@@ -40,7 +41,7 @@ EVENT_DEFS = ({"code": "100M", "name": "100 Meter", "type": "sprint"},
 
 
 EVENT_TYPES = ("sprint", "distance", "relay",
-                "vertjump", "horzjump", "throw")
+               "vertjump", "horzjump", "throw")
 
 MEET_STATUS = ("Not Published", "Accepting Entries", "Awaiting Assignment",
                "Assignments Done", "Meet In Progress", "Completed")
@@ -66,8 +67,8 @@ db = SQLAlchemy()
 
 # #############
 # class Tms_App:
-#     """ 
-#     TODO - This is just a regular class, not mapped to the database?  
+#     """
+#     TODO - This is just a regular class, not mapped to the database?
 #     Do I really need this?
 #     """
 #     def __init__(self):
@@ -85,7 +86,7 @@ db = SQLAlchemy()
 class TmsError(Exception):
     """ Base class for exceptions in the TMS module """
     def __init__(self, message):
-        self.message= message
+        self.message = message
 
 
 meet_status_enum = Enum(*MEET_STATUS, name="meet_status")
@@ -109,39 +110,36 @@ class Meet(db.Model):
     max_athletes_per_heat = db.Column(db.Integer, nullable=True)
     max_heats_per_mde = db.Column(db.Integer, nullable=True)
 
-    # order_of_events at meet 
+    # order_of_events at meet
     # order_of_divs_in_event
 
     host_school = db.relationship("School", uselist=False)
     mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
     events = db.relationship("EventDefinition",
-                             secondary="meet_division_events", 
+                             secondary="meet_division_events",
                              )
     divisions = db.relationship("Division",
-                                secondary="meet_division_events", 
+                                secondary="meet_division_events",
                                 )
     entries = db.relationship("Entry", secondary="meet_division_events",
                               back_populates="meet")
-
     editor_users = db.relationship("User", secondary="schools")
-
 
     def __repr__(self):
         return "\n<MEET id# {}: {}>".format(self.id, self.name)
 
-
     def get_event_mdes(self, ev):
         q = MeetDivisionEvent.query.filter(
-                MeetDivisionEvent.meet==self,
-                MeetDivisionEvent.event==ev)
+                MeetDivisionEvent.meet == self,
+                MeetDivisionEvent.event == ev)
         # TODO - sort them  q = q.order_by(XX)
         mdes = q.all()
         return mdes
 
     def get_event_athlete_count(self, ev):
         mde_q = MeetDivisionEvent.query.filter(
-                MeetDivisionEvent.meet==self,
-                MeetDivisionEvent.event==ev)
+                MeetDivisionEvent.meet == self,
+                MeetDivisionEvent.event == ev)
         # TODO - sort them  q = q.order_by(XX)
         count = 0
         for mde in mde_q:
@@ -149,8 +147,10 @@ class Meet(db.Model):
         return count
 
     def get_schools(self):
- #       db.session.query(Meet.meet_id, Entry.entry_id, Athlete.athlete_id, School)
+        # db.session.query(
+                # Meet.meet_id, Entry.entry_id, Athlete.athlete_id, School)
         pass
+
 
 class Athlete(db.Model):
     """ """
@@ -189,15 +189,17 @@ class Athlete(db.Model):
         try:
             div = div_q.one()
         except (NoResultFound, MultipleResultsFound):
-            print(f"SKIPPING Athlete {fname} {lname}. no division match. Grade: {grade}, Gender:{gender}.")
-            raise TmsError(f"BadAthleteRecord: {fname}, {lname}, grade:{grade} gender:{gender}")
-
+            print("SKIPPING {} {}. No Div for grade: {}, Gender:{}".format(
+                    fname, lname, grade, gender))
+            raise TmsError("BadAthleteRecord: {}, {}, gr:{} gender:{}".format(
+                        fname, lname, grade, gender))
 
         self.division = div
 
         school = School.query.filter_by(abbrev=school_abbrev).one_or_none()
         if not school:
-            warning(f"Athete {fname} {lname}:School ({school_abbrev}) doesn't exist in TMS.")
+            warning("Athete {} {}: School ({}) not in TMS.".format(
+                    fname, lname, school_abbrev))
             warning(f"\nAssigning {fname} {lname} to 'Unattached' school.")
             school = School.query.filter_by(abbrev="UNA").one()
         self.school = school
@@ -340,9 +342,9 @@ class Entry(db.Model):
             # mark_measure_type == "M"
             # TODO - fix this for field events that are measured in Metric.
             # But for now it will work with california high school & ms meets
-            self.mark_type ="meters"
+            self.mark_type = "meters"
             if mark_string is None:
-                self.mark = 0 
+                self.mark = 0
             raise TmsError("Haven't implemented metric field measurements yet")
 
     @staticmethod
@@ -375,7 +377,7 @@ class Entry(db.Model):
         else:
             raise TmsError("UNIMPLEMENTED: metric field distance marks")
 
-    def _time_mark_to_string(self):
+    def time_mark_to_string(self):
         if self.mark == INFINITY_SECONDS:
             return None
         return self.seconds_to_time_string(self.mark)
@@ -404,7 +406,7 @@ class Entry(db.Model):
 
     @staticmethod
     def field_english_mark_to_inches(distance_str):
-        # TODO this function is poorly named and easily confused with the 
+        # TODO this function is poorly named and easily confused with the
         # english_dist_mark_to_string
         """
         Convert a string that represents an English distance, in inches,
@@ -439,6 +441,7 @@ class Entry(db.Model):
         # TODO - Need to fix this so it will only return 10' 6" instead of
         # 10' 6.00" for events like the high jump that aren't measured so the
         # fraction of an inch
+
 
 class MeetDivisionEvent(db.Model):
     """
@@ -503,7 +506,6 @@ class MeetDivisionEvent(db.Model):
             schools.add(athlete)
         return list(schools)
 
-
     def form_heats(self):
         pass
 
@@ -557,19 +559,18 @@ class School(db.Model):
     state = db.Column(db.String(2), nullable=True)
 
     athletes = db.relationship(
-        "Athlete", 
-        back_populates="school",
-        # lazy="joined"
-        )
+                                "Athlete",
+                                back_populates="school",
+                                # lazy="joined"
+                                )
     divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship(
-            "Entry", 
-            back_populates="school",
-            # lazy="joined",
-            secondary="athletes")
+                                "Entry",
+                                back_populates="school",
+                                # lazy="joined",
+                                secondary="athletes")
     coaches = db.relationship("User")
 
-    # hosted_meets = db.relationship("Meet")
     hosted_meets = db.relationship(
                                     "Meet",
                                     # lazy="joined"
@@ -589,10 +590,8 @@ class School(db.Model):
         if section:
             self.section = section.upper()
 
-
     def __repr__(self):
         return "<SCHOOL id#{}: {}>".format(self.id, self.name)
-
 
     @classmethod
     def init_unattached_school(cls):
@@ -616,13 +615,13 @@ class School(db.Model):
             db.session.add(new_unattached_school)
             db.session.commit()
 
-
     def meets_entered(self):
         meets = set()
         for entry in self.entries:
             meets.add(entry.meet)
         print(meets)
         return list(meets)
+
 
 """
 >>> for u, a in session.query(User, Address).\
@@ -776,19 +775,14 @@ class User(db.Model):
     email = db.Column(db.String(64), nullable=True)
     password = db.Column(db.String(64), nullable=True)
     school_id = db.Column(db.ForeignKey("schools.id"), nullable=True)
-    # TO DO - fix this to somethine less privileged by default
+    # TO DO - fix this to something less privileged by default
     role = db.Column(user_role_enum, nullable=False, default="coach")
-    # TODO FUTURE - add school is
-
 
     school = db.relationship("School")
     meets_owned = db.relationship("Meet", secondary="schools")
     athletes_editable = db.relationship("Athlete", secondary="schools")
 
     def __repr__(self):
-        # CHANGE TO ONE DAY STORE SCHOOL
-        # return "<USER #{}, {}, school={}, role={}".format(
-        #     self.user_id, self.email, self.school, self.role)
         return "<USER #{}, {}, school={}, role={}".format(
             self.id, self.email, self.school, self.role)
 
@@ -796,9 +790,9 @@ class User(db.Model):
 ###############
 # Helper functions
 def connect_to_db(app, db_uri="tms-dev"):
-    """ Connect the database to our Flask app
+    """ Configure to use dev version of PostgreSQL DB & connect it to Flask app.
+    NOTE: doesn't create the tables
     """
-    # Configure to use the dev version of our PostgreSQL database
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///" + db_uri
     app.config["SQLALCHEMY_ECHO"] = True
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -809,8 +803,11 @@ def connect_to_db(app, db_uri="tms-dev"):
 
 
 def reset_database():
-    # Delete all rows in tables, so if we need to run this seeding program
-    # a second time, we won't be trying to add duplicate data
+    """ Deletes all tables from db and our entire SQLAlchemy session
+
+    After running this, the db still exists but is empty, and the SQLAlchmey
+    session is stable.
+    """
     db.session.remove()
     db.drop_all()
     db.engine.dispose()

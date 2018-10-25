@@ -220,8 +220,6 @@ class testMeetDivisionEvent(unittest.TestCase):
         self.assertEqual(meet1_g7_hj.meet.name, "Meet #1")
 
 
-
-
 class TestRelationships(unittest.TestCase):
 
     def setUp(self):
@@ -385,8 +383,6 @@ class testEntryMarks(unittest.TestCase):
         self.assertEqual("4:04.04", Entry.seconds_to_time_string(244.04))
         self.assertEqual("58.90", Entry.seconds_to_time_string(58.9))
         self.assertEqual("9.93", Entry.seconds_to_time_string(9.93))
-
-
 
 
 class TestEntryToEventRelationships(unittest.TestCase):

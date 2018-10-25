@@ -140,7 +140,7 @@ CREATE TABLE public.athletes (
     phone character varying(12),
     school_id integer,
     div_id integer NOT NULL,
-    coach_notes character varying(256)
+    coach_notes character varying(64)
 );
 
 

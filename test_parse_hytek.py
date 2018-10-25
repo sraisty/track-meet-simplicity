@@ -2,9 +2,9 @@
 Tests the parse-hytek.py file.
 """
 
-from parse_hytek import parse_hytek_file
-
 import unittest
+
+from parse_hytek import parse_hytek_file
 
 from model import (
     Meet, Athlete, Entry, Division, School, EventDefinition, MeetDivisionEvent,
@@ -15,106 +15,15 @@ from server import app
 from test_utils import (
     init_meet, init_tms, setup_test_app_db, teardown_test_db_app)
 
+from util import error, warning, info
+from seed import EXAMPLE_MEETS
 
-EXAMPLE_MEETS = (
-    {
-        "name": "PCAL: San Benito (Hollister) vs. Everett Alvarez",
-        "date": "March 8, 2019",
-        "description": """ San Benito at Everett Alvarez. Meet starts at 3pm.
-        Entries must be submitted by noon the day before.
-                       """,
-        "status": "Accepting Entries",
-        "host_school_id": 2,        # Everett Alvarez
-        "filename": "MS_HtMeetEntries_43.txt"
-    }, {
-        "name": "PCAL: League Practice Meet #1",
-        "date": "March 10, 2019",
-        "description": """ Meet starts at 3pm, at Los Gatos High School.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 5,    # carmel
-        "filename": "MS_HtMeetEntries_44.txt"
-    }, {
-        "name": "PCAL League Practice Meet #2",
-        "date": "March 22, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 8,   # king city
-        "filename": "MS_HtMeetEntries_45.txt"
-    }, {
-        "name": "PCAL League Practice Meet #3",
-        "date": "March 22, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 9,    # marina
-        "filename": "MS_HtMeetEntries_46.txt"
-    }, {
-        "name": "PCAL League Practice Meet #4",
-        "date": "March 29, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 14,    # soledad
-        "filename": "MS_HtMeetEntries_47.txt"
-    }, {
-        "name": "PCAL League Practice Meet #5",
-        "date": "April 5, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 25,       # pajaro valley
-        "filename": "MS_HtMeetEntries_48.txt"
-    }, {
-        "name": "PCAL League Practice Meet #6",
-        "date": "April 12, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 8,    # king city
-        "filename": "MS_HtMeetEntries_49.txt"
-    }, {
-        "name": "PCAL League Practice Meet #7",
-        "date": "April 17, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 5,    # carmel
-        "filename": "MS_HtMeetEntries_50.txt"
-    }, {
-        "name": "PCAL League Practice Meet #8",
-        "date": "April 24, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 9,   # marina
-        "filename": "MS_HtMeetEntries_51.txt"
-    }, {
-        "name": "PCAL League Practice Meet #9",
-        "date": "May 1, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 14,   # soledad
-        "filename": "MS_HtMeetEntries_52.txt"
-    }, {
-        "name": "PCAL League Championships",
-        "date": "May 8, 2019",
-        "description": """ Meet starts at 3pm.
-            """,
-        "status": "Accepting Entries",
-        "host_school_id": 5,    # carmel
-        "filename": "MS_HtMeetEntries_53.txt"
-    })
-
-# NUM_SEED_MEETS = len(EXAMPLE_MEETS)
 NUM_SEED_MEETS = 1
 
 
 class TestVerifyEmptyDatabase(unittest.TestCase):
     def setUp(self):
-        print("testVerifyEmptyDatabase - setup")
+        info("testVerifyEmptyDatabase - setup")
         setup_test_app_db()
         self.client = app.test_client()
         (divs, events) = init_tms()
@@ -297,34 +206,32 @@ class TestEntryFilesOneByOne(unittest.TestCase):
         helper_file_to_meet(10, self.divs, self.events)
 
 
-class TestFillSeedDatabase(unittest.TestCase):
-    def setUp(self):
-        setup_test_app_db()
-        self.client = app.test_client()
-        (divs, events) = init_tms()
-        self.divs = divs
-        self.events = events
+# class TestFillSeedDatabase(unittest.TestCase):
+#     def setUp(self):
+#         setup_test_app_db()
+#         self.client = app.test_client()
+#         (divs, events) = init_tms()
+#         self.divs = divs
+#         self.events = events
 
-    def tearDown(self):
-        import ipdb; ipdb.set_trace()
-        teardown_test_db_app()
+#     def tearDown(self):
+#         teardown_test_db_app()
 
-    def test_parse_lots_big_files(self):
-        # CHANGE num_meets LATER
-        num_meets = NUM_SEED_MEETS
-        self.assertTrue(num_meets <= len(EXAMPLE_MEETS))
-        for i in range(num_meets):
-            meet_info = EXAMPLE_MEETS[i]
-            meet = init_meet(meet_info, self.divs, self.events)
-            self.assertIsNotNone(meet)
-            parse_hytek_file(f"seed_data/{meet_info['filename']}", meet)
-            meet.host_school_id = meet_info['host_school_id']
-        self.assertEqual(Meet.query.count(), num_meets)
+#     def test_parse_lots_big_files(self):
+#         # CHANGE num_meets LATER
+#         num_meets = NUM_SEED_MEETS
+#         self.assertTrue(num_meets <= len(EXAMPLE_MEETS))
+#         for i in range(num_meets):
+#             meet_info = EXAMPLE_MEETS[i]
+#             meet = init_meet(meet_info, self.divs, self.events)
+#             self.assertIsNotNone(meet)
+#             parse_hytek_file(f"seed_data/{meet_info['filename']}", meet)
+#             meet.host_school_id = meet_info['host_school_id']
+#         self.assertEqual(Meet.query.count(), num_meets)
 
 
 def helper_file_to_meet(example_meet_idx, divs, events):
     meet_init_info = EXAMPLE_MEETS[example_meet_idx]
-
     meet = init_meet(meet_init_info, divs, events)
     parse_hytek_file(f"seed_data/{meet_init_info['filename']}", meet)
     meet.host_school_id = meet_init_info['host_school_id']
