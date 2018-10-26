@@ -3,7 +3,7 @@ separated format.  Details on this file format follow:
 """
 
 
-from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from model import (Athlete, School, Entry, MeetDivisionEvent, TmsError, db)
 
@@ -129,11 +129,16 @@ def parse_entry(tokens, meet):
     # translate the HyTek event names into TMS event codes
     tms_event_code = ht_event_translator.get(ht_event_code, ht_event_code)
 
-    # Get the MDE for this event
+
     q = MeetDivisionEvent.query
-    mde = q.filter_by(meet_id=meet.id,
-                      event_code=tms_event_code,
-                      div_id=athlete.division.id).one()
+    try:
+        mde = q.filter_by(meet_id=meet.id,
+                          event_code=tms_event_code,
+                          div_id=athlete.division.id).one()
+    except NoResultFound:
+        raise TmsError("MDE doesn't exist: meet #{}, event {}, div {}".format(
+            meet.id, tms_event_code, athlete.division.abbrev()))
+
     entry = Entry(athlete=athlete, mde=mde)
     # we need to commit here, or else we can't see the event in the below call
     # of entry.set_mark method.
@@ -141,23 +146,17 @@ def parse_entry(tokens, meet):
     db.session.commit()
     info(f"Added entry: {entry}")
 
-    # If the athlete's entry includes a seed mark for this event, get it.
+    # If the athlete's entry includes a seed mark for this event, set it
     if len(tokens[11:13]) == 2:
-        mark_string = tokens[11]
-        mark_measure_type = tokens[12]
-    # We need to set a value for the entry's mark, even if the record in the
-    # file didn't include one. entry.set_mark handles it.
-    entry.set_mark(
-            mark_string=mark_string, mark_measure_type=mark_measure_type)
+        entry.set_mark(mark_string=tokens[11], mark_measure_type=tokens[12])
 
     # I don't understand why, but at this point the entry thinks its "event"
     # attribute is "None", even after I setup the relationship with the mde,
     # which should also get me the event. I believe this shoudl be possible
-    # without adding the entry to the session and commiting. Seems to have
-    # something to do with the lazy="joined" settings I put on the relationship
-    # between entry-athlete and entry-mde
+    # without adding the entry to the session and commiting.
     db.session.commit()
-    info(f"Set entry's mark. Entry: {entry.event.code}. Mark:{entry.mark_to_string()}")
+    info("Set entry's mark. Entry: {}. Mark:{}".format(
+        entry.event.code, entry.mark_to_string()))
 
 
 def parse_relay(tokens):

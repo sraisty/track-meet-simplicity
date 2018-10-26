@@ -249,7 +249,7 @@ def show_mde_detail(meet_id, mde_id):
     # for this function, but maybe it should be in the URL anyway ?
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
     templ = render_template('mde_detail.html.j2', mde=mde)
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     return templ
 
 
