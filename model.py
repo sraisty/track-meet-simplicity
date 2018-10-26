@@ -832,14 +832,14 @@ class User(db.Model):
 
 ###############
 # Helper functions
-def connect_to_db(app, db_uri="tms-dev"):
+def connect_to_db(app, db_uri="tms-dev", debug=True):
     """ Configure to use dev version of PostgreSQL DB & connect it to Flask app.
     NOTE: doesn't create the tables
     """
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///" + db_uri
-    app.config["SQLALCHEMY_ECHO"] = True
+    app.config["SQLALCHEMY_ECHO"] = debug
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["DEBUG"] = True
+    app.config["DEBUG"] = debug
     db.app = app
     db.init_app(app)
     info("Connected to DB")

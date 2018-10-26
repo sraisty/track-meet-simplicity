@@ -16,7 +16,7 @@ from util import info
 if __name__ == "__main__":
     # reset database
     app = Flask(__name__)
-    connect_to_db(app, "tms-dev")
+    connect_to_db(app, "tms-dev", debug=False)
     info("Connected to database")
     reset_database()
     db.create_all()
