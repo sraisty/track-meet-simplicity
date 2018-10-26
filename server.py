@@ -63,7 +63,7 @@ def do_login():
         # bad login
         flash("ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
               "danger")
-        return redirect(url_for('do_login'))
+        return redirect(url_for('show_login_form'))
 
     # Successful login
     session['user_id'] = user.id

@@ -533,18 +533,18 @@ class Entry(db.Model):
                            nullable=False)
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
+    heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
-    # In track, an athlete's "mark" for a parituclar event is either his/her
-    # time or distance thrown/jumped or height jumped (in inches) for field
-    # events. We store in seconds or inches, with precision to the hundredth of
-    # a second and up to 1/4 inch.
+    # An athlete's "mark" for a parituclar event is either his/her
+    # time or distance thrown/jumped or height jumped. We store in seconds or
+    # inches, with precision to the hundredth of a second and up to 1/4 inch.
     mark = db.Column(db.Numeric(12, 2), nullable=True)
     mark_type = db.Column(mark_type_enum, nullable=True)
     # describes a problem with the athlete's entry that a user needs to resolve
     problem = db.Column(db.String(64), nullable=True)
 
-    # # assigned_heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
 
+#
     meet = db.relationship("Meet",
                            secondary="meet_division_events",
                            uselist=False,
@@ -567,10 +567,10 @@ class Entry(db.Model):
                              secondary="athletes",
                              uselist=False,
                              back_populates="entries")
+    heat = db.relationship("Heat", uselist=False, back_populates="entries") 
 
     # editor_users = db.relationship("User", secondary="schools")
 
-    # assigned_heat = db.relationship("Heat")
 
     def __init__(self, athlete, mde):
         self.athlete = athlete
@@ -599,7 +599,6 @@ class Entry(db.Model):
         ??? Assumes that this entry has already been committed to the
         sqlalchemy session.
         """
-        # import ipdb; ipdb.set_trace()
         # We can't use "is_track" until this entry has been committed, becaue
         # otherwise we can't get to the event relationship.
         if self.event.is_track():
@@ -741,6 +740,28 @@ class Entry(db.Model):
         return feet_str + "{:.2f}".format(inches) + '"'
 
 
+class Heat(db.Model):
+    __tablename__ = "heats"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # seq_num
+    entries = db.relationship("Entry", back_populates="heat")
+    # athletes = db.relationship(
+    #         "Athlete", secondary="entries", back_populates="heats")
+    # mde = db.relationship("MeetDivisionEvent", secondary="entries")
+
+    def __repr__(self):
+        return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
+
+    def get_event(self):
+        return self.mde.event
+
+    def get_division(self):
+        return self.mde.division
+
+    def assign_lanes_pos(self):
+        pass
+
+
 class MeetDivisionEvent(db.Model):
     """
     Associative table to handle the many to many relationship between Events,
@@ -810,29 +831,6 @@ class MeetDivisionEvent(db.Model):
     def assign_athletes(self):
         pass
 
-
-# class Heat(db.Model):
-#     """ TODO - Does this really belong hanging off of entry?  It seems a more
-#     natural fit with being connected to MeetDivisionEvent
-#     """
-#     __tablename__ = "heats"
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     # seq_num
-#     entries = db.relationship("Entry")
-#     athletes = db.relationship("Athlete", secondary="entries")
-#     mde = db.relationship("MeetDivisionEvent", secondary="entries")
-
-#     def __repr__(self):
-#         return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
-
-#     def get_event(self):
-#         return self.mde.event
-
-#     def get_division(self):
-#         return self.mde.division
-
-#     def assign_lanes_pos(self):
-#         pass
 
 
 class School(db.Model):
