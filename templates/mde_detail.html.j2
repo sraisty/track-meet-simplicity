@@ -10,7 +10,6 @@
   <div class="card">
     <div class="card-body">
       {% if mde.event.is_track() %}
-        {{ mde.event.abbrev }}
         <table id="mde_table" class="display" data-paging='false'
           data-order='[[ 3, "asc" ]]' >
       {% else %}
@@ -36,13 +35,7 @@
                 </td>
                 <td>{{ entry.athlete.school.name }}</td>
                 <td data-order="{{entry.mark}}">
-                  {% if entry.mark %}
-                    {% if entry.mark_type == "seconds" %}
-                      {{ entry.time_mark_to_string() }}
-                      {% elif entry.mark_type == "inches" %}
-                      {{ entry.english_dist_mark_to_string() }}
-                    {% endif %}
-                  {% endif %}
+                      {{ entry.mark_to_string() }}
                 </td>
               </tr>
             {% endfor %}

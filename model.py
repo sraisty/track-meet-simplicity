@@ -306,49 +306,67 @@ class Entry(db.Model):
                              secondary="athletes",
                              uselist=False,
                              back_populates="entries")
+
     # editor_users = db.relationship("User", secondary="schools")
 
     # assigned_heat = db.relationship("Heat")
+
+    def __init__(self, athlete, mde):
+        self.athlete = athlete
+        self.mde = mde
+
+        if mde.event.is_track():
+            self.mark = INFINITY_SECONDS
+            self.mark_type = "seconds"
+        else:           # field event
+            self.mark = 0
+            self.mark_type = "inches"   # TODO one day handle meters
+
     def __repr__(self):
         return ("\n<ENTRY #{}, Ath: {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
                     self.id, self.athlete.full_name(),
                     self.event.code, self.division.abbrev(), self.meet.name))
 
+    # SETTING MARKS
     def set_mark(self, mark_string=None, mark_measure_type=None):
         """ If mark_string is empty or null, treat it as if no mark was
         submitted for that athlete. That means that we'll treat this entry's
         mark as "0" if it's a field event, and as positive infinity if it's a
         track event.
+
+        ??? Assumes that this entry has already been committed to the
+        sqlalchemy session.
         """
+        # import ipdb; ipdb.set_trace()
+        # We can't use "is_track" until this entry has been committed, becaue
+        # otherwise we can't get to the event relationship.
         if self.event.is_track():
             self.mark_type = "seconds"
-            if not mark_string:  # could be "" or None
+            if mark_string is None or mark_string == "":
                 self.mark = INFINITY_SECONDS
                 return
-            self.mark = Entry.time_string_to_seconds(mark_string)
-            return
+            self.mark = Entry._time_string_to_seconds(mark_string)
 
         # field events
-        elif mark_measure_type == "E":
+        elif mark_measure_type == "E" or mark_measure_type is None:
             self.mark_type = "inches"
-            if mark_string is None:
-                # assume 0 inches mark not provided
+            if mark_string is None or mark_string == "":
+                # assume 0 inches when mark is not provided
                 self.mark = 0
                 return
-            self.mark = Entry.field_english_mark_to_inches(mark_string)
+            self.mark = Entry._field_english_string_to_inches(mark_string)
 
         else:
-            # mark_measure_type == "M"
-            # TODO - fix this for field events that are measured in Metric.
-            # But for now it will work with california high school & ms meets
+            # field event & mark_measure_type == "M"
             self.mark_type = "meters"
-            if mark_string is None:
+            if mark_string is None or mark_string == "":
+                # assume 0 meters when mark is not provided
                 self.mark = 0
             raise TmsError("Haven't implemented metric field measurements yet")
 
     @staticmethod
-    def time_string_to_seconds(time_string):
+    def _time_string_to_seconds(time_string):
         """ Takes a string like '1:23.44.55, 1:19.14, 58.83, 13.4' and
         returns it in seconds, with resolution to the tenth or hundreth of a
         second
@@ -366,27 +384,60 @@ class Entry(db.Model):
             secs += float(t_list[i]) * 60**i
         return secs
 
-    def mark_to_string(self):
-        if self.mark is None:
+    @staticmethod
+    def _field_english_string_to_inches(distance_string):
+        """
+        Converts an "English/Imperial" distance string in feet and inches into
+        the number of inches (a float). If the string can't be converted,
+        returns None.
+
+        Examples 12' || 12' 10 || 12' 10.5 || 32' 4 || 5' 0
+        TODO later: numbers like: 121025 12-10.25".
+
+        NOTE: don't have to handle distances under 12 inches
+        """
+        dist_parts = distance_string.split()
+        if dist_parts is None or len(dist_parts) == 0 or len(dist_parts) > 2:
             return None
 
+        feet = dist_parts[0]
+        if len(dist_parts) == 2:
+            inches = dist_parts[1]
+        else:
+            inches = 0
+
+        # verify feet has the ' character at the end, and then remove it.
+        if feet[-1] != "'":
+            return None
+        feet = int(feet[0:-1])
+        return float(inches) + (12 * feet)
+
+    # ##### RETRIEVING AND PRINTING MARKS
+
+    def mark_to_string(self):
+        if self.mark is None:
+            return ""
         if self.mark_type == "seconds":
-            return self.time_mark_to_string()
+            return self._seconds_mark_to_string()
         elif self.mark_type == "inches":
-            return self.english_dist_mark_to_string()
+            return self._inches_mark_to_string()
         else:
             raise TmsError("UNIMPLEMENTED: metric field distance marks")
 
-    def time_mark_to_string(self):
+    # ---------
+
+    def _seconds_mark_to_string(self):
         if self.mark == INFINITY_SECONDS:
-            return None
-        return self.seconds_to_time_string(self.mark)
+            return ""
+        return self._seconds_to_string(self.mark)
 
     @staticmethod
-    def seconds_to_time_string(total_seconds):
-        seconds = 0.0
-        minutes = 0
-        hours = 0
+    def _seconds_to_string(total_seconds):
+        """ Assumes total_seconds is always a positive float of precision
+        to the hundredths of seconds. Returns well-formatted string like:
+            hh:mm:ss.tt,  h:mm:ss.tt, mm:ss.tt,  m:ss.tt, ss.tt, s.tt
+        """
+        (hours, minutes, seconds) = (0, 0, 0.0)
         if total_seconds > 60*60:
             hours = int(total_seconds // (60 * 60))
             total_seconds -= hours * 60 * 60
@@ -404,43 +455,29 @@ class Entry(db.Model):
             # less than a minute
             return '{:.2f}'.format(seconds)
 
-    @staticmethod
-    def field_english_mark_to_inches(distance_str):
-        # TODO this function is poorly named and easily confused with the
-        # english_dist_mark_to_string
-        """
-        Convert a string that represents an English distance, in inches,
-        for a field distance mark.
-        Examples 12' || 12' 10 || 12' 10.5 || 32' 4 || 5' 0
-        TODO later: numbers like: 121025 12-10.25".
+    # ------
 
-        Returns distance_str converted to inches. If it can't be converted,
-        returns None.
-        """
-        dist_parts = distance_str.split()
-        if len(dist_parts) != 2:
-            return None
-        (feet, inches) = dist_parts
-
-        # verify feet has the ' character at the end, and remove it.
-        if feet[-1] != "'":
-            return None
-        feet = int(feet[0:-1])
-        return float(inches) + (12 * feet)
-
-    def english_dist_mark_to_string(self):
+    def _inches_mark_to_string(self):
         if self.mark == 0:       # this is the same as no mark provided
-            return None
-
+            return ""
         inches = self.mark
+        return self._inches_to_string(inches)
+
+    @staticmethod
+    def _inches_to_string(inches):
+        feet = 0
         if inches >= 12:
             feet = int(inches // 12)
             inches = inches - feet * 12
-
-        return "{:d}".format(feet) + "' " + "{:.2f}".format(inches) + '"'
         # TODO - Need to fix this so it will only return 10' 6" instead of
         # 10' 6.00" for events like the high jump that aren't measured so the
         # fraction of an inch
+
+        if feet > 0:
+            feet_str = "{:d}".format(feet) + "' "
+        else:
+            feet_str = ""
+        return feet_str + "{:.2f}".format(inches) + '"'
 
 
 class MeetDivisionEvent(db.Model):
@@ -720,12 +757,18 @@ class Division(db.Model):
         return "<DIVISION id#{}: {}>".format(self.id, self.longname())
 
     def abbrev(self):
-        return f"{self.grade}{self.gender}"
+        if self.grade:
+            return f"{self.grade}{self.gender}"
+        else:
+            return f"{self.gender}"
 
     def longname(self):
         # TO DO - change this to just "name" - It's too confusing.
-        return (f"Grade {self.grade} " +
-                f"{DIV_NAME_DICT[self.adult_child][self.gender]}")
+        gender_string = f"{DIV_NAME_DICT[self.adult_child][self.gender]}"
+        if self.grade:
+            return f"Grade {self.grade} {gender_string}"
+        else:
+            return gender_string
 
     @classmethod
     def generate_divisions(cls, gender_list, grade_list):

@@ -10,7 +10,9 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from model import (
         db, Division, School, EventDefinition, Meet, MeetDivisionEvent,
-        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS, TmsError)
+        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS, INFINITY_SECONDS,
+        TmsError)
+
 from server import app
 
 from test_utils import (
@@ -37,7 +39,7 @@ EXAMPLE_MEETS = ({"name": "A Meet from the Past",
                   "date": "May 31, 2019"})
 
 
-class testDatabaseEmpty(unittest.TestCase):
+class TestDatabaseEmpty(unittest.TestCase):
     """ These test that the database is properly resetting before
         all the tests
     """
@@ -70,7 +72,7 @@ class testDatabaseEmpty(unittest.TestCase):
         self.assertEqual(0, School.query.count())
 
 
-class testMeet(unittest.TestCase):
+class TestMeet(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
@@ -225,11 +227,11 @@ class TestRelationships(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
         self.client = app.test_client()
-
-        meet1 = Meet(name="Meet #1")
-        db.session.add(meet1)
+        self.meet1 = Meet(name="Meet #1")
+        db.session.add(self.meet1)
         db.session.commit()
-        self.meet1 = Meet.query.filter_by(name="Meet #1").one()
+
+        School.init_unattached_school()
 
         Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
         divs = Division.query
@@ -240,72 +242,32 @@ class TestRelationships(unittest.TestCase):
     def tearDown(self):
         teardown_test_db_app()
 
-    # def test_event_to_mde(self):
-    #     pass
-
-    # def test_mde_to_entries(self):
-    #     pass
-
-    # def test_mde_to_athletes(self):
-    #     pass
-
-    # def test_meet_to_mdes(self):
-    #     pass
-
-    # def test_meet_to_entries(self):
-    #     pass
-
-    # def test_meet_to_divisions(self):
-    #     pass
-
-    # def test_meet_to_event_defs(self):
-    #     pass
-
-    # def test_meet_to_heats(self):
-    #     pass
-
-    # def test_meet_to_athletes(self):
-    #     pass
-
-    # def test_meet_to_schools(self):
-    #     pass
-
-    # def test_meet_to_host_school(self):
-    #     pass
-
     def test_event_to_mde_relationship(self):
         e = EventDefinition.query.filter_by(code="1600M").one()
         self.assertEqual(6, len(e.mdes))
 
-    # def test_event_to_entries_relationship(self):
-    #     pass
+    # def test_creating_entries_from_meet_div_event(self):
+        """ NOTE THAT THIS APPROACH CREATES A CONFLICT IN SQLALCHEMY
+            SO IT CAN'T BE DONE.
+        sue = Athlete("Sue", "", "Raisty", "F", "7")
+        db.session.add(sue)
+        db.session.commit()
 
-    # def test_event_to_meets_relationship(self):
-    #     pass
+        div_7F = sue.division
+        e_1600m = EventDefinition.query.filter_by(code="1600M").one()
 
-    # def test_event_to_divisions_relationship(self):
-    #     pass
-
-    # def test_division_to_mdes_relationship(self):
-    #     pass
-
-    # def test_division_to_meets_relationship(self):
-    #     pass
-
-    # def test_division_to_entries_relationship(self):
-    #     pass
-
-    # def test_division_to_events_relationship(self):
-    #     pass
-
-    # def test_division_to_athletes_relationship(self):
-    #     pass
-
-    # def test_division_to_schools_relationship(self):
-    #     pass
+        sue_entry = Entry(athlete=sue, event=e_1600m,
+                          division=div_7F, meet=self.meet1)
+        self.assertEqual(sue_entry.mark, INFINITY_SECONDS)
+        self.assertEqual(sue_entry.mark_type, "seconds")
+        self.assertIsNone(sue_entry.mde)
+        db.session.add(sue_entry)
+        db.session.commit()
+        self.assertIsNotNone(sue_entry.mde)
+        """
 
 
-class testAthlete(unittest.TestCase):
+class TestAthlete(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
@@ -316,7 +278,7 @@ class testAthlete(unittest.TestCase):
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_Athlete_constructor(self):
+    def test_athlete_constructor(self):
 
         sue = Athlete("Susan", "K", "Raisty", "F", "7")
         # sue.school = unattached
@@ -355,34 +317,99 @@ class testAthlete(unittest.TestCase):
         self.assertEqual(str(err), "Must provide first and last name.")
 
 
-class testEntryMarks(unittest.TestCase):
+class TestEntryMarks(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
         self.client = app.test_client()
+        School.init_unattached_school()
+        e_1600m = EventDefinition(
+                code="1600M", name="1600 Meters", etype="distance")
+        e_lj = EventDefinition(code="LJ", name="Long Jump", etype="horzjump")
+        div = Division(grade="7", gender="F", adult_child="child")
+        self.assertEqual(div.longname(), "Grade 7 Girls")
+        self.assertEqual(div.abbrev(), "7F")
+
+        meet = Meet(name="TestEntryMarks Meet")
+        db.session.add_all([e_1600m, e_lj, div, meet])
+        db.session.commit()
+
+        mde_1600m = MeetDivisionEvent(meet=meet, division=div, event=e_1600m)
+        mde_longjump = MeetDivisionEvent(meet=meet, division=div, event=e_lj)
+
+        athlete = Athlete("Sue", "K", "Raisty", "F", "7")
+        db.session.add_all([mde_1600m, mde_longjump, athlete])
+        db.session.commit()
+        self.athlete = athlete
+        self.mde_1600m = mde_1600m
+        self.mde_longjump = mde_longjump
 
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_one_entry_one_meet(self):
-        pass
-
-    def test_time_mark_conversion(self):
-        self.assertAlmostEqual(11.45, Entry.time_string_to_seconds('11.45'))
-        self.assertAlmostEqual(61.34, Entry.time_string_to_seconds('1:01.34'))
+    def test_time_string_to_seconds_static(self):
+        self.assertAlmostEqual(11.45, Entry._time_string_to_seconds('11.45'))
+        self.assertAlmostEqual(61.34, Entry._time_string_to_seconds('1:01.34'))
         self.assertAlmostEqual(7201.24,
-                               Entry.time_string_to_seconds('2:00:01.24'))
+                               Entry._time_string_to_seconds('2:00:01.24'))
         self.assertAlmostEqual(3601.24,
-                               Entry.time_string_to_seconds('01:00:01.24'))
+                               Entry._time_string_to_seconds('01:00:01.24'))
         with self.assertRaises(TmsError):
-            Entry.time_string_to_seconds('17.4h')
+            Entry._time_string_to_seconds('17.4h')
 
-    def test_time_mark_to_string(self):
-        self.assertEqual("23:23:23.23", Entry.seconds_to_time_string(84203.23))
-        self.assertEqual("1:01:01.01", Entry.seconds_to_time_string(3661.01))
-        self.assertEqual("59:59.59", Entry.seconds_to_time_string(3599.592))
-        self.assertEqual("4:04.04", Entry.seconds_to_time_string(244.04))
-        self.assertEqual("58.90", Entry.seconds_to_time_string(58.9))
-        self.assertEqual("9.93", Entry.seconds_to_time_string(9.93))
+    def test_seconds_to_time_string_static(self):
+        self.assertEqual("23:23:23.23", Entry._seconds_to_string(84203.23))
+        self.assertEqual("1:01:01.01", Entry._seconds_to_string(3661.01))
+        self.assertEqual("59:59.59", Entry._seconds_to_string(3599.592))
+        self.assertEqual("4:04.04", Entry._seconds_to_string(244.04))
+        self.assertEqual("58.90", Entry._seconds_to_string(58.9))
+        self.assertEqual("9.93", Entry._seconds_to_string(9.93))
+
+    def test_set_mark_with_no_mark_string_track_event(self):
+        entry_1600m = Entry(mde=self.mde_1600m, athlete=self.athlete)
+        db.session.add(entry_1600m)
+        db.session.commit()
+        entry_1600m.set_mark()
+
+        # Test no mark provided for the event
+        self.assertEqual(entry_1600m.mark, INFINITY_SECONDS)
+        self.assertEqual(entry_1600m.mark_type, "seconds")
+        self.assertEqual(entry_1600m.mark_to_string(), "")
+
+    def test_set_mark_with_no_mark_string_field_event(self):
+        entry_lj = Entry(mde=self.mde_longjump, athlete=self.athlete)
+        db.session.add(entry_lj)
+        db.session.commit()
+        entry_lj.set_mark()
+        self.assertEqual(entry_lj.mark, 0)
+        self.assertEqual(entry_lj.mark_type, "inches")
+        self.assertEqual(entry_lj.mark_to_string(), "")
+
+    def test_field_english_string_to_inches(self):
+        self.assertEqual(120, Entry._field_english_string_to_inches("10'"))
+        # No ' character provided as feet symbol
+        self.assertIsNone(Entry._field_english_string_to_inches("8"))
+        self.assertEqual(
+            1200.25, Entry._field_english_string_to_inches("100' 0.25"))
+        self.assertEqual(
+            90.5, Entry._field_english_string_to_inches("7' 6.5"))
+
+    def test_none_mark_to_string(self):
+        entry_lj = Entry(mde=self.mde_longjump, athlete=self.athlete)
+        db.session.add(entry_lj)
+        db.session.commit()
+        # No mark has been set
+        self.assertEqual(entry_lj.mark_to_string(), "")
+
+        entry_1600m = Entry(mde=self.mde_1600m, athlete=self.athlete)
+        db.session.add(entry_1600m)
+        db.session.commit()
+        self.assertEqual(entry_1600m.mark_to_string(), "")
+
+    def test_inches_to_string_static(self):
+        self.assertEqual("10' 6.00\"", Entry._inches_to_string(126.00))
+        self.assertEqual("10' 0.00\"", Entry._inches_to_string(120.00))
+        self.assertEqual("9.25\"", Entry._inches_to_string(9.25))
+        self.assertEqual("8.00\"", Entry._inches_to_string(8))
 
 
 class TestEntryToEventRelationships(unittest.TestCase):
@@ -425,7 +452,7 @@ class TestEntryToEventRelationships(unittest.TestCase):
 
 ###################################
 
-class testEventDefinition(unittest.TestCase):
+class TestEventDefinition(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
@@ -538,7 +565,7 @@ class TestEventDefinitionTypes(unittest.TestCase):
             self.assertIn(e.code, ["LJ", "TJ"])
 
 
-class testSchools(unittest.TestCase):
+class TestSchools(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
@@ -591,7 +618,7 @@ class testSchools(unittest.TestCase):
     #     pass
 
 
-class testDivision(unittest.TestCase):
+class TestDivision(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
         self.client = app.test_client()
@@ -648,6 +675,13 @@ class testDivision(unittest.TestCase):
 
     def test_get_div_name(self):
         self.assertEqual(self.boys8.longname(), "Grade 8 Boys")
+
+    def test_div_without_grade(self):
+        div = Division(gender="F", adult_child="child")
+        self.assertEqual(div.longname(), "Girls")
+        self.assertEqual(div.abbrev(), "F")
+        db.session.add(div)
+        db.session.commit()
 
     def test_generate_divisions(self):
         num_grades = len(GRADES)
