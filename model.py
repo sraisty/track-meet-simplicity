@@ -88,20 +88,21 @@ class Meet(db.Model):
     max_teammates_per_event = db.Column(db.Integer, default=12, nullable=True)
     max_heats_per_mde = db.Column(db.Integer, default=None, nullable=True)
 
-    # TODO - Make sure SQLAlchemy's "magic" uses different join paths to
-    # entered schools vs. host school.  Right now, I don't think it would be
-    # able to tell the difference.
-
-    # entered_schools = db.relationship(
-    #         "School", foreign_keys="[Meet.host_school_id]", uselist=True,
-    #         back_populates="meets_entered")
+    # TODO  Invited Schools is a many-to-many relationship with Meets, and
+    # requires an associative table or associative object.
+    # invited_schools = db.relationship(
+    #         "School", primaryjoin="School.id == Meet.host_school_id",
+    #         uselist=True, back_populates="meets_invited")
     host_school = db.relationship(
             "School", uselist=False,
             # foreign_keys="[Meet.host_school_id]",
+            primaryjoin="School.id == Meet.host_school_id",
             back_populates="meets_hosted")
 
     mdes = db.relationship(
-            "MeetDivisionEvent", uselist=True, back_populates="meet")
+            "MeetDivisionEvent", uselist=True,
+            order_by="meet_division_events.c.seq_num",
+            back_populates="meet")
 
     events = db.relationship(
             "EventDefinition", secondary="meet_division_events", uselist=True,
@@ -122,11 +123,12 @@ class Meet(db.Model):
             "Entry", secondary="meet_division_events", uselist=True,
             back_populates="meet")
 
-    # TODO - make sure that editor users is determine by HOST school,
-    # NOT the entered schools
+    # Make sure that editor users is determine by HOST school,
+    # NOT invited schools
     manager_users = db.relationship(
             "User", secondary="schools", uselist=True,
-            # foreign_keys=["Meet.host_school_id"],  # does this work for secondary
+            primaryjoin="School.id == Meet.host_school_id",
+            secondaryjoin="User.school_id == School.id",
             back_populates="meets_managed")
 
     def __repr__(self):
@@ -142,11 +144,10 @@ class Meet(db.Model):
                         len(self.mdes), len(self.entries))
         return str
 
-
     @classmethod
     def init_meet(cls, meet_info_dict):
-        # Note that this function does not set the meet's host_school_id. That
-        # has to be done later.
+        # Note that this function might not set the meet's host_school_id if
+        # the school doesn't already exist in the database
         info("init_meet")
         meet = Meet(
             name=meet_info_dict['name'],
@@ -154,14 +155,12 @@ class Meet(db.Model):
             description=meet_info_dict.get('description', ''),
             status=meet_info_dict.get('status', 'Unpublished'))
 
-        # db.session.commit()
-
         host_school_id = meet_info_dict.get('host_school_id')
         host_school = School.query.filter_by(id=host_school_id).one_or_none()
         if host_school:
             meet.host_school = host_school
-        else: 
-            # our host school isn't in the database yet.  This should not happen 
+        else:
+            # host school isn't in the database yet. This should not happen
             # in normal usage, but for seeding the database and testing
             # it's common, so I'm going to just reassign the meet's
             # host school to the "Unattached" school.
@@ -178,19 +177,16 @@ class Meet(db.Model):
 
         # associate this meet with the selected events (i.e. "4x400 relay"),
         # and specify how the events should be ordered within this meet
-
-        # TODO - if ev_code_order is none, then createEventOrders assumes the
-        # meet includes all possible events in whatever order. (For testing)
+        # If ev_code_order is None, then createEventOrders assumes the
+        # meet includes all possible events in alpha order by code.
         events = EventOrdering.create_events_in_order(
                         meet, meet_info_dict.get('event_order'))
 
         # associate this meet with the selected divisions for athletes
         # (i.e. "6th Grade Girls"), and specify the order in which divisions
         # will compete (each division has its own heats) within a given event.
-
-        # TODO - if ev_code_order is none, then createDivOrders assumes the
-        # meet includes all possible events in whatever order. (For testing)
-
+        # If ev_code_order is none, then createDivOrders assumes the
+        # meet includes all possible events in alpha order by code.
         divs = DivOrdering.create_divs_in_order(
                 meet, meet_info_dict.get('division_order'))
 
@@ -214,7 +210,6 @@ class Meet(db.Model):
         mde_q = MeetDivisionEvent.query.filter(
                 MeetDivisionEvent.meet == self,
                 MeetDivisionEvent.event == ev)
-        # TODO - sort them  q = q.order_by(XX)
         count = 0
         for mde in mde_q:
             count += len(mde.entries)
@@ -222,7 +217,7 @@ class Meet(db.Model):
 
     @classmethod
     def reorder_mdes(cls):
-        # TODO divisions = DivOrderPosition.division
+        # TODO if user changes order of meets and divisions
         pass
 
 
@@ -251,7 +246,6 @@ class Athlete(db.Model):
             back_populates="athletes")
     # Coaches for the athlete's school can edit the athlete's record
     editor_users = db.relationship("User", secondary="schools")
-    # meets
 
     def __init__(self, fname, minitial, lname, gender, grade,
                  school_code="UNA", phone=None):
@@ -302,8 +296,6 @@ class Athlete(db.Model):
     @staticmethod
     def _get_full_name(fname, minitial, lname):
         """ Creates a fullname from the first, last name, and middle initial
-        >>> Athlete._get_full_name("Jane", "", "Doe")
-        'Jane Doe'
         """
         if not (fname and lname):
             raise TmsError("Must provide first and last name.")
@@ -318,7 +310,6 @@ class Athlete(db.Model):
         in the database if the athlete's fname, middle initial, lname, gender,
         and school_code all match.
         """
-
         athletes_same_name = Athlete.query.filter_by(fname=fname, lname=lname,
                                                      minitial=middle).all()
         for ath in athletes_same_name:
@@ -387,7 +378,8 @@ class Entry(db.Model):
     event = db.relationship("EventDefinition",
                             secondary="meet_division_events",
                             uselist=False,
-                            back_populates="entries")
+                            # back_populates="entries"
+                            )
     school = db.relationship("School",
                              secondary="athletes",
                              uselist=False,
@@ -403,7 +395,7 @@ class Entry(db.Model):
         if mde.event.is_track():
             self.mark = INFINITY_SECONDS
             self.mark_type = "seconds"
-        else:           # field event
+        else:                           # field event
             self.mark = 0
             self.mark_type = "inches"   # TODO one day handle meters
 
@@ -411,7 +403,7 @@ class Entry(db.Model):
         return ("\n<ENTRY #{}, Ath: {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
                     self.id, self.athlete.full_name(),
-                    self.event.code, self.division.code(), self.meet.name))
+                    self.event.code, self.division.code, self.meet.name))
 
     # SETTING MARKS
     def set_mark(self, mark_string=None, mark_measure_type=None):
@@ -580,12 +572,6 @@ class Heat(db.Model):
     def __repr__(self):
         return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
 
-    # def get_event(self):
-    #     return self.mde.event
-
-    # def get_division(self):
-    #     return self.mde.division
-
     # def assign_lanes_pos(self):
     #     pass
 
@@ -613,7 +599,7 @@ class MeetDivisionEvent(db.Model):
             # back_populates="mdes"
             )
     event = db.relationship(
-            "EventDefinition", uselist=False, 
+            "EventDefinition", uselist=False,
             # back_populates="mdes"
             )
     entries = db.relationship(
@@ -694,24 +680,23 @@ class School(db.Model):
     state = db.Column(db.String(2), nullable=True)
 
     athletes = db.relationship(
-            "Athlete", uselist=True, back_populates="school",  # lazy="joined"
-            )
-    # divisions = db.relationship("Division", secondary="athletes")
+            "Athlete", uselist=True, back_populates="school")
+
     entries = db.relationship(
             "Entry", secondary="athletes", uselist=True,  # lazy="joined",
             back_populates="school",
             )
-
-    # TODO - figure out this backref from the Users to the schools
+    divisions = db.relationship(
+        "Division", secondary="athletes", uselist=True)
     coaches = db.relationship("User", uselist=True, backref="editor_users")
 
-    # TODO - right now SQLAlchemy has no way of knowing how hosted_meets and
-    # entered_meets use different joins, so I need to figure out how to more
-    # explicitly define the relationship
+
     meets_hosted = db.relationship(  # lazy="joined"
-            "Meet", uselist=True, back_populates="host_school")
-    # meets_entered = db.relationship(
-    #         "Meet", uselist=True, back_populates="entered_schools")
+            "Meet", uselist=True,
+            primaryjoin="Meet.host_school_id==School.id",
+            back_populates="host_school")
+    # meets_invited = db.relationship(
+    #         "Meet", uselist=True, back_populates="invited_schools")
 
     def __init__(
             self, name="Unattached", code="UNA", city=None, state=None,
@@ -747,12 +732,12 @@ class School(db.Model):
             db.session.add(new_unattached_school)
             db.session.commit()
 
-    # def meets_entered(self):
-    #     meets = set()
-    #     for entry in self.entries:
-    #         meets.add(entry.meet)
-    #     print(meets)
-    #     return list(meets)
+    def meets_entered(self):
+        meets = set()
+        for entry in self.entries:
+            meets.add(entry.meet)
+        print(meets)
+        return list(meets)
 
 
 # #######################  EVENTDEFINITION CLASS #####################
@@ -777,9 +762,6 @@ class EventDefinition(db.Model):
     # heats
 
     def __repr__(self):
-        """
-        Returns human-readable repr of the EventDefinition object
-        """
         return "\n<EVENT_DEF {}, Name: {}, Type: {}>".format(
                 self.code,
                 self.name,
@@ -820,8 +802,9 @@ class EventDefinition(db.Model):
 
 # #######################  EVENTORDERING CLASS #####################
 class EventOrdering(db.Model):
-    """ the order in which divisions participate in each event  can differ from
-        meet to meet """
+    """ the order in which divisions participate in each event can differ from
+        meet to meet
+    """
     __tablename__ = "event_ordering"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -839,7 +822,7 @@ class EventOrdering(db.Model):
 
         events = []
         seq_num = 1
-        if not ev_code_order:  # None or empty list
+        if not ev_code_order:           # None or empty list
             events = EventDefinition.query.order_by('code').all()
             for event in events:
                 e_o = EventOrdering(
@@ -914,7 +897,6 @@ class Division(db.Model):
             self.code = self._derive_code(gender, grade)
 
     def __repr__(self):
-        """ returns human-readable representation of Division object """
         return "<DIVISION id#{}: {} - {}>".format(
             self.id, self.code, self.name)
 
@@ -928,7 +910,6 @@ class Division(db.Model):
 
     @staticmethod
     def _derive_name(gender, grade=None, adult_child="child"):
-
         gender_string = f"{DIV_NAME_DICT[adult_child][gender]}"
         if grade:
             name = f"Grade {grade} {gender_string}"
@@ -1002,7 +983,7 @@ class DivOrdering(db.Model):
             "Meet", uselist=False, back_populates="div_orderings")
 
     def __repr__(self):
-        return "<DIVORDERING: id={self.id}, meet_id={meet_id}, " \
+        return f"<DIVORDERING: id={self.id}, meet_id={self.meet_id}, " \
                "div={self.division.code} seq_num={self.seq_num}".format(
                 self=self)
 
@@ -1037,7 +1018,7 @@ user_role_enum = Enum(*USER_ROLES, name="user_roles")
 
 
 class User(db.Model):
-    """User of TrackMeetSimplicity website."""
+    """ User of TrackMeetSimplicity website."""
 
     __tablename__ = "users"
 
@@ -1087,7 +1068,6 @@ def connect_to_db(app, db_uri="tms-dev", debug=True):
 
 def reset_database():
     """ Deletes all tables from db and our entire SQLAlchemy session
-
     After running this, the db still exists but is empty, and the SQLAlchmey
     session is stable.
     """
@@ -1099,7 +1079,7 @@ def reset_database():
 if __name__ == "__main__":
     from server import app
     connect_to_db(app, "tms-dev")
-    # db.session.remove()
-    # db.drop_all()
-
-    # db.create_all()
+    db.session.remove()
+    db.drop_all()
+    db.create_all()
+    TmsApp()

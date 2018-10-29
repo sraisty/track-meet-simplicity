@@ -281,7 +281,7 @@ def show_all_schools():
 
 @app.route('/schools/<int:school_id>')
 def show_school_detail(school_id):
-    school = School.query.get(id)
+    school = School.query.get(school_id)
     return render_template('school_detail.html.j2', school=school)
 
 

@@ -43,9 +43,9 @@
 
 
 {% block tab1_content %}
-    {% if school.hosted_meets %}
+    {% if school.meets_hosted %}
         <p>Meets this school is hosting</p>
-        {% set list = school.hosted_meets %}
+        {% set list = school.meets_hosted %}
 {#         {% for meet in list %}
             <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
                 {{ meet.name }}

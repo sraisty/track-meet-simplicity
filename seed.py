@@ -18,12 +18,11 @@ if __name__ == "__main__":
     # reset database
     app = Flask(__name__)
     connect_to_db(app, "tms-dev", debug=False)
-    db.create_all()
     info("Connected to database")
     reset_database()
-
+    db.create_all()
     # create divs & events that are standard across all our meegs
-    TmsApp.()
+    TmsApp()
 
     for i in range(NUM_MEETS):
         meet = Meet.init_meet(EXAMPLE_MEETS[i])

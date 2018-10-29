@@ -1,7 +1,6 @@
 """
 TESTS on data model in model.py
 by Sue Raisty
-
 """
 
 import unittest
@@ -18,7 +17,6 @@ from server import app
 
 from test_utils import (
     teardown_test_db_app, setup_test_app_db, EXAMPLE_MEETS)
-
 
 
 class TestDatabaseEmpty(unittest.TestCase):
@@ -53,6 +51,18 @@ class TestDatabaseEmpty(unittest.TestCase):
 
     def test_schools_empty_at_init(self):
         self.assertEqual(0, School.query.count())
+
+    def test_heats_empty_at_init(self):
+        self.assertEqual(0, Heat.query.count())
+
+    def test_users_empty_at_init(self):
+        self.assertEqual(0, User.query.count())
+
+    def test_div_orderings_empty_at_init(self):
+        self.assertEqual(0, DivOrdering.query.count())
+
+    def test_event_ordering_empty_at_init(self):
+        self.assertEqual(0, EventOrdering.query.count())
 
 
 class TestMeetConstructor(unittest.TestCase):
