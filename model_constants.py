@@ -22,6 +22,8 @@ MEET_STATUS = ("Unpublished", "Accepting Entries", "Awaiting Assignment",
 
 MARK_TYPES = ("seconds", "inches", "meters")
 
+MDE_STATUS = ("Unassigned", "Assigned")
+
 SPORTS = ("outdoor", "indoor", "cross country")
 
 # START_TYPE = ("allies", "lanes", "waterfall")

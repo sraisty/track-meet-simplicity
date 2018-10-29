@@ -7,7 +7,6 @@ from server import app
 from util import info
 
 
-
 EXAMPLE_MEETS = (
     {
         "name": "PCAL: San Benito (Hollister) vs. Everett Alvarez",

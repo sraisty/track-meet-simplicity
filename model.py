@@ -8,12 +8,13 @@ NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy_utils import aggregated, generic_repr, observes
 
 from util import warning, error, info
 
 from model_constants import (
     SUPERUSER_EMAIL, SUPERUSER_PASSWORD, USER_ROLES, GENDERS, GRADES,
-    MIDDLE_SCHOOL_GRADES, HIGH_SCHOOL_GRADES,
+    MIDDLE_SCHOOL_GRADES, HIGH_SCHOOL_GRADES, MDE_STATUS,
     ADULT_CHILD, DIV_NAME_DICT, MIN_ATHLETES_PER_HEAT, EVENT_TYPES,
     MEET_STATUS, MARK_TYPES, HEAT_FLIGHT_ASSIGN_METHOD,
     TRACK_LANE_ASSIGN_METHOD, FIELD_ORDER_ASSIGN_METHOD, EVENT_DEFS)
@@ -41,7 +42,7 @@ class TmsApp:
     def __init__(self):
         """
         Initialize the application from scratch: create database tables,
-        write constant data that are used across multiple meets to the database.
+        write constant data that are used across multiple meets to database.
 
         Sets up: the superuser, the unattached school, the list
         of the competition divisions (i.e "7th grade boys") used across most
@@ -101,7 +102,9 @@ class Meet(db.Model):
 
     mdes = db.relationship(
             "MeetDivisionEvent", uselist=True,
-            order_by="meet_division_events.c.seq_num",
+            # order_by="meet_division_events.c.seq_num",
+            # TODO - does the following work?  Is it a better alternative?
+            order_by="MeetDivisionEvent.seq_num",
             back_populates="meet")
 
     events = db.relationship(
@@ -237,7 +240,8 @@ class Athlete(db.Model):
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
     coach_notes = db.Column(db.String(64), nullable=True)
 
-    school = db.relationship("School", uselist=False, back_populates="athletes")
+    school = db.relationship(
+            "School", uselist=False, back_populates="athletes")
     division = db.relationship(
             "Division", uselist=False, back_populates="athletes")
     entries = db.relationship("Entry", uselist=True, back_populates="athlete")
@@ -328,6 +332,69 @@ class Athlete(db.Model):
             return
         return list(meets)
 
+    @classmethod
+    def add_athlete_to_db(cls, first_name, middle, last_name, gender,
+                          grade, team_code, team_name):
+        """ If the specified Athlete is not already in the database, add it.
+        Also adds the athlete's school if it is not already in the database.
+        Returns None if the athlete didn't get added to db because of a problem
+        with the record (grade/gender) or if the athlete was already added.
+
+        Note that an athlete is considered to already be in the database if
+        its first_name, middle, last_name, gender, and team_code are identical.
+        Note that GRADE is NOT used to identify the athlete uniquely, because
+        kids' grades change over time.
+        """
+
+        # See if there is an athlete with the same name, gender and team code
+        # in the database (not GRADE)
+        athlete = Athlete.get_athlete(first_name, middle, last_name, gender,
+                                      team_code)
+        # Athlete is already in DB, so return it.
+        if athlete is not None:
+            return athlete
+
+        # OK, the athlete is NOT already in the database, so let's add him/her.
+
+        # Check if this athlete's school is already in the database. If not,
+        # add the school to database. Note: the school must be committed to the
+        # database before adding the athlete, or an Exception will result.
+        school = School.query.filter_by(name=team_name,
+                                        code=team_code).one_or_none()
+        if not school:
+            warning(f"Unknown School Found: {team_name}, code:{team_code}")
+            school = School(name=team_name, code=team_code)
+            db.session.add(school)
+            db.session.commit()
+            warning(f"Added new school: {team_name}, code:{team_code}")
+
+        # Next, reate the new athlete, and add it to the database.
+        try:
+            athlete = Athlete(
+                    first_name, middle, last_name, gender, grade, team_code)
+        except TmsError as err:
+            error("Error parsing athlete record: " + err.message)
+            return
+
+        # Athlete constructor might return none if there was something wrong
+        # with the athlete's gender or grade. Just skip if this is the case.
+        if athlete is None:
+            return
+
+        db.session.add(athlete)
+        try:
+            db.session.commit()
+        except MultipleResultsFound:
+            # TODO . In theory this should never happen if the first query, to
+            # see if athlete was already in the db. Consolidate that query with
+            # the following & figure out why the below sometimes still happens.
+            error("Tried adding duplicate athlete: {},  {}, {}, {}, {}".format(
+                    first_name, last_name, gender, grade, team_code))
+            db.session.rollback()
+            return
+        info(f"Added athlete: {athlete}")
+        return athlete
+
 
 # #######################  ENTRY CLASS #####################
 mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
@@ -360,10 +427,36 @@ class Entry(db.Model):
     # describes a problem with the athlete's entry that a user needs to resolve
     problem = db.Column(db.String(64), nullable=True)
 
+    @aggregated('meet', db.Column(db.String(50)))
+    def meet_name(self):
+        # return meet.name
+        return db.func.max(Meet.name)
+
     meet = db.relationship("Meet",
                            secondary="meet_division_events",
                            uselist=False,
                            back_populates="entries")
+
+    # THE FOLLOWING ARE DENORMALIZED AND COPIED HERE ON CHANGES FROM THE
+    # LINKED MEET Object. We do this so we can rapidly get the list of
+    # Entered Meets from the School table.
+    # meet_id = db.Column(db.Integer)
+    # meet_name = db.Column(db.String(50))
+    # meet_date = db.Column(db.DateTime)
+    # meet_status = db.Column(meet_status_enum)
+
+
+
+
+    #      @aggregated('athletes', db.Column(db.Integer))
+    # def athletes_count(self):
+    #     return db.func.count('1')
+    # def meet_observer(self, meet):
+    #     self.meet_id = meet.id
+    #     self.meet_name = meet.name
+    #     self.meet_date = meet.date
+    #     self.meet_status = meet.status
+
     athlete = db.relationship("Athlete",
                               uselist=False,
                               back_populates="entries")
@@ -577,6 +670,10 @@ class Heat(db.Model):
 
 
 # #######################  MEETDIVISION EVENT CLASS #####################
+
+mde_status_enum = Enum(*MDE_STATUS, name="mde_status")
+
+
 class MeetDivisionEvent(db.Model):
     """
     Associative table to handle the many to many relationship between Events,
@@ -589,8 +686,13 @@ class MeetDivisionEvent(db.Model):
     event_code = db.Column(db.ForeignKey("event_defs.code"), nullable=False)
     seq_num = db.Column(db.Integer, nullable=False)
     qualifying_mark = db.Column(db.Integer, nullable=True)
+    status = db.Column(mde_status_enum, default="Unassigned", nullable=False)
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
+
+    @aggregated('athletes', db.Column(db.Integer))
+    def athletes_count(self):
+        return db.func.count('1')
 
     meet = db.relationship(
             "Meet", uselist=False, back_populates="mdes")
@@ -604,11 +706,11 @@ class MeetDivisionEvent(db.Model):
             )
     entries = db.relationship(
             "Entry", uselist=True, back_populates="mde")
-    # entrires using lazy="joined"
+
     athletes = db.relationship(
             "Athlete", secondary="entries", uselist=True,
             back_populates="mdes")
-    # athletes using lazy="joined",
+
     heats = db.relationship(
             "Heat", secondary="entries", uselist=True, back_populates="mde")
 
@@ -631,7 +733,8 @@ class MeetDivisionEvent(db.Model):
         the meet.
 
         divisions_list is an ordered list of Division instances. The order is
-        which order the divisions participate within a given event at this meet.
+        the sequence in which divisions participate within a given event at
+        this meet.
 
         events_list is an order list of EventDefinition instances. The list's
         order is the order in which this meet's events take place.
@@ -663,6 +766,7 @@ class MeetDivisionEvent(db.Model):
 
 
 # #######################  SCHOOL CLASS #####################
+@generic_repr
 class School(db.Model):
     """
     """
@@ -679,8 +783,17 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
+    @aggregated("athletes", db.Column(db.Integer))
+    def athletes_count(self):
+        return db.func.count('1')
+
+    @aggregated("entries", db.Column(db.Integer))
+    def entries_count(self):
+        return db.func.count('1')
+
     athletes = db.relationship(
-            "Athlete", uselist=True, back_populates="school")
+            "Athlete", uselist=True,
+            order_by="Athlete.lname", back_populates="school")
 
     entries = db.relationship(
             "Entry", secondary="athletes", uselist=True,  # lazy="joined",
@@ -690,13 +803,15 @@ class School(db.Model):
         "Division", secondary="athletes", uselist=True)
     coaches = db.relationship("User", uselist=True, backref="editor_users")
 
-
     meets_hosted = db.relationship(  # lazy="joined"
             "Meet", uselist=True,
             primaryjoin="Meet.host_school_id==School.id",
+            order_by="Meet.date",
             back_populates="host_school")
     # meets_invited = db.relationship(
     #         "Meet", uselist=True, back_populates="invited_schools")
+
+
 
     def __init__(
             self, name="Unattached", code="UNA", city=None, state=None,
@@ -712,8 +827,8 @@ class School(db.Model):
         if section:
             self.section = section.upper()
 
-    def __repr__(self):
-        return "<SCHOOL id#{}: {}, {}>".format(self.id, self.name, self.code)
+    # def __repr__(self):
+        # return "<SCHOOL id#{}: {}, {}>".format(self.id, self.name, self.code)
 
     @classmethod
     def init_unattached_school(cls):
@@ -862,7 +977,7 @@ class Division(db.Model):
     #         "Meet", secondary="meet_division_events", uselist=True,
     #         back_populates="divisions")
     # events = db.relationship(
-    #         "EventDefinition", secondary="meet_division_events", uselist=True,
+    #        "EventDefinition", secondary="meet_division_events", uselist=True,
     #         back_populates="divisions")
     athletes = db.relationship(
             "Athlete", uselist=True, back_populates="division")

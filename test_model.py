@@ -173,7 +173,6 @@ class TestInitMeet(unittest.TestCase):
         self.assertEqual(meet.events[0].name, "1600 Meter")
         self.assertEqual(meet.events[0].code, "1600M")
 
-
     def test_init_meet_just_gender_divs_2(self):
         meet = Meet.init_meet(
                 {
@@ -347,6 +346,7 @@ class TestMeetInitMdes(unittest.TestCase):
                 'event_order': ['PV', '200M', '4x400M', 'HJ']})
         e = EventDefinition.query.filter_by(code="1600M").all()
 
+
 class TestTmsAppInit(unittest.TestCase):
 
     def setUp(self):
@@ -468,7 +468,6 @@ class TestEntryMarks(unittest.TestCase):
                 meet=self.meet,
                 event_code="LJ").one()
 
-
     def tearDown(self):
         teardown_test_db_app()
 
@@ -578,7 +577,100 @@ class TestEntryToEventRelationships(unittest.TestCase):
         self.assertEqual(mde.entries[0].athlete.fname, "Veronica")
 
 
-###################################
+class TestAthleteEntriesMdeRelationships(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        db.create_all()
+        self.client = app.test_client()
+
+        TmsApp()
+        self.meet = Meet.init_meet(EXAMPLE_MEETS[0])
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_athlete_count_in_mde(self):
+
+        div_7g = Division.query.filter_by(code="7F").one()
+        mde_longjump = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="LJ",
+                division=div_7g).one()
+
+        for i in range(20):
+            ath = Athlete(
+                    fname=f"ath{i}", minitial="", lname="ath{i}", gender='F',
+                    grade='7')
+            db.session.add(ath)
+            entry_lj = Entry(mde=mde_longjump, athlete=ath)
+            db.session.add(entry_lj)
+        db.session.commit()
+
+        self.assertEqual(i+1, len(mde_longjump.athletes))
+        self.assertEqual(
+            mde_longjump.athletes_count, len(mde_longjump.athletes))
+
+class TestAthleteEntriesSchoolRelationships(unittest.TestCase):
+    def setUp(self):
+        setup_test_app_db()
+        db.create_all()
+        self.client = app.test_client()
+
+        TmsApp()
+        self.meet = Meet.init_meet(EXAMPLE_MEETS[0])
+
+        self.school = School(name="Hackbright", code="HBRT")
+        db.session.add(self.school)
+        db.session.commit()
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_school_athletes_count(self):
+        for i in range(10):
+            ath = Athlete(
+                    fname=f"ath{i}", minitial="", lname="ath{i}", gender='F',
+                    grade='7', school_code=self.school.code)
+            db.session.add(ath)
+        db.session.commit()
+        self.assertEqual(10, len(self.school.athletes))
+        self.assertEqual(10, self.school.athletes_count)
+
+    def test_school_entries_count(self):
+
+        div_7g = Division.query.filter_by(code="7F").one()
+        div_7b = Division.query.filter_by(code="7M").one()
+        mde_lj7g = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="LJ",
+                division=div_7g).one()
+        mde_lj7g = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="LJ",
+                division=div_7g).one()
+        mde_400_7g = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="400M",
+                division=div_7g).one()
+
+        for i in range(10):
+            ath = Athlete(
+                    fname=f"ath{i}", minitial="", lname="ath{i}", gender='F',
+                    grade='7', school_code=self.school.code)
+            db.session.add(ath)
+            entry_lj = Entry(mde=mde_lj7g, athlete=ath)
+            db.session.add(entry_lj)
+            if i % 2 == 0:
+                entry_400 = Entry(mde=mde_400_7g, athlete=ath)
+                db.session.add(entry_400)
+
+        db.session.commit()
+
+        self.assertEqual(15, len(self.school.entries))
+        self.assertEqual(15, self.school.entries_count)
+
+
+# ##################################
 
 class TestEventDefinition(unittest.TestCase):
 
@@ -707,6 +799,20 @@ class TestSchools(unittest.TestCase):
 
     def tearDown(self):
         teardown_test_db_app()
+
+    def test_generic_repr_for_school(self):
+        lghs = School(name="Los Gatos High School", code="LOGA")
+        print("BEFORE ADD\n", lghs)
+        db.session.add(lghs)
+        print("BEFORE COMMIT\n", lghs)
+        # db.session.flush()
+        # print("AFTER FLUSH\n", lghs)
+        # Note that things don't show up the way we want after
+        # in a generic_repr if we commit, but they do if we flush
+        # But actual changes to the DB seem to get written even
+        # after a db commit.
+        db.session.commit()
+        print("AFTER COMMIT\n", lghs)
 
     def test_empty_before_init(self):
         num_schools = School.query.count()
@@ -845,6 +951,49 @@ class TestDivision(unittest.TestCase):
 
         num_divs_for_grade = Division.query.filter_by(grade="7").count()
         self.assertEqual(num_divs_for_grade, len(GENDERS))
+
+
+class TestSchoolToMeetsRelationship(unittest.TestCase):
+
+    def setUp(self):
+        setup_test_app_db()
+        db.create_all()
+        self.client = app.test_client()
+        TmsApp()
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def testSchooltoMeet(self):
+
+        big_meet = Meet.init_meet(EXAMPLE_MEETS[0])
+        big_meet2 = Meet.init_meet(EXAMPLE_MEETS[1])
+        hbr = School(name="Hackbright", code="HBRT")
+        db.session.add(hbr)
+        db.session.commit()
+
+        veronica = Athlete("Veronica", "", "Rodriguez", "F",
+                           "6", school_code="HBRT")
+
+        betty = Athlete("Betty", "", "Rodriguez", "F",
+                        "6", school_code="HBRT")
+
+        mde_6f_4x100 = MeetDivisionEvent.query.filter_by(
+                meet=big_meet, seq_num=1).one()
+
+        mde_6f_4x100_meet2 = MeetDivisionEvent.query.filter_by(
+                meet=big_meet2, seq_num=1).one()
+
+        v_entry = Entry(mde=mde_6f_4x100, athlete=veronica)
+        b_entry = Entry(mde=mde_6f_4x100_meet2, athlete=betty)
+        db.session.add_all([veronica, v_entry, betty, b_entry])
+        db.session.commit()
+
+        self.assertEqual(Entry.query.count(), 2)
+        self.assertEqual(hbr.entries[0].meet_name, big_meet.name)
+        self.assertEqual(hbr.entries[1].meet_name, big_meet2.name)
+
+        print(hbr.entries)
 
 
 # ############## HELPER FUNCTIONS ###############
