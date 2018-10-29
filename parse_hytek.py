@@ -3,9 +3,9 @@ separated format.  Details on this file format follow:
 """
 
 
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.orm.exc import NoResultFound
 
-from model import (Athlete, School, Entry, MeetDivisionEvent, TmsError, db)
+from model import (Athlete, Entry, MeetDivisionEvent, TmsError, db)
 
 from util import warning, error, info
 
@@ -69,8 +69,8 @@ def parse_athlete(tokens):
     (_junk1, last_name, first_name, middle, gender, _junk2, team_code,
         team_name, _junk3, grade) = tokens[0:10]
 
-    athlete = add_athlete_to_db(first_name, middle, last_name, gender,
-                                grade, team_code, team_name)
+    athlete = Athlete.add_athlete_to_db(
+        first_name, middle, last_name, gender, grade, team_code, team_name)
     if athlete is None:
         # athlete might be null because there were issues with the file's
         # record (such as no matching division. if that's the case, just move
@@ -118,8 +118,8 @@ def parse_entry(tokens, meet):
     (_junk1, last_name, first_name, middle, gender, _junk2, team_code,
         team_name, _junk3, grade, ht_event_code) = tokens[0:11]
 
-    athlete = add_athlete_to_db(first_name, middle, last_name, gender,
-                                grade, team_code, team_name)
+    athlete = Athlete.add_athlete_to_db(
+        first_name, middle, last_name, gender, grade, team_code, team_name)
 
     # If the athlete's record in file was bad, add_athlete_to_db returns None.
     if athlete is None:
@@ -160,73 +160,6 @@ def parse_entry(tokens, meet):
 
 def parse_relay(tokens):
     pass
-
-
-# #### Helper Functions
-
-
-def add_athlete_to_db(first_name, middle, last_name, gender,
-                      grade, team_code, team_name):
-    """ If the Athlete is not already in the database, add him/her. Will
-    also add the athlete's school if it is not already in the database as well.
-    Returns None if the athlete did not get added to db because of a problem
-    with the record (grade/gender) or if the athlete was already added.
-
-    Fields 2-8 of any record uniquely identify an athlete and must be the
-    same across all entry records and athlete info records
-    See if this athlete is already in the database.
-    """
-
-    # See if there is an athlete with the same name, gender and team code
-    # in the database. Note that the GRADE is NOT used to identify the
-    # athlete, because kids' grades change over time.
-    athlete = Athlete.get_athlete(first_name, middle, last_name, gender,
-                                  team_code)
-    # Athlete is already in DB, so return it.
-    if athlete is not None:
-        return athlete
-
-    # OK, the athlete is NOT already in the database, so let's add him/her.
-
-    # First check if this athlete's school is already in the database. If not,
-    # add the school to the database. Note: the school must be committed to the
-    # database before adding the athlete, or an Exception will result.
-    school = School.query.filter_by(name=team_name,
-                                    code=team_code).one_or_none()
-    if not school:
-        warning(f"Unknown School Found: {team_name}, code:{team_code}")
-        school = School(name=team_name, code=team_code)
-        db.session.add(school)
-        db.session.commit()
-        warning(f"Added new school: {team_name}, code:{team_code}")
-
-    # Next, reate the new athlete, and add it to the database.
-    try:
-        athlete = Athlete(
-                first_name, middle, last_name, gender, grade, team_code)
-    except TmsError as err:
-        error("Error parsing athlete record: " + err.message)
-        return
-
-    # Athlete constructor might return none if there was something wrong
-    # with the athlete's gender or grade. Just skip if this is the case.
-    if athlete is None:
-        return
-
-    db.session.add(athlete)
-    try:
-        db.session.commit()
-    except MultipleResultsFound:
-        # TODO . In theory this should never happen if the first query, to
-        # see if athlete was already in the db.  Consolidate that query with
-        # the following and figure out why the below sometimes still happens.
-        error("Tried adding duplicate athlete: {},  {}, {}, {}, {}".format(
-                first_name, last_name, gender, grade, team_code))
-        db.session.rollback()
-        return
-
-    info(f"Added athlete: {athlete}")
-    return athlete
 
 
 """

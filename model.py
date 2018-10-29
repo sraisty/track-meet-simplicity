@@ -8,7 +8,7 @@ NOTE: "mde" and "mdes" (plural of mde) refer to "MeetDivisionEvent"
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy_utils import aggregated, generic_repr, observes
+from sqlalchemy_utils import aggregated, generic_repr
 
 from util import warning, error, info
 
@@ -96,14 +96,11 @@ class Meet(db.Model):
     #         uselist=True, back_populates="meets_invited")
     host_school = db.relationship(
             "School", uselist=False,
-            # foreign_keys="[Meet.host_school_id]",
             primaryjoin="School.id == Meet.host_school_id",
             back_populates="meets_hosted")
 
     mdes = db.relationship(
             "MeetDivisionEvent", uselist=True,
-            # order_by="meet_division_events.c.seq_num",
-            # TODO - does the following work?  Is it a better alternative?
             order_by="MeetDivisionEvent.seq_num",
             back_populates="meet")
 
@@ -116,7 +113,6 @@ class Meet(db.Model):
 
     divisions = db.relationship(
             "Division", secondary="meet_division_events", uselist=True,
-            # back_populates="meets"
             )
     div_orderings = db.relationship(
             "DivOrdering", uselist=True,
@@ -444,9 +440,6 @@ class Entry(db.Model):
     # meet_name = db.Column(db.String(50))
     # meet_date = db.Column(db.DateTime)
     # meet_status = db.Column(meet_status_enum)
-
-
-
 
     #      @aggregated('athletes', db.Column(db.Integer))
     # def athletes_count(self):
@@ -796,22 +789,20 @@ class School(db.Model):
             order_by="Athlete.lname", back_populates="school")
 
     entries = db.relationship(
-            "Entry", secondary="athletes", uselist=True,  # lazy="joined",
+            "Entry", secondary="athletes", uselist=True, 
             back_populates="school",
             )
     divisions = db.relationship(
         "Division", secondary="athletes", uselist=True)
     coaches = db.relationship("User", uselist=True, backref="editor_users")
 
-    meets_hosted = db.relationship(  # lazy="joined"
+    meets_hosted = db.relationship(  
             "Meet", uselist=True,
             primaryjoin="Meet.host_school_id==School.id",
             order_by="Meet.date",
             back_populates="host_school")
     # meets_invited = db.relationship(
     #         "Meet", uselist=True, back_populates="invited_schools")
-
-
 
     def __init__(
             self, name="Unattached", code="UNA", city=None, state=None,
@@ -852,8 +843,17 @@ class School(db.Model):
         for entry in self.entries:
             meets.add(entry.meet)
         print(meets)
-        return list(meets)
 
+        # q = db.session.query(Entry).join(Entry.meet_id)
+        # q = q.join()
+
+        # __entries=session.query(Entry).filter_by(school=self).
+        # EXAMPLE CODE FROM https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DeclarativeComputeTotalOfSubquery
+        # parent=session.query(Parent).filter_by(name="foo").first()
+        # qa=session.query(Host.id).filter_by(parent=parent).subquery()
+        # qb=session.query(func.sum(HostFilesystem.sizeMB)).filter(HostFilesystem.host_id.in_(qa))
+        # subtotal=qb.first()[0]
+        return list(meets)
 
 # #######################  EVENTDEFINITION CLASS #####################
 
