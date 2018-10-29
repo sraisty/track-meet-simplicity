@@ -6,30 +6,7 @@ from model import db, reset_database
 from server import app
 from util import info
 
-SMALL_TEST_MEETS = {
-    "only_gender_divs": {
-        "name": "Meet with Just a Male and Female Div & 3 events",
-        "date": "March 8, 2019",
-        "description": """ Meet with Just a Male and Female Div and 3 events
-                   """,
-        "status": "Unpublished",
-        "host_school_id": 1,  # UNA
-        "division_order": ["M", "F"],
-        "event_order": ["1600M", "100M", "LJ"],
-        "filename": "",
-    },
-    "only_2_grades": {
-        "name": "Just 2 grades and 2 events",
-        "date": "March 8, 2019",
-        "description": """ Just 2 grades and 2 events
-                   """,
-        "status": "Unpublished",
-        "host_school_id": 1,  # UNA
-        "division_order": ["7F", "8F", "7M", "8M"],
-        "event_order": ["100M"],
-        "filename": "",
-    }
-}
+
 
 EXAMPLE_MEETS = (
     {

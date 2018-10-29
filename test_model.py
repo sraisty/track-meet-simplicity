@@ -3,7 +3,7 @@ TESTS on data model in model.py
 by Sue Raisty
 
 """
-# from decimal import *
+
 import unittest
 
 from sqlalchemy.exc import IntegrityError, DataError
@@ -17,12 +17,8 @@ from model import (
 from server import app
 
 from test_utils import (
-    teardown_test_db_app, setup_test_app_db, EXAMPLE_MEETS, SMALL_TEST_MEETS)
+    teardown_test_db_app, setup_test_app_db, EXAMPLE_MEETS)
 
-
-# We are not importing the following 'constants' from init_data because
-# we don't want these unit tests to break when we one day add more events,
-# more grades, etc.
 
 
 class TestDatabaseEmpty(unittest.TestCase):
@@ -227,7 +223,6 @@ class TestMeetInitMdes(unittest.TestCase):
         db.create_all()
         self.client = app.test_client()
 
-
     def tearDown(self):
         teardown_test_db_app()
 
@@ -333,7 +328,6 @@ class TestMeetInitMdes(unittest.TestCase):
         self.assertEqual(meet_g7_hj.event.name, "High Jump")
         self.assertEqual(meet_g7_hj.meet.name, "TestMeet")
 
-
     def test_event_to_mde_relationship(self):
         TmsApp()
         self.meet = Meet.init_meet({
@@ -349,10 +343,6 @@ class TestTmsAppInit(unittest.TestCase):
         setup_test_app_db()
         db.create_all()
         self.client = app.test_client()
-
-        # self.meet1 = Meet(name="Meet #1")
-        # db.session.add(self.meet1)
-        # db.session.commit()
 
     def tearDown(self):
         teardown_test_db_app()
@@ -390,27 +380,6 @@ class TestTmsAppInit(unittest.TestCase):
         self.assertEqual(MeetDivisionEvent.query.count(), 0)
         self.assertEqual(EventOrdering.query.count(), 0)
         self.assertEqual(DivOrdering.query.count(), 0)
-
-
-    # def test_creating_entries_from_meet_div_event(self):
-        """ NOTE THAT THIS APPROACH CREATES A CONFLICT IN SQLALCHEMY
-            SO IT CAN'T BE DONE.
-        sue = Athlete("Sue", "", "Raisty", "F", "7")
-        db.session.add(sue)
-        db.session.commit()
-
-        div_7F = sue.division
-        e_1600m = EventDefinition.query.filter_by(code="1600M").one()
-
-        sue_entry = Entry(athlete=sue, event=e_1600m,
-                          division=div_7F, meet=self.meet1)
-        self.assertEqual(sue_entry.mark, INFINITY_SECONDS)
-        self.assertEqual(sue_entry.mark_type, "seconds")
-        self.assertIsNone(sue_entry.mde)
-        db.session.add(sue_entry)
-        db.session.commit()
-        self.assertIsNotNone(sue_entry.mde)
-        """
 
 
 class TestAthlete(unittest.TestCase):
@@ -630,7 +599,7 @@ class TestEventDefinition(unittest.TestCase):
             db.session.commit()
 
     def test_generate_event_defs(self):
-        # this happens as part of TmsApp()
+        # this usually happens as part of TmsApp()
         EventDefinition.generate_event_defs(EVENT_DEFS)
 
         q = EventDefinition.query
@@ -811,7 +780,7 @@ class TestDivision(unittest.TestCase):
         pass
 
     def test_division_create_and_query_get(self):
-        # shoul match the "boys8" already in the databse
+        # should match the "boys8" already in the databse
         q = Division.query.filter_by(gender="M", grade="8")
         self.assertEqual(q.count(), 1)
         self.assertIs(q.one(), self.boys8)

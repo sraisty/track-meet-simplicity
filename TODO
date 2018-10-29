@@ -1,0 +1,35 @@
+TODO
+
+1. Modify to use  Flask logging instead of my own util.py
+
+2. Trigger automatic creation of "Unattached School" and Super user when the schools and users tables are created for the first time. 
+    See: https://dzone.com/articles/how-to-initialize-database-with-default-values-in
+
+3. Move to React & use React Table
+
+4. Figure out how to better restructure all the JQuery code
+
+5. Optimize my queries
+
+6. Make certain pages inaccessible without being logged in, via "login-required" decorator:
+http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+
+7. Deploy to AWS or heroku or something
+
+8. Use a Meet Status "wizard" with the nice graphical status like 
+
+9. Learn what "with" is and if I should use it.
+
+10. Do better exceptions triggering and handling for the file parsing
+
+11. Refactor into better uses of classes for field vs track events, marks, 
+relays, etc.
+
+12. Make some of my 'mark to string' and 'string to mark' methods private methods preceded by "_"
+(if I can still test them, that is)
+
+13. Trigger exceptions for unimplemented stuff (like Relays)
+
+
+
+
