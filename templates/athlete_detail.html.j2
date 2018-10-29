@@ -13,7 +13,7 @@
 
 {% block nav2_subtitle %}
   <div class="d-flex justify-content-md-between flex-wrap">
-    <div>Division: {{ athlete.division.longname() }}</div>
+    <div>Division: {{ athlete.division.name }}</div>
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
       School: 
@@ -78,7 +78,7 @@
           </a>
           <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id, 
                               mde_id=entry.mde.id) }}">
-            {{ entry.division.longname() }}
+            {{ entry.division.name }}
           </a>
           ==
           <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">

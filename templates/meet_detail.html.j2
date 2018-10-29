@@ -86,7 +86,7 @@
                 {% for mde in meet.get_event_mdes(event) %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
-                            {{ mde.division.longname() }}
+                            {{ mde.division.name }}
                         </a>
                         <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
                     </li>

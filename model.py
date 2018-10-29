@@ -11,337 +11,19 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from util import warning, error, info
 
+from model_constants import (
+    SUPERUSER_EMAIL, SUPERUSER_PASSWORD, USER_ROLES, GENDERS, GRADES,
+    MIDDLE_SCHOOL_GRADES, HIGH_SCHOOL_GRADES,
+    ADULT_CHILD, DIV_NAME_DICT, MIN_ATHLETES_PER_HEAT, EVENT_TYPES,
+    MEET_STATUS, MARK_TYPES, HEAT_FLIGHT_ASSIGN_METHOD,
+    TRACK_LANE_ASSIGN_METHOD, FIELD_ORDER_ASSIGN_METHOD, EVENT_DEFS)
 
-GENDERS = ('M', 'F')
-GRADES = ('6', '7', '8')
-ADULT_CHILD = ('adult', 'child')
-DIV_NAME_DICT = {"child": {"M": "Boys", "F": "Girls"},
-                 "adult": {"M": "Men", "F": "Women"}}
-
-MIN_NUMBER_PER_FINAL_HEAT: 2
-
-EVENT_DEFS = (
-        # {
-        #     "code": "60M",
-        #     "name": "60 Meter",
-        #     "type": "sprint",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        {
-            "code": "100M",
-            "name": "100 Meter",
-            "type": "sprint",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "200M",
-            "name": "200 Meter",
-            "type": "sprint",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": True,
-        },
-        {
-            "code": "400M",
-            "name": "400 Meter",
-            "type": "sprint",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": True,
-        },
-        # {
-        #     "code": "600M",
-        #     "name": "600 Meter",
-        #     "type": "sprint",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        {
-            "code": "800M",
-            "name": "800 Meter",
-            "type": "sprint",
-            "max_per_heat": 12,
-            "outdoor": True,
-            "indoor": True,
-        },
-        # {
-        #     "code": "1000M",
-        #     "name": "1000 Meter",
-        #     "type": "sprint",
-        #     "max_per_heat": 12,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        # {
-        #     "code": "1500M",
-        #     "name": "1500 Meter",
-        #     "type": "distance",
-        #     "max_per_heat": 15,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },
-        {
-            "code": "1600M",
-            "name": "1600 Meter",
-            "type": "distance",
-            "max_per_heat": 15,
-            "outdoor": True,
-            "indoor": False,
-        },
-        # {
-        #     "code": "MILE",
-        #     "name": "Mile",
-        #     "type": "distance",
-        #     "max_per_heat": 15,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        # {
-        #     "code": "3000M",
-        #     "name": "3000 Meter",
-        #     "type": "distance",
-        #     "max_per_heat": 18,
-        #     "indoor": True,
-        #     "outdoor": False,
-        # },
-        {
-            "code": "3200M",
-            "name": "3200 Meter",
-            "type": "distance",
-            "max_per_heat": 18,
-            "outdoor": True,
-            "indoor": False,
-        },
-        # {
-        #     "code": "5000M",
-        #     "name": "5000 Meter",
-        #     "type": "distance",
-        #     "max_per_heat": 24,
-        #     "indoor": True,
-        #     "outdoor": True,
-        # },
-        # {
-        #     "code": "10000M",
-        #     "name": "10000 Meter",
-        #     "type": "distance",
-        #     "max_per_heat": 30,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },
-        # {
-        #     "code": "3000S",
-        #     "name": "3000 Meter Steeplechase",
-        #     "type": "distance",
-        #     "max_per_heat": 18,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },
-        {
-            "code": "4x100M",
-            "name": "4x100 Meter Relay",
-            "type": "relay",
-            "max_per_heat": 15,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "4x400M",
-            "name": "4x400 Meter Relay",
-            "type": "relay",
-            "max_per_heat": 15,
-            "outdoor": True,
-            "indoor": True,
-        },
-        # {
-        #     "code": "DMR",
-        #     "name": "Distance Medley Relay",
-        #     "type": "relay",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        # },
-        # {
-        #     "code": "4x800M",
-        #     "name": "4x800 Meter Relay",
-        #     "type": "relay",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        #     "indoor": False,
-        # },
-        # {
-        #     "code": "55H",
-        #     "name": "55 Meter Hurdles",
-        #     "type": "hurdle",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        # {
-        #     "code": "60H",
-        #     "name": "60 Meter Hurdles",
-        #     "type": "hurdle",
-        #     "max_per_heat": 8,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        {
-            "code": "65H",
-            "name": "65 Meter Hurdles",
-            "type": "hurdle",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "100H",
-            "name": "100 Meter Hurdles (Girls Only)",
-            "type": "hurdle",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "110H",
-            "name": "110 Meter Hurdles (Boys Only)",
-            "type": "hurdle",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "300H",
-            "name": "300 Meter Hurdles",
-            "type": "hurdle",
-            "max_per_heat": 8,
-            "outdoor": True,
-            "indoor": False,
-        },
-        # {
-        #     "code": "400H",
-        #     "name": "400 Meter Hurdles",
-        #     "type": "hurdle",
-        #     "max_per_heat": 8,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },
-        {
-            "code": "LJ",
-            "name": "Long Jump",
-            "type": "horzjump",
-            "max_per_heat": 13,
-            "outdoor": True,
-            "indoor": True,
-        },
-        {
-            "code": "TJ",
-            "name": "Triple Jump",
-            "type": "horzjump",
-            "max_per_heat": 13,
-            "outdoor": True,
-            "indoor": True,
-        },
-        {
-            "code": "DT",
-            "name": "Discus Throw",
-            "type": "throw",
-            "max_per_heat": 13,
-            "outdoor": True,
-            "indoor": False,
-        },
-        {
-            "code": "SP",
-            "name": "Shot Put",
-            "type": "throw",
-            "max_per_heat": 13,
-            "outdoor": True,
-            "indoor": False,
-        },
-        # {
-        #     "code": "JT",
-        #     "name": "Javelin Throw",
-        #     "type": "throw",
-        #     "max_per_heat": 13,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },
-        # {
-        #     "code": "HT",
-        #     "name": "Hammer Throw",
-        #     "type": "throw",
-        #     "max_per_heat": 13,
-        #     "outdoor": True,
-        #     "indoor": False,
-        # },        {
-        #     "code": "WT",
-        #     "name": "Weight Throw",
-        #     "type": "throw",
-        #     "max_per_heat": 13,
-        #     "outdoor": False,
-        #     "indoor": True,
-        # },
-        {
-            "code": "HJ",
-            "name": "High Jump",
-            "type": "vertjump",
-            "max_per_heat": 20,
-            "outdoor": True,
-            "indoor": True,
-        },
-        {
-            "code": "PV",
-            "name": "Pole Vault",
-            "type": "vertjump",
-            "max_per_heat": 20,
-            "outdoor": True,
-            "indoor": True,
-        })
-
-
-EVENT_TYPES = ("sprint", "distance", "relay",
-               "vertjump", "horzjump", "throw", "hurdle")
-
-MEET_STATUS = ("Not Published", "Accepting Entries", "Awaiting Assignment",
-               "Assignments Done", "Meet In Progress", "Completed")
-
-MARK_TYPES = ("seconds", "inches", "meters")
-
-USER_ROLES = ("meet_director", "coach", "athlete", "other")
-
-
-START_TYPE = ("allies", "lanes", "waterfall")
-
-HEAT_FLIGHT_ASSIGNMENT_METHOD = ("best-to-worst", "worst-to-best", "random")
-
-TRACK_LANE_POS_ASSIGNMENT_METHOD = ("serpentine", "random")
-FIELD_POS_ASSIGNMENT_METHOD = ("best-to-worst", "worst-to-best")
-
-# this is a hack. It's a number of seconds that is greater than any track meeet
+# This is a hack. It's a number of seconds that is greater than any track meeet
 # event would possibly take, so I can get the database to do sorting of marks
-# without special handling.  Equal to the number of seconds in a year.
+# without special handling.
 INFINITY_SECONDS = 99999999
 
 db = SQLAlchemy()
-
-# #############
-# class Tms_App:
-#     """
-#     TODO - This is just a regular class, not mapped to the database?
-#     Do I really need this?
-#     """
-#     def __init__(self):
-#         self.meets = []
-#         self.athletes = []
-#         self.schools = []
-#         School.init_unattached_school()
-#         Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-#         EventDefinition.generate_event_defs(EVENT_DEFS)
-
-# def get_all_meets(self):
-""" returns a list of all meets, inactive, active, and whatever status """
 
 
 class TmsError(Exception):
@@ -350,6 +32,43 @@ class TmsError(Exception):
         self.message = message
 
 
+class TmsApp:
+    """ TODO - This is just a regular class, not mapped to the database. Is
+        this good practice?  Should it just be a function?
+        Initializes the database and ets up application-level data (not
+        meet-leve;) that are used across multiple meets.
+    """
+    def __init__(self):
+        """
+        Initialize the application from scratch: create database tables,
+        write constant data that are used across multiple meets to the database.
+
+        Sets up: the superuser, the unattached school, the list
+        of the competition divisions (i.e "7th grade boys") used across most
+        middle school and high school meets, and the definitions of official
+        track & field events.
+
+        This should only be used once, with a completely empty database.
+        """
+
+        # TODO - test tp make sure the database is empty first.
+
+        User.create_superuser()
+        School.init_unattached_school()
+
+        # Create all the standard divisions for middle school
+        Division.generate_grade_gender_divisions(
+                gender_list=GENDERS, grade_list=MIDDLE_SCHOOL_GRADES)
+
+        Division.generate_gender_only_divisions(gender_list=GENDERS)
+        # TODO Create the typical highschool divisions: varisty/JV/FS(boys)
+
+        # Create all the possible event definitions as defined by Track & Field
+        # governance bodies.
+        EventDefinition.generate_event_defs(EVENT_DEFS)
+
+
+# #######################  MEET CLASS #####################
 meet_status_enum = Enum(*MEET_STATUS, name="meet_status")
 
 
@@ -361,43 +80,137 @@ class Meet(db.Model):
     date = db.Column(db.DateTime, nullable=True)
     host_school_id = db.Column(db.ForeignKey("schools.id"), nullable=True)
     description = db.Column(db.String(300), nullable=True)
-    status = db.Column(meet_status_enum,
-                       default="Accepting Entries",
-                       nullable=False)
+    status = db.Column(
+            meet_status_enum, default="Unpublished", nullable=False)
 
-    max_entries_per_athlete = db.Column(db.Integer, nullable=True)
-    # max_relays_per_athlete = db.Column(db.Integer, nullable=True)
-    max_team_entries_per_event = db.Column(db.Integer, nullable=True)
-    max_athletes_per_heat = db.Column(db.Integer, nullable=True)
-    max_heats_per_mde = db.Column(db.Integer, nullable=True)
+    max_entries_per_athlete = db.Column(db.Integer, default=4, nullable=True)
+    max_relays_per_athlete = db.Column(db.Integer, default=2, nullable=True)
+    max_teammates_per_event = db.Column(db.Integer, default=12, nullable=True)
+    max_heats_per_mde = db.Column(db.Integer, default=None, nullable=True)
 
-    # order_of_events at meet
-    # order_of_divs_in_event
+    # TODO - Make sure SQLAlchemy's "magic" uses different join paths to
+    # entered schools vs. host school.  Right now, I don't think it would be
+    # able to tell the difference.
 
-    host_school = db.relationship("School", uselist=False)
-    mdes = db.relationship("MeetDivisionEvent", back_populates="meet")
-    events = db.relationship("EventDefinition",
-                             secondary="meet_division_events",
-                             )
-    divisions = db.relationship("Division",
-                                secondary="meet_division_events",
-                                )
-    entries = db.relationship("Entry", secondary="meet_division_events",
-                              back_populates="meet")
-    editor_users = db.relationship("User", secondary="schools")
+    # entered_schools = db.relationship(
+    #         "School", foreign_keys="[Meet.host_school_id]", uselist=True,
+    #         back_populates="meets_entered")
+    host_school = db.relationship(
+            "School", uselist=False,
+            # foreign_keys="[Meet.host_school_id]",
+            back_populates="meets_hosted")
+
+    mdes = db.relationship(
+            "MeetDivisionEvent", uselist=True, back_populates="meet")
+
+    events = db.relationship(
+            "EventDefinition", secondary="meet_division_events", uselist=True,
+            backref="meets")
+    event_orderings = db.relationship(
+            "EventOrdering", uselist=True,
+            back_populates="meet")
+
+    divisions = db.relationship(
+            "Division", secondary="meet_division_events", uselist=True,
+            # back_populates="meets"
+            )
+    div_orderings = db.relationship(
+            "DivOrdering", uselist=True,
+            back_populates="meet")
+
+    entries = db.relationship(
+            "Entry", secondary="meet_division_events", uselist=True,
+            back_populates="meet")
+
+    # TODO - make sure that editor users is determine by HOST school,
+    # NOT the entered schools
+    manager_users = db.relationship(
+            "User", secondary="schools", uselist=True,
+            # foreign_keys=["Meet.host_school_id"],  # does this work for secondary
+            back_populates="meets_managed")
 
     def __repr__(self):
-        return "\n<MEET id# {}: {}>".format(self.id, self.name)
+        str = "\n<MEET id={self.id}, name=<{self.name}>, " \
+               "date={self.date}, status={self.status}, " \
+               "host_school={self.host_school.name}, " \
+               "events={self.events}, " \
+               "event_ordering={self.event_orderings}, " \
+               "divisions={self.divisions}, " \
+               "div_ordering={self.div_orderings}, " \
+               "managing_users = {self.manager_users} ".format(self=self)
+        str = str + "num_mdes = {}, num_entries={}".format(
+                        len(self.mdes), len(self.entries))
+        return str
+
+
+    @classmethod
+    def init_meet(cls, meet_info_dict):
+        # Note that this function does not set the meet's host_school_id. That
+        # has to be done later.
+        info("init_meet")
+        meet = Meet(
+            name=meet_info_dict['name'],
+            date=meet_info_dict['date'],
+            description=meet_info_dict.get('description', ''),
+            status=meet_info_dict.get('status', 'Unpublished'))
+
+        # db.session.commit()
+
+        host_school_id = meet_info_dict.get('host_school_id')
+        host_school = School.query.filter_by(id=host_school_id).one_or_none()
+        if host_school:
+            meet.host_school = host_school
+        else: 
+            # our host school isn't in the database yet.  This should not happen 
+            # in normal usage, but for seeding the database and testing
+            # it's common, so I'm going to just reassign the meet's
+            # host school to the "Unattached" school.
+            meet.host_school_id = 1     # Unattached school has id of 1
+
+        meet.max_entries_per_athlete = meet_info_dict.get(
+                "max_entries_per_athlete")
+        meet.max_relays_per_athlete = meet_info_dict.get(
+                "max_relays_per_athlete")
+        meet.max_teammates_per_event = meet_info_dict.get(
+                "max_team_entries_per_event")
+        meet.max_heats_per_mde = meet_info_dict.get(
+                "max_heats_per_mde")
+
+        # associate this meet with the selected events (i.e. "4x400 relay"),
+        # and specify how the events should be ordered within this meet
+
+        # TODO - if ev_code_order is none, then createEventOrders assumes the
+        # meet includes all possible events in whatever order. (For testing)
+        events = EventOrdering.create_events_in_order(
+                        meet, meet_info_dict.get('event_order'))
+
+        # associate this meet with the selected divisions for athletes
+        # (i.e. "6th Grade Girls"), and specify the order in which divisions
+        # will compete (each division has its own heats) within a given event.
+
+        # TODO - if ev_code_order is none, then createDivOrders assumes the
+        # meet includes all possible events in whatever order. (For testing)
+
+        divs = DivOrdering.create_divs_in_order(
+                meet, meet_info_dict.get('division_order'))
+
+        # With the events and divisions selected for this meet, now generate
+        # the "MeetDivisionEvents" for the whole meet and each "MDE's" sequence
+        # order within the overall meet
+        MeetDivisionEvent.generate_mdes(meet, events, divs)
+        db.session.add(meet)
+        db.session.commit()
+        return meet
 
     def get_event_mdes(self, ev):
         q = MeetDivisionEvent.query.filter(
                 MeetDivisionEvent.meet == self,
                 MeetDivisionEvent.event == ev)
-        # TODO - sort them  q = q.order_by(XX)
+        q = q.order_by(MeetDivisionEvent.seq_num)
         mdes = q.all()
         return mdes
 
-    def get_event_athlete_count(self, ev):
+    def get_event_athlete_count_across_divs(self, ev):
         mde_q = MeetDivisionEvent.query.filter(
                 MeetDivisionEvent.meet == self,
                 MeetDivisionEvent.event == ev)
@@ -407,11 +220,13 @@ class Meet(db.Model):
             count += len(mde.entries)
         return count
 
-    def get_schools(self):
-        # db.session.query(
-                # Meet.meet_id, Entry.entry_id, Athlete.athlete_id, School)
+    @classmethod
+    def reorder_mdes(cls):
+        # TODO divisions = DivOrderPosition.division
         pass
 
+
+# #######################  ATHLETE CLASS #####################
 
 class Athlete(db.Model):
     """ """
@@ -427,42 +242,51 @@ class Athlete(db.Model):
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
     coach_notes = db.Column(db.String(64), nullable=True)
 
-    school = db.relationship("School", back_populates="athletes")
-    division = db.relationship("Division", back_populates="athletes")
-    entries = db.relationship("Entry", back_populates="athlete")
-    mdes = db.relationship("MeetDivisionEvent", secondary="entries",
-                           back_populates="athletes")
-    # Coaches for the athlete's team can edit the athlete's record
+    school = db.relationship("School", uselist=False, back_populates="athletes")
+    division = db.relationship(
+            "Division", uselist=False, back_populates="athletes")
+    entries = db.relationship("Entry", uselist=True, back_populates="athlete")
+    mdes = db.relationship(
+            "MeetDivisionEvent", uselist=True, secondary="entries",
+            back_populates="athletes")
+    # Coaches for the athlete's school can edit the athlete's record
     editor_users = db.relationship("User", secondary="schools")
     # meets
 
     def __init__(self, fname, minitial, lname, gender, grade,
-                 school_abbrev="UNA", phone=None):
+                 school_code="UNA", phone=None):
         self.fname = fname
         self.minitial = minitial
         self.lname = lname
         self.phone = phone
 
+        # TODO - test to see if athlete already exists?
+
+        # set athlete's division
         div_q = Division.query.filter_by(gender=gender)
         if grade:
             div_q = div_q.filter_by(grade=grade)
-
         try:
             div = div_q.one()
-        except (NoResultFound, MultipleResultsFound):
+        except NoResultFound:
             print("SKIPPING {} {}. No Div for grade: {}, Gender:{}".format(
                     fname, lname, grade, gender))
             raise TmsError("BadAthleteRecord: {}, {}, gr:{} gender:{}".format(
                         fname, lname, grade, gender))
-
+        except MultipleResultsFound:
+            # This should never happen? TODO eliminate this?
+            raise TmsError(
+                    "Athlete matches >1 div: {} {}, gr:{} gen:{}".format(
+                        fname, lname, grade, gender))
         self.division = div
 
-        school = School.query.filter_by(abbrev=school_abbrev).one_or_none()
+        # set athlete's school
+        school = School.query.filter_by(code=school_code).one_or_none()
         if not school:
-            warning("Athete {} {}: School ({}) not in TMS.".format(
-                    fname, lname, school_abbrev))
+            warning("Athete {} {}: School ({}) not in database.".format(
+                    fname, lname, school_code))
             warning(f"\nAssigning {fname} {lname} to 'Unattached' school.")
-            school = School.query.filter_by(abbrev="UNA").one()
+            school = School.query.filter_by(code="UNA").one()
         self.school = school
 
     def __repr__(self):
@@ -473,12 +297,12 @@ class Athlete(db.Model):
                 self.division.__repr__())
 
     def full_name(self):
-        return self.get_full_name(self.fname, self.minitial, self.lname)
+        return self._get_full_name(self.fname, self.minitial, self.lname)
 
     @staticmethod
-    def get_full_name(fname, minitial, lname):
+    def _get_full_name(fname, minitial, lname):
         """ Creates a fullname from the first, last name, and middle initial
-        >>> Athlete.get_full_name("Jane", "", "Doe")
+        >>> Athlete._get_full_name("Jane", "", "Doe")
         'Jane Doe'
         """
         if not (fname and lname):
@@ -489,30 +313,32 @@ class Athlete(db.Model):
 
     @classmethod
     def get_athlete(cls, fname, middle, lname, gender, school_code):
-        """ The HyTek file format requires that the first 7 fields of an
-        athlete's entry record be the same as the first 8 fields of any
-        athlete info record.  This method makes the test. If the athlete is
-        alaredy in the database, returns that athlete's object.
-
-        Returns none if this athlete is not already in the database
+        """ If a athlete is already in the database, returns that athlete's
+        object. If not, returns None. An athlete is considered to be already
+        in the database if the athlete's fname, middle initial, lname, gender,
+        and school_code all match.
         """
+
         athletes_same_name = Athlete.query.filter_by(fname=fname, lname=lname,
                                                      minitial=middle).all()
         for ath in athletes_same_name:
-            if (ath.school.abbrev == school_code and
+            if (ath.school.code == school_code and
                     ath.division.gender == gender):
                 return ath
-
-        # DB doesn't contain a matching athlete
-        return None
+        return
 
     def meets(self):
+        """ Returns a list of all the meet objects that this athlete is
+        entered into. If athlete is not entered into any meets, returns None.
+        """
         meets = set()
-        for mde in self.mdes:
-            meets.add(mde.meet)
+        meets = {mde.meet for mde in self.mdes}
+        if len(meets) == 0:
+            return
         return list(meets)
 
 
+# #######################  ENTRY CLASS #####################
 mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
 
 
@@ -543,8 +369,6 @@ class Entry(db.Model):
     # describes a problem with the athlete's entry that a user needs to resolve
     problem = db.Column(db.String(64), nullable=True)
 
-
-#
     meet = db.relationship("Meet",
                            secondary="meet_division_events",
                            uselist=False,
@@ -558,7 +382,8 @@ class Entry(db.Model):
     division = db.relationship("Division",
                                secondary="athletes",
                                uselist=False,
-                               back_populates="entries")
+                               # back_populates="entries"
+                               )
     event = db.relationship("EventDefinition",
                             secondary="meet_division_events",
                             uselist=False,
@@ -567,10 +392,9 @@ class Entry(db.Model):
                              secondary="athletes",
                              uselist=False,
                              back_populates="entries")
-    heat = db.relationship("Heat", uselist=False, back_populates="entries") 
+    heat = db.relationship("Heat", uselist=False, back_populates="entries")
 
     # editor_users = db.relationship("User", secondary="schools")
-
 
     def __init__(self, athlete, mde):
         self.athlete = athlete
@@ -587,7 +411,7 @@ class Entry(db.Model):
         return ("\n<ENTRY #{}, Ath: {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
                     self.id, self.athlete.full_name(),
-                    self.event.code, self.division.abbrev(), self.meet.name))
+                    self.event.code, self.division.code(), self.meet.name))
 
     # SETTING MARKS
     def set_mark(self, mark_string=None, mark_measure_type=None):
@@ -740,28 +564,33 @@ class Entry(db.Model):
         return feet_str + "{:.2f}".format(inches) + '"'
 
 
+# #######################  HEAT CLASS #####################
+
 class Heat(db.Model):
     __tablename__ = "heats"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # seq_num
-    entries = db.relationship("Entry", back_populates="heat")
-    # athletes = db.relationship(
-    #         "Athlete", secondary="entries", back_populates="heats")
-    # mde = db.relationship("MeetDivisionEvent", secondary="entries")
+    # TODO decide if seq_num is unique to whole meet or just this MDE
+    seq_num = db.Column(db.Integer, default=1, nullable=False)
+    entries = db.relationship(
+            "Entry", uselist=True, back_populates="heat")
+    mde = db.relationship(
+        "MeetDivisionEvent", secondary="entries", uselist=False,
+        back_populates="heats")
 
     def __repr__(self):
         return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
 
-    def get_event(self):
-        return self.mde.event
+    # def get_event(self):
+    #     return self.mde.event
 
-    def get_division(self):
-        return self.mde.division
+    # def get_division(self):
+    #     return self.mde.division
 
-    def assign_lanes_pos(self):
-        pass
+    # def assign_lanes_pos(self):
+    #     pass
 
 
+# #######################  MEETDIVISION EVENT CLASS #####################
 class MeetDivisionEvent(db.Model):
     """
     Associative table to handle the many to many relationship between Events,
@@ -772,58 +601,73 @@ class MeetDivisionEvent(db.Model):
     div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
     meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
     event_code = db.Column(db.ForeignKey("event_defs.code"), nullable=False)
+    seq_num = db.Column(db.Integer, nullable=False)
     qualifying_mark = db.Column(db.Integer, nullable=True)
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
 
-    meet = db.relationship("Meet", back_populates="mdes", uselist=False)
-    host_school = db.relationship(
-            "School", secondary="meets",
-            backref="hosted_mdes",
-            uselist=False)
+    meet = db.relationship(
+            "Meet", uselist=False, back_populates="mdes")
     division = db.relationship(
-            "Division",
-            back_populates="mdes",
-            uselist=False)
-    event = db.relationship(
-            "EventDefinition",
-            back_populates="mdes",
-            uselist=False)
-
-    entries = db.relationship(
-            "Entry", back_populates="mde",
-            # lazy="joined"
+            "Division", uselist=False,
+            # back_populates="mdes"
             )
+    event = db.relationship(
+            "EventDefinition", uselist=False, 
+            # back_populates="mdes"
+            )
+    entries = db.relationship(
+            "Entry", uselist=True, back_populates="mde")
+    # entrires using lazy="joined"
     athletes = db.relationship(
-            "Athlete", secondary="entries",
-            # lazy="joined",
+            "Athlete", secondary="entries", uselist=True,
             back_populates="mdes")
+    # athletes using lazy="joined",
+    heats = db.relationship(
+            "Heat", secondary="entries", uselist=True, back_populates="mde")
 
-    # editor_users = db.relationship("User", secondary="schools")
+    # host_school = db.relationship(
+    #        "School", secondary="meets", uselist=False, backref="hosted_mdes")
+    # # editor_users = db.relationship("User", secondary="schools")
 
     def __repr__(self):
         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
                 self.id,
                 self.meet.name,
                 self.event.code,
-                self.division.longname())
+                self.division.name())
 
     @classmethod
-    def generate_mdes(cls, meet, divisions, event_defs):
-        for event in event_defs:
-            for division in divisions:
+    def generate_mdes(cls, meet, events_list, divisions_list):
+        """ For this meet, from the provided list of Division objects
+        EventDefinition objects, generates all the MDE objects and assigns
+        each MDE sequence number of the order each MDE will take place within
+        the meet.
+
+        divisions_list is an ordered list of Division instances. The order is
+        which order the divisions participate within a given event at this meet.
+
+        events_list is an order list of EventDefinition instances. The list's
+        order is the order in which this meet's events take place.
+        """
+        seq_num = 1
+        for event in events_list:
+            for division in divisions_list:
                 mde = MeetDivisionEvent()
                 mde.meet = meet
                 mde.division = division
                 mde.event = event
+                mde.seq_num = seq_num
                 db.session.add(mde)
+                seq_num += 1
+
         db.session.commit()
 
-    def schools(self):
-        schools = set()
-        for athlete in self.athletes:
-            schools.add(athlete)
-        return list(schools)
+    # def schools(self):
+    #     schools = set()
+    #     for athlete in self.athletes:
+    #         schools.add(athlete)
+    #     return list(schools)
 
     def form_heats(self):
         pass
@@ -832,51 +676,48 @@ class MeetDivisionEvent(db.Model):
         pass
 
 
-
+# #######################  SCHOOL CLASS #####################
 class School(db.Model):
     """
     """
     __tablename__ = "schools"
 
     # Set up so that the "Unattached" School always uses primary key #1
-    id = db.Column(db.Integer, primary_key=True,
-                   autoincrement=True)
-    abbrev = db.Column(db.String(8),
-                       nullable=False,
-                       unique=True,
-                       default="UNA")
-    name = db.Column(db.String(50),
-                     nullable=False,
-                     unique=True,
-                     default="Unattached")
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # TODO - change this to code
+    code = db.Column(db.String(8), unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     league = db.Column(db.String(6), nullable=True)
     section = db.Column(db.String(12), nullable=True)
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
     athletes = db.relationship(
-                                "Athlete",
-                                back_populates="school",
-                                # lazy="joined"
-                                )
-    divisions = db.relationship("Division", secondary="athletes")
+            "Athlete", uselist=True, back_populates="school",  # lazy="joined"
+            )
+    # divisions = db.relationship("Division", secondary="athletes")
     entries = db.relationship(
-                                "Entry",
-                                back_populates="school",
-                                # lazy="joined",
-                                secondary="athletes")
-    coaches = db.relationship("User")
+            "Entry", secondary="athletes", uselist=True,  # lazy="joined",
+            back_populates="school",
+            )
 
-    hosted_meets = db.relationship(
-                                    "Meet",
-                                    # lazy="joined"
-                                    )
+    # TODO - figure out this backref from the Users to the schools
+    coaches = db.relationship("User", uselist=True, backref="editor_users")
+
+    # TODO - right now SQLAlchemy has no way of knowing how hosted_meets and
+    # entered_meets use different joins, so I need to figure out how to more
+    # explicitly define the relationship
+    meets_hosted = db.relationship(  # lazy="joined"
+            "Meet", uselist=True, back_populates="host_school")
+    # meets_entered = db.relationship(
+    #         "Meet", uselist=True, back_populates="entered_schools")
 
     def __init__(
-            self, name="Unattached", abbrev="UNA", city=None, state=None,
+            self, name="Unattached", code="UNA", city=None, state=None,
             league=None, section=None):
         self.name = name
-        self.abbrev = abbrev
+        self.code = code
         if city:
             self.city = city.title()
         if state:
@@ -887,50 +728,34 @@ class School(db.Model):
             self.section = section.upper()
 
     def __repr__(self):
-        return "<SCHOOL id#{}: {}>".format(self.id, self.name)
+        return "<SCHOOL id#{}: {}, {}>".format(self.id, self.name, self.code)
 
     @classmethod
     def init_unattached_school(cls):
+        """ Creates the "unattached" school in the database if it isn't already
+        in the database. Should only call this once, right after
+        the database tables are created, before any athletes are created.
+
+        TO DO - get rid of this nethod and have this record created
+        automatically when the table is created via an event listener. Because
+        this must be called immediatley after table initialization and not at
+        any other time.
         """
-        Side Effects: Writes to the database
-
-        This shoudl only be called before any records have been added to the
-        schools table.
-
-        In general, we're going to add schools as they start using the TMS,
-        but we need to make sure that there is always an "Unattached"
-        school in the database, no matter what.
-        Note that School() will create the unattached school if it is not
-        created yet. But if it has been,  SQL Alchemy will throw an exception.
-        """
-
-        # Don't initialize the unattached school if it already exists.
-        unattached_school = School.query.filter_by(abbrev="UNA").one_or_none()
+        unattached_school = School.query.filter_by(code="UNA").one_or_none()
         if unattached_school is None:
-            new_unattached_school = cls()
+            new_unattached_school = cls(name="Unattached", code="UNA")
             db.session.add(new_unattached_school)
             db.session.commit()
 
-    def meets_entered(self):
-        meets = set()
-        for entry in self.entries:
-            meets.add(entry.meet)
-        print(meets)
-        return list(meets)
+    # def meets_entered(self):
+    #     meets = set()
+    #     for entry in self.entries:
+    #         meets.add(entry.meet)
+    #     print(meets)
+    #     return list(meets)
 
 
-"""
->>> for u, a in session.query(User, Address).\
-...                     filter(User.id==Address.user_id).\
-...                     filter(Address.email_address=='jack@google.com').\
-...                     all():
-...     print(u)
-...     print(a)
-<User(name='jack', fullname='Jack Bean', password='gjffdd')>
-<Address(email_address='jack@google.com')>
-"""
-# # ###### THESE TABLES ARE INITIALIZED BUT NOT MODIFIED GOING FORWARD
-# # ###### CONTAIN "Constant" Data or are used for referential integrity
+# #######################  EVENTDEFINITION CLASS #####################
 
 event_type_enum = Enum(*EVENT_TYPES, name="event_types")
 
@@ -940,13 +765,14 @@ class EventDefinition(db.Model):
     """
     __tablename__ = "event_defs"
 
-    code = db.Column(db.String(8), primary_key=True)
+    code = db.Column(db.String(6), primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     etype = db.Column(event_type_enum, nullable=False)
+    max_per_heat = db.Column(db.Integer, nullable=True)
 
     mdes = db.relationship("MeetDivisionEvent")
-    divisions = db.relationship("Division", secondary="meet_division_events")
-    meets = db.relationship("Meet", secondary="meet_division_events")
+    # divisions = db.relationship("Division", secondary="meet_division_events")
+    # meets = db.relationship("Meet", secondary="meet_division_events")
     entries = db.relationship("Entry", secondary="meet_division_events")
     # heats
 
@@ -957,7 +783,8 @@ class EventDefinition(db.Model):
         return "\n<EVENT_DEF {}, Name: {}, Type: {}>".format(
                 self.code,
                 self.name,
-                self.etype)
+                self.etype,
+                self.max_per_heat)
 
     @classmethod
     def generate_event_defs(cls, event_list):
@@ -967,14 +794,15 @@ class EventDefinition(db.Model):
         event_list is a tuple of event_dictionaries:
         eg: ({"code": "100M", "name": "100 Meter", "type": "sprint"})
         """
-        event_defs = []
+        edef_list = []
         for e_dict in event_list:
-            event_defs.append(cls(code=e_dict["code"],
-                              name=e_dict['name'],
-                              etype=e_dict['type']))
-        db.session.add_all(event_defs)
+            edef_list.append(cls(code=e_dict["code"],
+                                 name=e_dict['name'],
+                                 etype=e_dict['type'],
+                                 max_per_heat=e_dict['max_per_heat']))
+        db.session.add_all(edef_list)
         db.session.commit()
-        return event_defs
+        return edef_list
 
     def is_field(self):
         if self.etype in ['horzjump', 'vertjump', 'throw']:
@@ -985,11 +813,52 @@ class EventDefinition(db.Model):
         return not self.is_field()
 
     def is_indiv(self):
-        if self.etype != 'relay':
+        if self.etype is not 'relay':
             return True
         return False
 
 
+# #######################  EVENTORDERING CLASS #####################
+class EventOrdering(db.Model):
+    """ the order in which divisions participate in each event  can differ from
+        meet to meet """
+    __tablename__ = "event_ordering"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
+    event_code = db.Column(db.ForeignKey("event_defs.code"), nullable=False)
+    seq_num = db.Column(db.Integer, nullable=False)
+
+    event = db.relationship(
+            "EventDefinition", uselist=False, backref="event_orderings")
+    meet = db.relationship(
+            "Meet", uselist=False, back_populates="event_orderings")
+
+    @classmethod
+    def create_events_in_order(cls, meet, ev_code_order):
+
+        events = []
+        seq_num = 1
+        if not ev_code_order:  # None or empty list
+            events = EventDefinition.query.order_by('code').all()
+            for event in events:
+                e_o = EventOrdering(
+                        meet=meet, event_code=event.code, seq_num=seq_num)
+                db.session.add(e_o)
+                seq_num += 1
+        else:
+            for ev_code in ev_code_order:
+                event = EventDefinition.query.filter_by(code=ev_code).one()
+                events.append(event)
+                e_o = EventOrdering(
+                        meet=meet, event_code=ev_code, seq_num=seq_num)
+                db.session.add(e_o)
+                seq_num += 1
+        db.session.commit()
+        return events
+
+
+# #######################  DIVISION CLASS #####################
 gender_enum = Enum(*GENDERS, name="gender")
 grade_enum = Enum(*GRADES, name='grade')
 adult_enum = Enum(*ADULT_CHILD, name='adultchild')
@@ -999,71 +868,170 @@ class Division(db.Model):
     __tablename__ = "divisions"
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     gender = db.Column(gender_enum, nullable=False)
-    # In some meets, they don't separate kids out by grade, so null is ok
+    # In some meets, divisions are not determined by grade, so null is ok.
     grade = db.Column(grade_enum, nullable=True)
-    adult_child = db.Column(adult_enum, default='child', nullable=False)
+    code = db.Column(db.String(5), unique=True, nullable=False)
+    name = db.Column(db.String(20), unique=True, nullable=False)
 
-    mdes = db.relationship("MeetDivisionEvent")
-    meets = db.relationship("Meet", secondary="meet_division_events")
-    events = db.relationship("EventDefinition",
-                             secondary="meet_division_events")
-    athletes = db.relationship("Athlete")
-    schools = db.relationship("School", secondary="athletes")
-    entries = db.relationship("Entry", secondary="athletes")
+    # mdes = db.relationship(
+    #         "MeetDivisionEvent", uselist=True, back_populates="division")
+    # meets = db.relationship(
+    #         "Meet", secondary="meet_division_events", uselist=True,
+    #         back_populates="divisions")
+    # events = db.relationship(
+    #         "EventDefinition", secondary="meet_division_events", uselist=True,
+    #         back_populates="divisions")
+    athletes = db.relationship(
+            "Athlete", uselist=True, back_populates="division")
+    # schools = db.relationship(
+    #         "School", secondary="athletes", uselist=True,
+    #         back_populates="divisions")
+    # entries = db.relationship(
+    #         "Entry", secondary="athletes", uselist=True,
+    #         back_populates="division")
+
+    def __init__(self, gender, grade=None, adult_child='child',
+                 name=None, code=None):
+
+        if gender not in GENDERS:
+            raise TmsError(f"Illegal Gender: {gender}")
+        if grade:
+            if grade not in GRADES:
+                # A none grade is allowed
+                raise TmsError(f"Illegal Grade: {grade}")
+
+        self.gender = gender
+        self.grade = grade
+
+        if name:
+            self.name = name.title()
+        else:
+            self.name = self._derive_name(gender, grade, adult_child)
+
+        if code:
+            self.code = code.upper()
+        else:
+            self.code = self._derive_code(gender, grade)
 
     def __repr__(self):
         """ returns human-readable representation of Division object """
-        return "<DIVISION id#{}: {}>".format(self.id, self.longname())
+        return "<DIVISION id#{}: {} - {}>".format(
+            self.id, self.code, self.name)
 
-    def abbrev(self):
-        if self.grade:
-            return f"{self.grade}{self.gender}"
+    @staticmethod
+    def _derive_code(gender, grade=None):
+        if grade:
+            code = f"{grade}{gender}"
         else:
-            return f"{self.gender}"
+            code = f"{gender}"
+        return code.upper()
 
-    def longname(self):
-        # TO DO - change this to just "name" - It's too confusing.
-        gender_string = f"{DIV_NAME_DICT[self.adult_child][self.gender]}"
-        if self.grade:
-            return f"Grade {self.grade} {gender_string}"
+    @staticmethod
+    def _derive_name(gender, grade=None, adult_child="child"):
+
+        gender_string = f"{DIV_NAME_DICT[adult_child][gender]}"
+        if grade:
+            name = f"Grade {grade} {gender_string}"
         else:
-            return gender_string
+            name = gender_string
+        return name.title()
 
     @classmethod
-    def generate_divisions(cls, gender_list, grade_list):
+    def generate_grade_gender_divisions(cls, gender_list, grade_list):
         """
-        Side Effects: Writes to the database
-
         Generate a combination of divisions for every combination of genders
-        and grades. If a particular division already exists in the database,
-        do nothing.
-        >>> generate_divisions(gender_list=("M", "F"), grade_list=(6, 7, 8))
+        and grades and returns them in a list. If a particular division already
+        exists in the database, don't add it again, but do include in the
+        returned list.
+
+        SIDE EFFECT: adds and commits records to the database.
+
+        We assume that if there are numbered GRADES, that they the division is
+        for children and shoudl use the labels "boys" and "girls".
         """
         divs = []
         for gender_str in gender_list:
             for grade_str in grade_list:
-                if (grade_str.isnumeric() and
-                        (0 < int(grade_str) <= 12)):
-                    adult_child_str = "child"
-                else:
-                    adult_child_str = "adult"
+                if (not grade_str.isnumeric()
+                        or int(grade_str) < 1
+                        or int(grade_str) > 12):
+                    err_msg = (
+                        "Division Generation by grade/gender failed."
+                        + f" Grade:{grade_str}, gender:{gender_str}."
+                        + " Grade must be numeric and 12 or lower")
+                    raise TmsError(err_msg)
 
-                if Division.query.filter_by(gender=gender_str, grade=grade_str,
-                                            adult_child=adult_child_str
-                                            ).one_or_none():
-                    # this division was already in the database, so no need
-                    # to create a new object and  new db Rows
-                    continue
-                else:
+                # don't create a duplicate division
+                div = Division.query.filter_by(
+                        gender=gender_str,
+                        grade=grade_str).one_or_none()
+                if div is None:
                     div = Division(gender=gender_str,
                                    grade=grade_str,
-                                   adult_child=adult_child_str)
-                    divs.append(div)
-        db.session.add_all(divs)
+                                   adult_child="child")
+                    db.session.add(div)
+                divs.append(div)
         db.session.commit()
         return divs
-        # TODO Now, change our list back into an orderd list
 
+    @classmethod
+    def generate_gender_only_divisions(cls, gender_list):
+        divs = []
+        for gender in gender_list:
+            div = Division(gender=gender, adult_child="child")
+            db.session.add(div)
+            divs.append(div)
+        db.session.commit()
+        return divs
+
+
+# #######################  DIVORDERING CLASS #####################
+class DivOrdering(db.Model):
+    """ the order in which divisions participate in each event  can differ from
+        meet to meet """
+    __tablename__ = "div_orderings"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    meet_id = db.Column(db.ForeignKey("meets.id"), nullable=False)
+    div_id = db.Column(db.ForeignKey("divisions.id"), nullable=False)
+    seq_num = db.Column(db.Integer, nullable=False)
+
+    division = db.relationship(
+            "Division", uselist=False)
+    meet = db.relationship(
+            "Meet", uselist=False, back_populates="div_orderings")
+
+    def __repr__(self):
+        return "<DIVORDERING: id={self.id}, meet_id={meet_id}, " \
+               "div={self.division.code} seq_num={self.seq_num}".format(
+                self=self)
+
+    @classmethod
+    def create_divs_in_order(cls, meet, divcode_order):
+        """ Creates the division ordering for this meet and returns
+            the div objects corresponding to it in order in a list.
+        """
+        divs = []
+        seq_num = 1
+
+        if not divcode_order:  # none or empty list
+            divs = Division.query.order_by('code').all()
+            for div in divs:
+                d_o = DivOrdering(meet=meet, division=div, seq_num=seq_num)
+                db.session.add(d_o)
+                seq_num += 1
+        else:
+            for divcode in divcode_order:
+                div = Division.query.filter_by(code=divcode).one()
+                d_o = DivOrdering(meet=meet, division=div, seq_num=seq_num)
+                divs.append(div)
+                db.session.add(d_o)
+                seq_num += 1
+        db.session.commit()
+        return divs
+
+
+# #######################  USER  CLASS #####################
 
 user_role_enum = Enum(*USER_ROLES, name="user_roles")
 
@@ -1077,19 +1045,32 @@ class User(db.Model):
     email = db.Column(db.String(64), nullable=True)
     password = db.Column(db.String(64), nullable=True)
     school_id = db.Column(db.ForeignKey("schools.id"), nullable=True)
-    # TO DO - fix this to something less privileged by default
     role = db.Column(user_role_enum, nullable=False, default="coach")
 
-    school = db.relationship("School")
-    meets_owned = db.relationship("Meet", secondary="schools")
-    athletes_editable = db.relationship("Athlete", secondary="schools")
+    # TO DO - fix the following so the back_population doesn't happen for users
+    # associated with a school who are not in the "coaches" role
+    school = db.relationship(
+            "School", uselist=False, back_populates="coaches")
+    meets_managed = db.relationship(
+            "Meet", secondary="schools", uselist=True,
+            back_populates="manager_users")
 
     def __repr__(self):
         return "<USER #{}, {}, school={}, role={}".format(
             self.id, self.email, self.school, self.role)
 
+    @classmethod
+    def create_superuser(cls):
+        # TODO - get rid of this method and have a superuser be auto-created
+        # when table is first created
+        superuser = User(
+            email=SUPERUSER_EMAIL, password=SUPERUSER_PASSWORD,
+            role="superuser")
+        db.session.add(superuser)
+        db.session.commit()
 
-###############
+
+# ##############  HELPER FUNCTIONS ###########################
 # Helper functions
 def connect_to_db(app, db_uri="tms-dev", debug=True):
     """ Configure to use dev version of PostgreSQL DB & connect it to Flask app.

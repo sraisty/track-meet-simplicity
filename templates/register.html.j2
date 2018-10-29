@@ -13,7 +13,7 @@
                 Click to select your school
             </option>
             <option value="False">
-                My school isn't listed
+                &lt;My school isn't listed&gt;
             </option>
             {% for school in school_list %}
                 <option value="{{school.id}}">{{school.name}}</option>
@@ -34,9 +34,9 @@
     </div>
 
     <div class="form-group tms-get-school d-none">     
-        <label for="new_school_abbrev">School Abbreviation:</label>
-        <input type="text" id="new_school_abbrev" name="new_school_abbrev" class="form-control" placeholder="Enter the official abbreviation for your school" aria-describedby="school_abbrev_help" />
-        <small id="school_abbrev_help" class="form-text text-muted">Don't know your school's 3 or 4-character abbreviation? <a href="#">Found out here.</a>
+        <label for="new_school_code">School Code:</label>
+        <input type="text" id="new_school_code" name="new_school_code" class="form-control" placeholder="Enter the official track & field code for your school" aria-describedby="school_code_help" />
+        <small id="school_code_help" class="form-text text-muted">Don't know your school's 3 or 4-character code? <a href="#">Found out here.</a>
         </small>
     </div>
 

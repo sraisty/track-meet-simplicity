@@ -127,17 +127,16 @@ def parse_entry(tokens, meet):
         return
 
     # translate the HyTek event names into TMS event codes
-    tms_event_code = ht_event_translator.get(ht_event_code, ht_event_code)
-
+    event_code = ht_event_translator.get(ht_event_code, ht_event_code)
 
     q = MeetDivisionEvent.query
     try:
         mde = q.filter_by(meet_id=meet.id,
-                          event_code=tms_event_code,
+                          event_code=event_code,
                           div_id=athlete.division.id).one()
     except NoResultFound:
         raise TmsError("MDE doesn't exist: meet #{}, event {}, div {}".format(
-            meet.id, tms_event_code, athlete.division.abbrev()))
+            meet.id, event_code, athlete.division.code))
 
     entry = Entry(athlete=athlete, mde=mde)
     # we need to commit here, or else we can't see the event in the below call
@@ -193,10 +192,10 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
     # add the school to the database. Note: the school must be committed to the
     # database before adding the athlete, or an Exception will result.
     school = School.query.filter_by(name=team_name,
-                                    abbrev=team_code).one_or_none()
+                                    code=team_code).one_or_none()
     if not school:
         warning(f"Unknown School Found: {team_name}, code:{team_code}")
-        school = School(name=team_name, abbrev=team_code)
+        school = School(name=team_name, code=team_code)
         db.session.add(school)
         db.session.commit()
         warning(f"Added new school: {team_name}, code:{team_code}")
@@ -221,7 +220,7 @@ def add_athlete_to_db(first_name, middle, last_name, gender,
         # TODO . In theory this should never happen if the first query, to
         # see if athlete was already in the db.  Consolidate that query with
         # the following and figure out why the below sometimes still happens.
-        error("Tried adding duplicate athlete: {},  {}, {}, {}, {}, {}".format(
+        error("Tried adding duplicate athlete: {},  {}, {}, {}, {}".format(
                 first_name, last_name, gender, grade, team_code))
         db.session.rollback()
         return

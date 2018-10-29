@@ -6,7 +6,7 @@
   </a>
   : {{ mde.meet.date.strftime("%B %d, %Y") }}
   </h1>
-  <h2>{{ mde.event.name }}: {{ mde.division.longname() }}</h2>
+  <h2>{{ mde.event.name }}: {{ mde.division.name }}</h2>
   <div class="card">
     <div class="card-body">
       {% if mde.event.is_track() %}

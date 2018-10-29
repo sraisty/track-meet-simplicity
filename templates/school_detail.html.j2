@@ -11,14 +11,14 @@
 {% block nav2_subtitle %}
     <div class="d-flex justify-content-md-between flex-wrap">
         <div>
-            Code: {{ school.abbrev }} 
+            Code: {{ school.code }} 
         </div>
 
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
 
     <div>Divisions: 
         {% for division in school.divisions %}
-            {{division.abbrev()}},
+            {{ division.code }},
         {% endfor %}
     </div>
 {% endblock nav2_subtitle %}

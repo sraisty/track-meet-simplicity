@@ -11,7 +11,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 import requests
 
 from model import (connect_to_db, db, User, Meet, Athlete, Entry,
-                   Division, School, MeetDivisionEvent)
+                   School, MeetDivisionEvent)
 
 from util import error, warning, info
 # from model import more stuff
@@ -61,17 +61,16 @@ def do_login():
 
     if user is None:
         # bad login
-        flash("ERROR: Incorrect email address or password. Try again, or <a href='/register'>sign up</a> as a new user.",
+        flash("Try again, or <a href='/register'>sign up</a> as a new user.",
               "danger")
         return redirect(url_for('show_login_form'))
 
     # Successful login
     session['user_id'] = user.id
     session['user_email'] = user.email
-
     session['user_school_id'] = user.school.id
     session['user_school_name'] = user.school.name
-    session['admin_user'] = True
+    # session['user_role'] = user.role
 
     flash("Successfully logged in. Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for('index'))
@@ -101,12 +100,12 @@ def do_register():
     password = request.form["password"]
     school_id = request.form.get('school_id')
 
-    if school_id == "False":
+    if school_id is None:
         # user is entering a new school in the form
         new_school_name = request.form.get('new_school_name')
-        new_school_abbrev = request.form.get('new_school_abbrev')
-        # Our form shouldn't allow illegal values for new_school_name or abbrev
-        new_school = School(name=new_school_name, abbrev=new_school_abbrev)
+        new_school_code = request.form.get('new_school_code')
+        # Our form shouldn't allow illegal values for new_school_name or code
+        new_school = School(name=new_school_name, code=new_school_code)
         db.session.add(new_school)
         db.session.commit()
         school_id = new_school.id
@@ -191,24 +190,27 @@ def show_new_meet_form():
 
 @app.route('/meets/do-new-meet', methods=['POST'])
 def do_new_meet_form():
-    # Get form variables
-    name = request.form["name"]
-    date = request.form["date"]
-    description = request.form["description"]
-    host_school = request.form["host_school"]
-    max_entries_per_athlete = request.form["max_entries_per_athlete"]
-    max_team_entries_per_event = request.form["max_team_entries_per_event"]
-    max_relays_per_athlete = request.form["max_relays_per_athlete"]
+    # # Get form variables
+    # name = request.form["name"]
+    # date = request.form["date"]
+    # description = request.form["description"]
+    # host_school = request.form["host_school"]
+    # max_entries_per_athlete = request.form["max_entries_per_athlete"]
+    # max_relays_per_athlete = request.form["max_relays_per_athlete"]
+    # max_teammates_per_event = request.form["max_team_entries_per_event"]
+    # max_heats_per_mde = 3request.form["max_heats_per_mde"]
+    # # max_heats_per_mde = request.form["max_heats_per_mde"]
 
-    max_athletes_per_heat = 8
-    max_heats_per_mde = 3
+    # ev_code_list = request.form["ev_code_list"]
+    # div_code_list = request.form["div_code_list"]
 
-    # allowed_divisions and  their order
-    # selected_events and their order
     # seeding tiebreakers
     # heat assignment method
     # lane/position assignment method
     # meet status = unpublished?
+
+    meet = Meet.init_meet(request.form)
+    meet.status = "Unpublished"
 
     flash("New meet created!", "success")
     return (redirect(url_for('show_all_meets')))
@@ -234,13 +236,13 @@ def show_enter_meet_form(meet_id):
 @app.route('/meets/<int:meet_id>/school/<int:school_id>/edit_entries')
 @app.route('/meets/<int:meet_id>/edit_entries')
 def edit_meet_entries(meet_id, school_id=None):
-    if school_id==None:
+    if school_id is None:
         school_id = session['school.id']
 
     meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
     return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
             meet.id)
-    return render_template('meet_detail.html.j2', meet=meet)
+    # return render_template('meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
@@ -248,9 +250,7 @@ def show_mde_detail(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
     # for this function, but maybe it should be in the URL anyway ?
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
-    templ = render_template('mde_detail.html.j2', mde=mde)
-    # import ipdb; ipdb.set_trace()
-    return templ
+    return render_template('mde_detail.html.j2', mde=mde)
 
 
 @app.route('/athletes')
@@ -281,7 +281,7 @@ def show_all_schools():
 
 @app.route('/schools/<int:school_id>')
 def show_school_detail(school_id):
-    school = School.query.get(school_id)
+    school = School.query.get(id)
     return render_template('school_detail.html.j2', school=school)
 
 
@@ -301,7 +301,7 @@ def edit_school_detail(school_id):
 
 
 @app.errorhandler(404)
-def page_not_found(error):
+def page_not_found(err):
     return render_template('page_not_found.html.j2'), 404
 
 

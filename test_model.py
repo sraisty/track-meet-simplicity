@@ -9,34 +9,20 @@ import unittest
 from sqlalchemy.exc import IntegrityError, DataError
 
 from model import (
-        db, Division, School, EventDefinition, Meet, MeetDivisionEvent,
-        Athlete, Entry, GENDERS, GRADES, EVENT_DEFS, INFINITY_SECONDS,
+        db, TmsApp, Division, School, EventDefinition, Meet, MeetDivisionEvent,
+        Athlete, Entry, EventOrdering, DivOrdering, Heat, User,
+        GENDERS, MIDDLE_SCHOOL_GRADES, GRADES, EVENT_DEFS, INFINITY_SECONDS,
         TmsError)
 
 from server import app
 
 from test_utils import (
-    teardown_test_db_app, setup_test_app_db, init_tms, init_meet)
+    teardown_test_db_app, setup_test_app_db, EXAMPLE_MEETS, SMALL_TEST_MEETS)
 
 
 # We are not importing the following 'constants' from init_data because
 # we don't want these unit tests to break when we one day add more events,
 # more grades, etc.
-
-
-EXAMPLE_MEETS = ({"name": "A Meet from the Past",
-                  "date": "August 5, 2018",
-                  "status": "Completed"},
-                 {"name": "WVAL League Practice Meet #1",
-                  "date": "April 15, 2019"},
-                 {"name": "WVAL League Practice Meet #2",
-                  "date": "April 25, 2019"},
-                 {"name": "WVAL League Practice Meet #3",
-                  "date": "May 8, 2019"},
-                 {"name": "Santa Clara County Middle School Championships",
-                  "date": "May 15, 2019"},
-                 {"name": "Central Coast Section Middle School Championships",
-                  "date": "May 31, 2019"})
 
 
 class TestDatabaseEmpty(unittest.TestCase):
@@ -45,6 +31,7 @@ class TestDatabaseEmpty(unittest.TestCase):
     """
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
     def tearDown(self):
@@ -72,11 +59,13 @@ class TestDatabaseEmpty(unittest.TestCase):
         self.assertEqual(0, School.query.count())
 
 
-class TestMeet(unittest.TestCase):
+class TestMeetConstructor(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
+        TmsApp()
 
     def tearDown(self):
         teardown_test_db_app()
@@ -91,7 +80,7 @@ class TestMeet(unittest.TestCase):
         m = Meet.query.get(id)
         self.assertTrue(m)
         self.assertEqual(m.name, "WVAL League Practice Meet #1")
-        self.assertEqual(m.status, "Accepting Entries")
+        self.assertEqual(m.status, "Unpublished")
 
     def test_bad_create_just_name(self):
         meet1 = Meet(name="My Meet Name")
@@ -114,7 +103,7 @@ class TestMeet(unittest.TestCase):
         meet1 = Meet(name="WVAL League Practice Meet #1",
                      date="April 15, 2019")
         school1 = School(name="RJ Fisher Middle School",
-                         abbrev="RJFM",
+                         code="RJFM",
                          city="Los Gatos",
                          state="CA")
         meet1.host_school = school1
@@ -122,11 +111,11 @@ class TestMeet(unittest.TestCase):
         db.session.commit()
 
         m = Meet.query.first()
-        self.assertEqual(m.status, "Accepting Entries")
+        self.assertEqual(m.status, "Unpublished")
         # test relationship from meet to host_school
-        self.assertEqual(m.host_school.abbrev, "RJFM")
+        self.assertEqual(m.host_school.code, "RJFM")
 
-        sch = School.query.filter_by(abbrev="RJFM").one()
+        sch = School.query.filter_by(code="RJFM").one()
         self.assertTrue(sch)
         self.assertEqual(sch.city, "Los Gatos")
         self.assertEqual(sch.state, "CA")
@@ -146,105 +135,262 @@ class TestMeet(unittest.TestCase):
         db.session.commit()
         self.assertEqual(Meet.query.count(), 5)
 
-    def test_populate_example_meets(self):
-        populate_example_meets(EXAMPLE_MEETS)
-        self.assertEqual(Meet.query.count(), 6)
 
-    def test_get_meet_selects(self):
-        populate_example_meets(EXAMPLE_MEETS)
-        self.assertEqual(3,
-                         Meet.query.filter(Meet.name.like("%WVAL%")).count())
-        q = Meet.query.filter_by(status="Completed")
+class TestInitMeet(unittest.TestCase):
+
+    def setUp(self):
+        setup_test_app_db()
+        db.create_all()
+        self.client = app.test_client()
+        TmsApp()
+
+    def tearDown(self):
+        teardown_test_db_app()
+
+    def test_init_meet_just_gender_divs_1(self):
+
+        meet = Meet.init_meet(
+                {
+                    "name": "Meet with Just a Male and Female Div & 1 event",
+                    "date": "March 8, 2019",
+                    "division_order": ["M", "F"],
+                    "event_order": ["1600M"]
+                })
+        self.assertEqual(DivOrdering.query.count(), 2)
+        self.assertEqual(len(meet.divisions), 2)
+        self.assertEqual(meet.divisions[0].code, "M")
+        self.assertEqual(meet.divisions[0].name, "Boys")
+        self.assertEqual(meet.divisions[1].code, "F")
+        self.assertEqual(meet.divisions[1].name, "Girls")
+
+        self.assertEqual(EventOrdering.query.count(), 1)
+        self.assertEqual(meet.events[0].name, "1600 Meter")
+        self.assertEqual(meet.events[0].code, "1600M")
+
+
+    def test_init_meet_just_gender_divs_2(self):
+        meet = Meet.init_meet(
+                {
+                    "name": "Meet with Just a Male and Female Div & 1 event",
+                    "date": "March 8, 2019",
+                    "division_order": ["M", "F"],
+                    "event_order": ["1600M"]
+                },)
+        self.assertEqual(MeetDivisionEvent.query.count(), 2)
+
+        mdes = MeetDivisionEvent.query.order_by(
+                    MeetDivisionEvent.seq_num)
+
+        self.assertEqual(mdes[0].division.code, "M")
+        self.assertEqual(mdes[0].division.name, "Boys")
+        self.assertEqual(mdes[0].event.name, "1600 Meter")
+        self.assertEqual(mdes[0].event.code, "1600M")
+        self.assertEqual(mdes[0].seq_num, 1)
+
+        self.assertEqual(mdes[1].division.code, "F")
+        self.assertEqual(mdes[1].division.name, "Girls")
+        self.assertEqual(mdes[1].event.name, "1600 Meter")
+        self.assertEqual(mdes[1].event.code, "1600M")
+        self.assertEqual(mdes[1].seq_num, 2)
+
+    def init_small_meet_with_div_event_orders(self):
+        meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['7F', '7M'],
+                'event_order': ['PV', '200M', '4x400M']})
+
+    def test_init_meet_thrice(self):
+        meet0 = Meet.init_meet(EXAMPLE_MEETS[0])
+        meet1 = Meet.init_meet(EXAMPLE_MEETS[1])
+        meet2 = Meet.init_meet(EXAMPLE_MEETS[2])
+        self.assertEqual(Meet.query.count(), 3)
+
+    def test_init_all_meets(self):
+        for meet_info in EXAMPLE_MEETS:
+            meet = Meet.init_meet(meet_info)
+
+        self.assertEqual(len(EXAMPLE_MEETS)-1,
+                         Meet.query.filter(Meet.name.like("%PCAL%")).count())
+        q = Meet.query.filter_by(status="Unpublished")
         self.assertEqual(q.count(), 1)
-        self.assertEqual(q.first().name, "A Meet from the Past")
+        self.assertEqual(q.first().name, "Unpublished Meet")
 
     def test_meet_status(self):
         pass
 
-    def test_meet_lifecycle(self):
-        pass
 
-    def test_order_of_events(self):
-        pass
-
-    def test_order_of_divs_in_event(self):
-        pass
-
-
-class testMeetDivisionEvent(unittest.TestCase):
+class TestMeetInitMdes(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
-        meet1 = Meet(name="Meet #1")
-        db.session.add(meet1)
-        db.session.commit()
-        self.meet1 = Meet.query.filter_by(name="Meet #1").one()
 
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_mde_generate_mdes_one_meet_and_count(self):
-        Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-        divs = Division.query.all()
-        EventDefinition.generate_event_defs(EVENT_DEFS)
-        events = EventDefinition.query.all()
-        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
-        num_mdes = MeetDivisionEvent.query.count()
-        self.assertEqual(
-                num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
+    def test_count_mdes(self):
+        TmsApp()
 
-    def test_mde_generate_mdes_with_returned_divs_and_events(self):
-        divs = Division.generate_divisions(gender_list=GENDERS,
-                                           grade_list=GRADES)
-        events = EventDefinition.generate_event_defs(EVENT_DEFS)
-        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['7F', '7M'],
+                'event_order': ['PV', '200M', '4x400M']})
+        num_mdes_overall = MeetDivisionEvent.query.count()
+        num_mdes_this_meet = MeetDivisionEvent.query.filter_by(
+                meet=self.meet).count()
+        self.assertEqual(num_mdes_overall, num_mdes_this_meet)
+        self.assertEqual(num_mdes_this_meet, 6)
+
+    def test_count_DivOrdering(self):
+        TmsApp()
+
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['7F', '7M'],
+                'event_order': ['PV', '200M', '4x400M']})
+        self.assertEqual(DivOrdering.query.filter_by(
+                meet=self.meet).count(), 2)
+
+    def test_count_EventOrdering(self):
+        TmsApp()
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['7F', '7M'],
+                'event_order': ['PV', '200M', '4x400M']})
+        self.assertEqual(EventOrdering.query.filter_by(
+                meet=self.meet).count(), 3)
+        self.assertEqual(EventDefinition.query.count(), len(EVENT_DEFS))
+
+    def test_mde_sequence(self):
+        TmsApp()
+
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['7F', '7M'],
+                'event_order': ['PV', '200M', '4x400M']})
+        q_mdes = MeetDivisionEvent.query.filter_by(meet=self.meet)
+        mdes = q_mdes.order_by(MeetDivisionEvent.seq_num)
+
+        self.assertEqual(mdes[0].event.code, "PV")
+        self.assertEqual(mdes[0].division.code, "7F")
+        self.assertEqual(mdes[1].event.code, "PV")
+        self.assertEqual(mdes[1].division.code, "7M")
+
+        self.assertEqual(mdes[2].event.code, "200M")
+        self.assertEqual(mdes[2].division.code, "7F")
+        self.assertEqual(mdes[3].event.code, "200M")
+        self.assertEqual(mdes[3].division.code, "7M")
+
+        self.assertEqual(mdes[4].event.code, "4x400M")
+        self.assertEqual(mdes[4].division.code, "7F")
+        self.assertEqual(mdes[5].event.code, "4x400M")
+        self.assertEqual(mdes[5].division.code, "7M")
+
+    def test_init_meet_no_event_div_orders(self):
+        # if we don't provide dictionary with 'event_order' or 'division_order'
+        # keys, then we assume the meet includes all possible EventDefinitions
+        # and Divisions already defined.
+        TmsApp()
+        meet = Meet.init_meet({'name': 'TestMeet', 'date': "August 5, 2018"})
+
         num_mdes = MeetDivisionEvent.query.count()
         self.assertEqual(
-                num_mdes, len(EVENT_DEFS) * len(GENDERS) * len(GRADES))
+                num_mdes,
+                len(EVENT_DEFS) * len(GENDERS) *
+                # There are also all-M and all-F divisions.  We didn't provide
+                # a division_list to init_meet, so we're using ALL 8 divisions
+                (len(MIDDLE_SCHOOL_GRADES) + 1))
+        self.assertEqual(
+                DivOrdering.query.filter_by(meet=meet).count(),
+                len(GENDERS) * (len(MIDDLE_SCHOOL_GRADES)+1))
+        self.assertEqual(
+                EventOrdering.query.filter_by(meet=meet).count(),
+                len(EVENT_DEFS))
 
     def test_mde_meet_division_event_relationships(self):
-        divs = Division.generate_divisions(gender_list=GENDERS,
-                                           grade_list=GRADES)
-        events = EventDefinition.generate_event_defs(EVENT_DEFS)
-        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
+        TmsApp()
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['6F', '7F', '8F', '6M', '7M', '8M'],
+                'event_order': ['PV', '200M', '4x400M', 'HJ']})
 
         g7 = Division.query.filter_by(grade="7", gender="F").one()
         hj = EventDefinition.query.filter_by(code="HJ").one()
 
-        q = MeetDivisionEvent.query.filter_by(meet_id=self.meet1.id)
-        q = q.filter_by(div_id=g7.id, event_code=hj.code)
-        meet1_g7_hj = q.one()
+        q = MeetDivisionEvent.query.filter_by(meet=self.meet)
+        q = q.filter_by(division=g7, event=hj)
+        meet_g7_hj = q.one()
 
-        self.assertEqual(meet1_g7_hj.division.abbrev(), "7F")
-        self.assertEqual(meet1_g7_hj.event.name, "High Jump")
-        self.assertEqual(meet1_g7_hj.meet.name, "Meet #1")
+        self.assertEqual(meet_g7_hj.division.code, "7F")
+        self.assertEqual(meet_g7_hj.event.name, "High Jump")
+        self.assertEqual(meet_g7_hj.meet.name, "TestMeet")
 
 
-class TestRelationships(unittest.TestCase):
+    def test_event_to_mde_relationship(self):
+        TmsApp()
+        self.meet = Meet.init_meet({
+                'name': 'TestMeet',
+                'date': "August 5, 2018",
+                'division_order': ['6F', '7F', '8F', '6M', '7M', '8M'],
+                'event_order': ['PV', '200M', '4x400M', 'HJ']})
+        e = EventDefinition.query.filter_by(code="1600M").all()
+
+class TestTmsAppInit(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
-        self.meet1 = Meet(name="Meet #1")
-        db.session.add(self.meet1)
-        db.session.commit()
 
-        School.init_unattached_school()
-
-        Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
-        divs = Division.query
-        EventDefinition.generate_event_defs(EVENT_DEFS)
-        events = EventDefinition.query
-        MeetDivisionEvent.generate_mdes(self.meet1, divs, events)
+        # self.meet1 = Meet(name="Meet #1")
+        # db.session.add(self.meet1)
+        # db.session.commit()
 
     def tearDown(self):
         teardown_test_db_app()
 
-    def test_event_to_mde_relationship(self):
-        e = EventDefinition.query.filter_by(code="1600M").one()
-        self.assertEqual(6, len(e.mdes))
+    def test_TmsApp(self):
+        # everything should be empty before
+        self.assertEqual(Meet.query.count(), 0)
+        self.assertEqual(Athlete.query.count(), 0)
+        self.assertEqual(Entry.query.count(), 0)
+        self.assertEqual(Heat.query.count(), 0)
+        self.assertEqual(MeetDivisionEvent.query.count(), 0)
+        self.assertEqual(School.query.count(), 0)
+        self.assertEqual(EventDefinition.query.count(), 0)
+        self.assertEqual(EventOrdering.query.count(), 0)
+        self.assertEqual(Division.query.count(), 0)
+        self.assertEqual(DivOrdering.query.count(), 0)
+        self.assertEqual(User.query.count(), 0)
+
+        TmsApp()
+
+        # After TmsApp, User, School, EventDef and Division
+        # tables should have data, but no other tables.
+        self.assertEqual(User.query.count(), 1)
+        self.assertEqual(School.query.count(), 1)
+        self.assertEqual(
+                EventDefinition.query.count(), len(EVENT_DEFS))
+        self.assertEqual(
+            Division.query.count(),
+            (len(GENDERS) * len(MIDDLE_SCHOOL_GRADES)) + len(GENDERS))
+
+        self.assertEqual(Meet.query.count(), 0)
+        self.assertEqual(Athlete.query.count(), 0)
+        self.assertEqual(Entry.query.count(), 0)
+        self.assertEqual(Heat.query.count(), 0)
+        self.assertEqual(MeetDivisionEvent.query.count(), 0)
+        self.assertEqual(EventOrdering.query.count(), 0)
+        self.assertEqual(DivOrdering.query.count(), 0)
+
 
     # def test_creating_entries_from_meet_div_event(self):
         """ NOTE THAT THIS APPROACH CREATES A CONFLICT IN SQLALCHEMY
@@ -271,9 +417,9 @@ class TestAthlete(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
-        School.init_unattached_school()
-        Division.generate_divisions(gender_list=GENDERS, grade_list=GRADES)
+        TmsApp()
 
     def tearDown(self):
         teardown_test_db_app()
@@ -281,38 +427,38 @@ class TestAthlete(unittest.TestCase):
     def test_athlete_constructor(self):
 
         sue = Athlete("Susan", "K", "Raisty", "F", "7")
-        # sue.school = unattached
+        # school was not provided, so should be unattached
         db.session.add(sue)
         db.session.commit()
 
         ath = Athlete.query.filter_by(
                     fname="Susan", lname="Raisty").one()
         self.assertEqual(ath.school.name, "Unattached")
-        self.assertEqual(ath.school.abbrev, "UNA")
+        self.assertEqual(ath.school.code, "UNA")
         self.assertIsNone(ath.phone)
-        self.assertEqual(ath.division.abbrev(), "7F")
-        self.assertEqual(ath.division.longname(), "Grade 7 Girls")
+        self.assertEqual(ath.division.code, "7F")
+        self.assertEqual(ath.division.name, "Grade 7 Girls")
 
     def test_athlete_get_full_name(self):
-        fullname = Athlete.get_full_name("Susan", "Kathleen", "Raisty")
+        fullname = Athlete._get_full_name("Susan", "Kathleen", "Raisty")
         self.assertEqual("Susan K. Raisty", fullname)
 
-        fullname = Athlete.get_full_name("Jane", "", "Doe")
+        fullname = Athlete._get_full_name("Jane", "", "Doe")
         self.assertEqual(fullname, "Jane Doe")
 
-        fullname = Athlete.get_full_name("William", "H.", "Macy")
+        fullname = Athlete._get_full_name("William", "H.", "Macy")
         self.assertEqual(fullname, "William H. Macy")
 
-        fullname = Athlete.get_full_name("William", "H", "Macy")
+        fullname = Athlete._get_full_name("William", "H", "Macy")
         self.assertEqual(fullname, "William H. Macy")
 
         with self.assertRaises(Exception) as cm:
-            Athlete.get_full_name("", "", "Raisty")
+            Athlete._get_full_name("", "", "Raisty")
         err = cm.exception
         self.assertEqual(str(err), "Must provide first and last name.")
 
         with self.assertRaises(Exception) as cm:
-            Athlete.get_full_name("Susan", "", "")
+            Athlete._get_full_name("Susan", "", "")
         err = cm.exception
         self.assertEqual(str(err), "Must provide first and last name.")
 
@@ -320,28 +466,29 @@ class TestAthlete(unittest.TestCase):
 class TestEntryMarks(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
-        School.init_unattached_school()
-        e_1600m = EventDefinition(
-                code="1600M", name="1600 Meters", etype="distance")
-        e_lj = EventDefinition(code="LJ", name="Long Jump", etype="horzjump")
-        div = Division(grade="7", gender="F", adult_child="child")
-        self.assertEqual(div.longname(), "Grade 7 Girls")
-        self.assertEqual(div.abbrev(), "7F")
 
-        meet = Meet(name="TestEntryMarks Meet")
-        db.session.add_all([e_1600m, e_lj, div, meet])
-        db.session.commit()
+        TmsApp()
 
-        mde_1600m = MeetDivisionEvent(meet=meet, division=div, event=e_1600m)
-        mde_longjump = MeetDivisionEvent(meet=meet, division=div, event=e_lj)
+        self.meet = Meet.init_meet({
+                'name': 'TestEntryMarks Meet',
+                'date': "August 5, 2018",
+                'division_order': ['7F'],
+                'event_order': ['1600M', 'LJ']})
 
         athlete = Athlete("Sue", "K", "Raisty", "F", "7")
-        db.session.add_all([mde_1600m, mde_longjump, athlete])
+        db.session.add(athlete)
         db.session.commit()
         self.athlete = athlete
-        self.mde_1600m = mde_1600m
-        self.mde_longjump = mde_longjump
+
+        self.mde_1600m = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="1600M").one()
+        self.mde_longjump = MeetDivisionEvent.query.filter_by(
+                meet=self.meet,
+                event_code="LJ").one()
+
 
     def tearDown(self):
         teardown_test_db_app()
@@ -416,9 +563,11 @@ class TestEntryToEventRelationships(unittest.TestCase):
     # TODO = Move this to the test-model file
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
-        (divs, events) = init_tms()
-        self.meet1 = init_meet(EXAMPLE_MEETS[0], divs, events)
+
+        TmsApp()
+        self.meet1 = Meet.init_meet(EXAMPLE_MEETS[0])
 
     def tearDown(self):
         teardown_test_db_app()
@@ -426,7 +575,7 @@ class TestEntryToEventRelationships(unittest.TestCase):
     def test_entry_to_event_relationship(self):
         veronica = Athlete("Veronica", "", "Rodriguez", "F", "6")
         self.assertIsNotNone(veronica)
-        self.assertEqual(veronica.division.abbrev(), "6F")
+        self.assertEqual(veronica.division.code, "6F")
         db.session.add(veronica)
         db.session.commit()
 
@@ -456,6 +605,7 @@ class TestEventDefinition(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
     def tearDown(self):
@@ -476,8 +626,11 @@ class TestEventDefinition(unittest.TestCase):
                             name="3000M Steeplechase",
                             etype="bananas")
         db.session.add(e)
+        with self.assertRaises(DataError):
+            db.session.commit()
 
     def test_generate_event_defs(self):
+        # this happens as part of TmsApp()
         EventDefinition.generate_event_defs(EVENT_DEFS)
 
         q = EventDefinition.query
@@ -498,6 +651,7 @@ class TestEventDefinition(unittest.TestCase):
 class TestEventDefinitionTypes(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
         EventDefinition.generate_event_defs(EVENT_DEFS)
@@ -569,6 +723,7 @@ class TestSchools(unittest.TestCase):
 
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
     def tearDown(self):
@@ -579,31 +734,54 @@ class TestSchools(unittest.TestCase):
         self.assertEqual(num_schools, 0)
 
     def test_new_school_minimal(self):
-        lghs = School(name="Los Gatos High School", abbrev="LOGA")
+        lghs = School(name="Los Gatos High School", code="LOGA")
         db.session.add(lghs)
         db.session.commit()
         self.assertEqual(School.query.count(), 1)
         s = School.query.first()
         self.assertEqual(s.name, "Los Gatos High School")
-        self.assertEqual(s.abbrev, "LOGA")
+        self.assertEqual(s.code, "LOGA")
 
     def test_new_school_all_info(self):
-        lghs = School(name="Los Gatos High School", abbrev="LOGA",
-                      city="Los Gatos", state="CA")
+        lghs = School(name="Los Gatos High School", code="LOGA",
+                      city="Los Gatos", state="CA",
+                      league="BVAL", section="SCC")
         db.session.add(lghs)
         db.session.commit()
         self.assertEqual(School.query.count(), 1)
         s = School.query.first()
         self.assertEqual(s.name, "Los Gatos High School")
-        self.assertEqual(s.abbrev, "LOGA")
+        self.assertEqual(s.code, "LOGA")
         self.assertEqual(s.city, "Los Gatos")
         self.assertEqual(s.state, "CA")
+        self.assertEqual(s.league, "BVAL")
+        self.assertEqual(s.section, "SCC")
 
     def test_unattached_school(self):
         School.init_unattached_school()
         unattachedSchool = School.query.get(1)
         self.assertEqual(unattachedSchool.name, "Unattached")
-        self.assertEqual(unattachedSchool.abbrev, "UNA")
+        self.assertEqual(unattachedSchool.code, "UNA")
+
+    def test_host_school(self):
+        TmsApp()
+        lghs = School(name="Los Gatos High School", code="LOGA")
+        db.session.add(lghs)
+        db.session.commit()
+
+        meet1 = Meet.init_meet({"name": "Meet #1",
+                                "date": "October 28, 2018"})
+        meet1.host_school = lghs
+        meet2 = Meet.init_meet({"name": "Meet #2",
+                                "date": "November 5, 2018"})
+        meet2.host_school = lghs
+
+        self.assertIn(meet1, lghs.meets_hosted)
+        self.assertIn(meet2, lghs.meets_hosted)
+        self.assertEqual(len(lghs.meets_hosted), 2)
+
+        self.assertEqual(lghs.meets_hosted[0].name, "Meet #1")
+        self.assertEqual(lghs.meets_hosted[1].name, "Meet #2")
 
     # def test_school_to_division_relationship(self):
     #     pass
@@ -614,13 +792,11 @@ class TestSchools(unittest.TestCase):
     # def test_school_to_entries_relationship(self):
     #     pass
 
-    # def test_hostschool_to_meet_relationship(self):
-    #     pass
-
 
 class TestDivision(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
+        db.create_all()
         self.client = app.test_client()
 
         self.boys8 = Division(gender="M", grade="8")
@@ -635,28 +811,22 @@ class TestDivision(unittest.TestCase):
         pass
 
     def test_division_create_and_query_get(self):
-        # shoul match the boys.8 already in the databse
+        # shoul match the "boys8" already in the databse
         q = Division.query.filter_by(gender="M", grade="8")
         self.assertEqual(q.count(), 1)
         self.assertIs(q.one(), self.boys8)
 
     def test_create_division_illegal_gender(self):
-        mixed_gr8 = Division(gender="X", grade="8")
-        db.session.add(mixed_gr8)
-        with self.assertRaises(DataError):
-            db.session.commit()
+        with self.assertRaises(TmsError):
+            mixed_gr8 = Division(gender="X", grade="8")
 
     def test_create_division_illegal_grade_num(self):
-        boys_gr3 = Division(gender="M", grade="3")
-        db.session.add(boys_gr3)
-        with self.assertRaises(DataError):
-            db.session.commit()
+        with self.assertRaises(TmsError):
+            boys_gr3 = Division(gender="M", grade="3")
 
     def test_create_division_illegal_grade_letters(self):
-        boys_senior = Division(gender="M", grade="Senior")
-        db.session.add(boys_senior)
-        with self.assertRaises(DataError):
-            db.session.commit()
+        with self.assertRaises(TmsError):
+            boys_senior = Division(gender="M", grade="Senior")
 
     def test_get_by_gender_grade(self):
         div1 = Division.query.filter_by(gender="M", grade="8").one()
@@ -674,21 +844,22 @@ class TestDivision(unittest.TestCase):
             Division.query.filter_by(gender="X", grade="6").one()
 
     def test_get_div_name(self):
-        self.assertEqual(self.boys8.longname(), "Grade 8 Boys")
+        self.assertEqual(self.boys8.name, "Grade 8 Boys")
 
     def test_div_without_grade(self):
         div = Division(gender="F", adult_child="child")
-        self.assertEqual(div.longname(), "Girls")
-        self.assertEqual(div.abbrev(), "F")
+        self.assertEqual(div.name, "Girls")
+        self.assertEqual(div.code, "F")
         db.session.add(div)
         db.session.commit()
 
-    def test_generate_divisions(self):
-        num_grades = len(GRADES)
-        num_genders = len(GENDERS)
-        Division.generate_divisions(grade_list=GRADES, gender_list=GENDERS)
+    def test_generate_grade_gender_divisions(self):
+
+        Division.generate_grade_gender_divisions(
+                grade_list=GRADES, gender_list=GENDERS)
+
         num_divisions = Division.query.count()
-        self.assertEqual(num_divisions, num_grades * num_genders)
+        self.assertEqual(num_divisions, len(GRADES) * len(GENDERS))
 
         num_divs_for_males = Division.query.filter_by(gender="M").count()
         self.assertEqual(num_divs_for_males, len(GRADES))
@@ -698,13 +869,6 @@ class TestDivision(unittest.TestCase):
 
 
 # ############## HELPER FUNCTIONS ###############
-def populate_example_meets(meet_list):
-    for meet_dict in meet_list:
-        meet = Meet(name=meet_dict['name'], date=meet_dict['date'],
-                    status=meet_dict.get('status', 'Accepting Entries'))
-
-        db.session.add(meet)
-    db.session.commit()
 
 
 if __name__ == "__main__":

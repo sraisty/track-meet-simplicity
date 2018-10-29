@@ -8,7 +8,7 @@ from parse_hytek import parse_hytek_file
 
 from model import (
     Meet, Athlete, Entry, Division, School, EventDefinition, MeetDivisionEvent,
-    INFINITY_SECONDS)
+    INFINITY_SECONDS, EVENT_DEFS)
 
 from server import app
 
@@ -38,7 +38,7 @@ class TestVerifyEmptyDatabase(unittest.TestCase):
         self.assertEqual(Athlete.query.count(), 0)
         self.assertEqual(School.query.one().name, "Unattached")
         self.assertEqual(6, Division.query.count())
-        self.assertEqual(18, EventDefinition.query.count())
+        self.assertEqual(len(EVENT_DEFS), EventDefinition.query.count())
         self.assertEqual(1, Meet.query.count())
         self.assertEqual(18 * 6, MeetDivisionEvent.query.count())
         self.assertEqual(0, Athlete.query.count())
@@ -170,37 +170,38 @@ class TestEntryFilesOneByOne(unittest.TestCase):
         teardown_test_db_app()
 
     def test_parse_file0(self):
-        meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
-        parse_hytek_file(
-                f"seed_data/{EXAMPLE_MEETS[0]['filename']}",
-                meet1)
+        # meet1 = init_meet(EXAMPLE_MEETS[0], self.divs, self.events)
+        # parse_hytek_file(
+        #         f"seed_data/{EXAMPLE_MEETS[0]['filename']}",
+        #         meet1)
+        helper_file_to_meet(0, self.divs, self.events)
 
     def test_parse_file1(self):
         helper_file_to_meet(1, self.divs, self.events)
 
-    def test_parse_file2(self):
-        helper_file_to_meet(2, self.divs, self.events)
+    # def test_parse_file2(self):
+    #     helper_file_to_meet(2, self.divs, self.events)
 
-    def test_parse_file3(self):
-        helper_file_to_meet(3, self.divs, self.events)
+    # def test_parse_file3(self):
+    #     helper_file_to_meet(3, self.divs, self.events)
 
-    def test_parse_file4(self):
-        helper_file_to_meet(4, self.divs, self.events)
+    # def test_parse_file4(self):
+    #     helper_file_to_meet(4, self.divs, self.events)
 
     def test_parse_file5(self):
         helper_file_to_meet(5, self.divs, self.events)
 
-    def test_parse_file6(self):
-        helper_file_to_meet(6, self.divs, self.events)
+    # def test_parse_file6(self):
+    #     helper_file_to_meet(6, self.divs, self.events)
 
-    def test_parse_file7(self):
-        helper_file_to_meet(7, self.divs, self.events)
+    # def test_parse_file7(self):
+    #     helper_file_to_meet(7, self.divs, self.events)
 
-    def test_parse_file8(self):
-        helper_file_to_meet(8, self.divs, self.events)
+    # def test_parse_file8(self):
+    #     helper_file_to_meet(8, self.divs, self.events)
 
-    def test_parse_file9(self):
-        helper_file_to_meet(9, self.divs, self.events)
+    # def test_parse_file9(self):
+    #     helper_file_to_meet(9, self.divs, self.events)
 
     def test_parse_file10(self):
         helper_file_to_meet(10, self.divs, self.events)
