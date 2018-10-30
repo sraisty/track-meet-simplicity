@@ -382,8 +382,8 @@ class Athlete(db.Model):
             warning(f"Unknown School Found: {team_name}, code:{team_code}")
             school = School(name=team_name, code=team_code)
             db.session.add(school)
-            db.session.commit()
-            warning(f"Added new school: {team_name}, code:{team_code}")
+            db.session.flush()
+            warning(f"Staged new school: {team_name}, code:{team_code}")
 
         # Next, reate the new athlete, and add it to the database.
         try:
@@ -405,7 +405,7 @@ class Athlete(db.Model):
             # TODO . In theory this should never happen if the first query, to
             # see if athlete was already in the db. Consolidate that query with
             # the following & figure out why the below sometimes still happens.
-            error("Tried adding duplicate athlete: {},  {}, {}, {}, {}".format(
+            error("Tried adding duplicate athlete (although it could be a duplicate school?): {},  {}, {}, {}, {}".format(
                     first_name, last_name, gender, grade, team_code))
             db.session.rollback()
             return

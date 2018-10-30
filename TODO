@@ -46,16 +46,32 @@ https://sqlalchemy-utils.readthedocs.io/en/latest/models.html#module-sqlalchemy_
 
 17. Add constraints to columns of my SQLAlchemy models
 
-18. Add create_database, database_exists, drop_database calls to my seed and tests stuff, instead of requring I go to the command line to dropdb anc createdb.  https://sqlalchemy-utils.readthedocs.io/en/latest/database_helpers.html
+18. Add create_database, database_exists, drop_database calls to my seed and tests stuff, instead of requring I go to the command line to dropdb and createdb.  https://sqlalchemy-utils.readthedocs.io/en/latest/database_helpers.html
 
-19. Create a relationship for School.invited_meets and Meet.invited_schools.  For an athlete to get entered into a Meet, his school should need to be invited first. And if the school gets "uninvited" (i.e. deleted) from a meet, then all the meet's entries for athletes from that school should also get deleted. Look at "cascade="delete delete-orphan"  at 
-https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#tutorial-delete-cascade
-https://docs.sqlalchemy.org/en/latest/orm/cascades.html#unitofwork-cascades
-(Basically, create a parent/child relationship between an associate MeetSchoolsEntered object/table and the Entries, where the MeetSchoolsEntered is a parent and the Entries are children)
+19. Explore using db.session.flush instead of db.session.commit within the 
+Athlete.add_athlete method, in order to make sure that the athlete's school 
+(if not already known to the database ) is only committed to the database at the 
+same time as the new athlete record.
 
 DONE
 12. Make some of my 'mark to string' and 'string to mark' methods private methods preceded by "_"
 (if I can still test them, that is)
 
 
+NO LONGER NEEDED
 
+19. 
+I managed to create a special joined query that goes 
+School --> Athlete --> Entries --> MDEs --> Meet and in reverse, so no longer to 
+complicate my data model with the following:
+
+ORIG: Create a relationship for School.invited_meets and Meet.invited_schools.
+For an athlete to get entered into a Meet, his school should need to be invited
+first. And if the school gets "uninvited" (i.e. deleted) from a meet, then all
+the meet's entries for athletes from that school should also get deleted. Look
+at "cascade="delete delete-orphan"  at 
+https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#tutorial-delete-cascade
+https://docs.sqlalchemy.org/en/latest/orm/cascades.html#unitofwork-cascades
+(Basically, create a parent/child relationship between an associate 
+MeetSchoolsEntered object/table and the Entries, where the MeetSchoolsEntered 
+is a parent and the Entries are children)
