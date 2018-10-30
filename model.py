@@ -214,6 +214,27 @@ class Meet(db.Model):
             count += len(mde.entries)
         return count
 
+    def schools_entered(self):
+        """ returns a list of school objects, ordered alphabetically by the
+        school's codes, that have atheltes entered into this meet.
+        """
+        q = db.session.query(School).join(School.entries).join(Entry.meet)
+        q = q.filter(Meet.id == self.id).distinct()
+        q = q.order_by(School.code)
+        schools = q.all()
+        num_schools = q.count()
+        info(f"Meet {self.name} has **{num_schools}** entered:")
+        for s in schools:
+            info(f"\t\t\t{s.name}, {s.code}")
+        return schools
+
+    def get_athletes(self):
+        q = db.session.query(Athlete).join(Athlete.entries).join(Entry.meet)
+        q = q.filter(Meet.id == self.id).distinct()
+        q = q.order_by(Athlete.fname).order_by(Athlete.lname)
+        athletes = q.all()
+        return athletes
+
     @classmethod
     def reorder_mdes(cls):
         # TODO if user changes order of meets and divisions
@@ -423,32 +444,15 @@ class Entry(db.Model):
     # describes a problem with the athlete's entry that a user needs to resolve
     problem = db.Column(db.String(64), nullable=True)
 
-    @aggregated('meet', db.Column(db.String(50)))
-    def meet_name(self):
-        # return meet.name
-        return db.func.max(Meet.name)
+    # @aggregated('meet', db.Column(db.String(50)))
+    # def meet_name(self):
+    #     # return meet.name
+    #     return db.func.max(Meet.name)
 
     meet = db.relationship("Meet",
                            secondary="meet_division_events",
                            uselist=False,
                            back_populates="entries")
-
-    # THE FOLLOWING ARE DENORMALIZED AND COPIED HERE ON CHANGES FROM THE
-    # LINKED MEET Object. We do this so we can rapidly get the list of
-    # Entered Meets from the School table.
-    # meet_id = db.Column(db.Integer)
-    # meet_name = db.Column(db.String(50))
-    # meet_date = db.Column(db.DateTime)
-    # meet_status = db.Column(meet_status_enum)
-
-    #      @aggregated('athletes', db.Column(db.Integer))
-    # def athletes_count(self):
-    #     return db.func.count('1')
-    # def meet_observer(self, meet):
-    #     self.meet_id = meet.id
-    #     self.meet_name = meet.name
-    #     self.meet_date = meet.date
-    #     self.meet_status = meet.status
 
     athlete = db.relationship("Athlete",
                               uselist=False,
@@ -683,9 +687,9 @@ class MeetDivisionEvent(db.Model):
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
 
-    @aggregated('athletes', db.Column(db.Integer))
-    def athletes_count(self):
-        return db.func.count('1')
+    # @aggregated('athletes', db.Column(db.Integer))
+    # def athletes_count(self):
+    #     return db.func.count('1')
 
     meet = db.relationship(
             "Meet", uselist=False, back_populates="mdes")
@@ -776,33 +780,34 @@ class School(db.Model):
     city = db.Column(db.String(30), nullable=True)
     state = db.Column(db.String(2), nullable=True)
 
-    @aggregated("athletes", db.Column(db.Integer))
-    def athletes_count(self):
-        return db.func.count('1')
+    # @aggregated("athletes", db.Column(db.Integer))
+    # def athletes_count(self):
+    #     return db.func.count('1')
 
-    @aggregated("entries", db.Column(db.Integer))
-    def entries_count(self):
-        return db.func.count('1')
+    # @aggregated("entries", db.Column(db.Integer))
+    # def entries_count(self):
+    #     return db.func.count('1')
 
     athletes = db.relationship(
             "Athlete", uselist=True,
             order_by="Athlete.lname", back_populates="school")
 
     entries = db.relationship(
-            "Entry", secondary="athletes", uselist=True, 
+            "Entry", secondary="athletes", uselist=True,
             back_populates="school",
             )
     divisions = db.relationship(
         "Division", secondary="athletes", uselist=True)
     coaches = db.relationship("User", uselist=True, backref="editor_users")
 
-    meets_hosted = db.relationship(  
+    meets_hosted = db.relationship(
             "Meet", uselist=True,
             primaryjoin="Meet.host_school_id==School.id",
             order_by="Meet.date",
             back_populates="host_school")
     # meets_invited = db.relationship(
     #         "Meet", uselist=True, back_populates="invited_schools")
+
 
     def __init__(
             self, name="Unattached", code="UNA", city=None, state=None,
@@ -839,23 +844,23 @@ class School(db.Model):
             db.session.commit()
 
     def meets_entered(self):
-        meets = set()
-        for entry in self.entries:
-            meets.add(entry.meet)
-        print(meets)
+        """ Returns a list of meets where this school has any athletes entered
+        """
 
-        # q = db.session.query(Entry).join(Entry.meet_id)
-        # q = q.join()
+        q = db.session.query(Meet).join(Meet.entries).join(Entry.school)
+        q = q.filter(School.id == self.id).distinct()
+        q = q.order_by(Meet.date)
+        meets = q.all()
+        num_meets = q.count()
+        info(f"School {self.name} is in **{num_meets}** meets:")
+        for m in meets:
+            info(f"\t\t\t{m.name}, {m.date}")
 
-        # __entries=session.query(Entry).filter_by(school=self).
-        # EXAMPLE CODE FROM https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DeclarativeComputeTotalOfSubquery
-        # parent=session.query(Parent).filter_by(name="foo").first()
-        # qa=session.query(Host.id).filter_by(parent=parent).subquery()
-        # qb=session.query(func.sum(HostFilesystem.sizeMB)).filter(HostFilesystem.host_id.in_(qa))
-        # subtotal=qb.first()[0]
-        return list(meets)
+        return meets
+
 
 # #######################  EVENTDEFINITION CLASS #####################
+
 
 event_type_enum = Enum(*EVENT_TYPES, name="event_types")
 

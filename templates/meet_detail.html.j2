@@ -57,11 +57,21 @@
 {% endblock tab1_content %}
 
 {% block tab2_content %}
-    <p>This lists the schools in the meet</p>
+    {% for school in meet.schools_entered() %}
+        <p>
+            <a href="{{url_for('show_school_detail', school_id=school.id)}}">
+                {{ school.name }}
+            </a>
+        </p>
+    {% endfor %}
 {% endblock tab2_content %}
 
 {% block tab3_content %}
-    <p>This lists the athletes in the meet</p>
+    {% for athlete in meet.get_athletes() %}
+        <p>{{athlete.full_name() }}</p>
+    {% endfor %}
+
+
 {% endblock tab3_content %}
 
 {% block tab4_content %}

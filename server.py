@@ -114,7 +114,8 @@ def do_register():
     user = User.query.filter_by(email=email).one_or_none()
     if user:
         flash(
-            f"ERROR: A user with email {email} already exists!\nTry again, or <a href='/login'>log in</a> if you already have an account.", 
+            f"ERROR: A user with email {email} already exists!\nTry again, " +
+            f"or <a href='/login'>log in</a> if you already have an account.",
             "danger")
         return redirect(url_for('show_register_form'))
 
@@ -255,8 +256,9 @@ def show_mde_detail(meet_id, mde_id):
 
 @app.route('/athletes')
 def show_all_athletes():
-    # athletes = Athlete.query.order_by(fname).order_by(lname).all()
-    athletes = Athlete.query.all()
+    q = Athlete.query.order_by(Athlete.lname).order_by(Athlete.fname)
+    athletes = q.all()
+    # athletes = Athlete.query.all()
     return render_template('all_athletes.html.j2', list=athletes)
 
 

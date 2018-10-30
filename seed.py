@@ -11,8 +11,8 @@ from parse_hytek import parse_hytek_file
 from test_utils import EXAMPLE_MEETS
 from util import info
 
-# NUM_MEETS = len(EXAMPLE_MEETS)
-NUM_MEETS = 3
+NUM_MEETS = len(EXAMPLE_MEETS)
+# NUM_MEETS = 3
 
 if __name__ == "__main__":
     # reset database
