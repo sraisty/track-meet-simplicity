@@ -2,8 +2,6 @@
 Some module docstring
 """
 import os
-
-
 from flask import (Flask, render_template, redirect, request, flash,
                    session, url_for)
 from jinja2 import StrictUndefined
@@ -28,6 +26,11 @@ app.secret_key = os.environ['FLASK_APP_SECRET_KEY']
 app.jinja_env.undefined = StrictUndefined
 
 
+@app.route('/test')
+def test_render():
+    return render_template('/test.html.j2')
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -45,7 +48,7 @@ def index():
 
 @app.route('/login', methods=['GET'])
 def show_login_form():
-    return render_template('login.html.j2')
+    return render_template('users/login.html.j2')
 
 
 @app.route('/do-login', methods=['POST'])
@@ -88,7 +91,7 @@ def show_register_form():
     """Show form for user signup."""
     # Get the list of schools to populate the drop-down
     schools = School.query.order_by("name").all()
-    return render_template("register.html.j2", school_list=schools)
+    return render_template("users/register.html.j2", school_list=schools)
 
 
 @app.route('/do-register', methods=['POST'])
@@ -137,7 +140,7 @@ def do_register():
 def show_user_profile():
     school_list = School.query.order_by(School.name).all()
 
-    return render_template('profile.html.j2', school_list=school_list)
+    return render_template('users/profile.html.j2', school_list=school_list)
 
 
 @app.route('/do-change-profile', methods=['POST'])

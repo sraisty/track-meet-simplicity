@@ -2,20 +2,15 @@ TODO
 
 1. Modify to use  Flask logging instead of my own util.py
 
-2. Trigger automatic creation of "Unattached School" and Super user when the schools and users tables are created for the first time. 
+2. Trigger automatic creation of "Unattached School" and Super user when the 
+schools and users tables are created for the first time. 
     See: https://dzone.com/articles/how-to-initialize-database-with-default-values-in
 
 3. Move to React & use React Table
 
 4. Figure out how to better restructure all the JQuery code and Jinja templates
 
-5. Optimize my queries.
 
-    - 5a. Look at using "aggregated attributes" within sqlalchemy_utils package: 
-    https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html
-    "for when you need to dynamically calculate some aggregate value for a given model", like "average ratign for a movie" or "number of products in a catalog". While I could use SQLAlchemy column_property function, the aggregation is done on the fly and might have a perf hit.  This module lets you calculate these aggregate values automatically and efficiently at the time of modification rather than on the fly.
-
-    For most of my code, using aggregates.aggregated() should be preferable to using @observes(): https://sqlalchemy-utils.readthedocs.io/en/latest/observers.html
 
 6. Make certain pages inaccessible without being logged in, via "login-required" decorator:
 http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
@@ -32,7 +27,6 @@ http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
 relays, etc. 
 Look at: https://sqlalchemy-utils.readthedocs.io/en/latest/generic_relationship.html#inheritance
 https://sqlalchemy-utils.readthedocs.io/en/latest/generic_relationship.html#abstract-base-classes
-
 
 
 13. Trigger exceptions for unimplemented stuff (like Relays)
@@ -59,6 +53,15 @@ DONE
 
 
 NO LONGER NEEDED
+
+5. Query optimization using utility "aggregated attribtes" or observers.  I managed to optimze the queries via regular joins that use distinct.
+
+    - 5a. Look at using "aggregated attributes" within sqlalchemy_utils package: 
+    https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html
+    "for when you need to dynamically calculate some aggregate value for a given model", like "average ratign for a movie" or "number of products in a catalog". While I could use SQLAlchemy column_property function, the aggregation is done on the fly and might have a perf hit.  This module lets you calculate these aggregate values automatically and efficiently at the time of modification rather than on the fly.
+
+    For most of my code, using aggregates.aggregated() should be preferable to using @observes(): https://sqlalchemy-utils.readthedocs.io/en/latest/observers.html
+
 
 19. 
 I managed to create a special joined query that goes 

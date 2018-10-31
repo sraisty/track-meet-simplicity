@@ -1,6 +1,6 @@
 {# Detail info about a particular athlete, at /athletes/<athlete-id> #}
 
-{% extends "secondary_nav.html.j2" %}
+{% extends "__secondary_nav.html.j2" %}
 
 
 {% block secondary_nav_title %}
@@ -17,7 +17,7 @@
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
       School: 
-      <a href="/schools/{{athlete.school.id}}">
+      <a href="/schools/{{ athlete.school.id }}">
         {{ athlete.school.name }}
       </a>
     </div>

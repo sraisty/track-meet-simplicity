@@ -1,5 +1,6 @@
 {# New meet #}
-{% extends "base.html.j2" %}
+{% extends "__base.html.j2" %}
+
 {% block content %}
   <h1 class="mb-5">Create New Meet</h1>
   <form action="" method="POST">
@@ -48,14 +49,14 @@
     <button type="submit" class="btn btn-primary col-md-4 ">Submit</button>
   </div>
   </form>
-{% endblock %}
+{% endblock content %}
 
 {% block my_javascripts %}
-  {# <script type="text/javascript" src="static/js/tms-datatable.js"></script> #}
+  {{ super() }}
   <script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/js/gijgo.min.js" type="text/javascript"></script>
   <script>
   $('#datepicker').datepicker({
   uiLibrary: 'bootstrap4'
   });
   </script>
-{% endblock %}
+{% endblock my_javascripts %}

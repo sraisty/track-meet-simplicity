@@ -1,5 +1,8 @@
+{% extends "__tabnav.html.j2" %}
 {# Detail info about a particular meet, at /meets/<meet-id> #}
-{% extends "secondary_nav.html.j2" %}
+
+{% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+
 {% block secondary_nav_title %}
     {{ meet.name }}
 {% endblock secondary_nav_title %}
@@ -17,92 +20,51 @@
 {% endblock nav2_subtitle %}
 
 
-{% block tab1_name %}
-    Event Schedule
-{% endblock tab1_name %}
 
-{% block tab2_name %}
-    Schools
-{% endblock tab2_name %}
+{% block tab_navs %}
+    {{ MACRO_MAKE_TAB("mdetail-events-tab", true, "Event Schedule") }}
+    {{ MACRO_MAKE_TAB("mdetail-schools-tab", false, "Events") }}
+    {{ MACRO_MAKE_TAB("mdetail-athletes-tab", false, "Athletes") }}
+    {{ MACRO_MAKE_TAB("mdetail-meetinfo-tab", false, "Meet Info") }}
+{% endblock tab_navs %}  
 
-{% block tab3_name %}
-    Athletes
-{% endblock tab3_name %}
 
-{% block tab4_name %}
-    Meet Information
-{% endblock tab4_name %}
 
 {# The expandable event cards that are on the accordions on   #}
 {# MeetDetail > Schedule of events  #}
-{% block tab1_content %}
-    <div class="row">
-        <div id="track-event-accordion" class="col-lg-6 col">
-            <h5 class="card-header bg-info text-white">TrackEvents</h5>
-            {% for event in meet.events %}
-                {% if event.is_track() %}
-                    {{ show_event_card(meet, "track", event) }}
-                {% endif %}
-            {% endfor %}
-        </div>    {# track-event-accordion #}
-        <div id="field-event-accordion" class="col-lg-6 col">
-            <h5 class="card-header bg-info text-white">FieldEvents</h5>
-            {% for event in meet.events %}
-                {% if event.is_field() %}
-                    {{ show_event_card(meet, "field", event) }}
-                {% endif %}
-            {% endfor %}
-        </div>    {# field-event-accordion #}
-    </div>
-{% endblock tab1_content %}
+{% block tab_content %}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-events-tab", true, "event_accordion.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", true, "not_done.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", true, "not_done.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", true, "not_done.html.j2")}}
+{% endblock tab_content %}
 
-{% block tab2_content %}
+
+{# TAB2
     {% for school in meet.schools_entered() %}
         <p>
             <a href="{{url_for('show_school_detail', school_id=school.id)}}">
                 {{ school.name }}
             </a>
         </p>
-    {% endfor %}
-{% endblock tab2_content %}
+    {% endfor %} #}
 
-{% block tab3_content %}
+
+
+{# TAB3 ATHLETES
     {% for athlete in meet.get_athletes() %}
         <p>{{athlete.full_name() }}</p>
     {% endfor %}
+ #}
 
 
-{% endblock tab3_content %}
-
+{# TAB4 MEETINFO 
 {% block tab4_content %}
     <p>{{meet.description}}</p>
-{% endblock tab4_content %}
+#}
 
 
-{#  MACROS DEFINITION TO HANDLE THE EVENT ACCORDIONS #}
-{% macro show_event_card(meet, ev_type, event) %}
-<div class="card">
-    <div class="card-header" id="{{ event.name }}">
-        <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
-            <span class="mr-auto">{{ event.name }} :&nbsp;</span>
-            <span class-"badge badge-secondary">
-                {{ meet.get_event_athlete_count_across_divs(event) }} athletes
-            </span>
-        </button>
-    </div>
-    <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
-        <div class="card-body">
-            <ul class="list-group">
-                {% for mde in meet.get_event_mdes(event) %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
-                            {{ mde.division.name }}
-                        </a>
-                        <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</div>
-{% endmacro %}
+{% block my_javascripts %}
+    {{super()}}
+    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+{% endblock my_javascripts %}
