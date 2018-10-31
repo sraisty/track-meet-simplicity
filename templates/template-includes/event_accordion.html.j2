@@ -1,0 +1,21 @@
+{# Renders the event cards for meet_detail #}
+{% from "/__macros.html.j2" import MACRO_SHOW_EVENTS_CARD with context %}
+
+<div class="row">
+    <div id="track-event-accordion" class="col-lg-6 col">
+        <h5 class="card-header bg-info text-white">TrackEvents</h5>
+        {% for event in meet.events %}
+            {% if event.is_track() %}
+                {{ MACRO_SHOW_EVENTS_CARD(meet, "track", event) }}
+            {% endif %}
+        {% endfor %}
+    </div>    {# track-event-accordion #}
+    <div id="field-event-accordion" class="col-lg-6 col">
+        <h5 class="card-header bg-info text-white">FieldEvents</h5>
+        {% for event in meet.events %}
+            {% if event.is_field() %}
+                {{ MACRO_SHOW_EVENTS_CARD(meet, "field", event) }}
+            {% endif %}
+        {% endfor %}
+    </div>    {# field-event-accordion #}
+</div>

@@ -1,0 +1,51 @@
+{% extends "__base.html.j2" %}
+{% block content %}
+  <h1>
+  <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
+    {{ mde.meet.name }}
+  </a>
+  : {{ mde.meet.date.strftime("%B %d, %Y") }}
+  </h1>
+  <h2>{{ mde.event.name }}: {{ mde.division.name }}</h2>
+  <div class="card">
+    <div class="card-body">
+      {% if mde.event.is_track() %}
+        <table id="mde_table" class="display" data-paging='false'
+          data-order='[[ 3, "asc" ]]' >
+      {% else %}
+        <table id="mde_table" class="display" data-paging='false'
+          data-order='[[ 3, "desc" ]]' >
+      {% endif %}
+          <thead>
+            <tr>
+              <th>Seed #<br>(pending)</th>
+              <th>Athlete name</th>
+              <th>School</th>
+              <th>Seed Mark</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in mde.entries %}
+              <tr>
+                <td>TBD</td>
+                <td>
+                  <a href="/athletes/{{ entry.athlete.id }}">
+                    {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+                  </a>
+                </td>
+                <td>{{ entry.athlete.school.name }}</td>
+                <td data-order="{{entry.mark}}">
+                      {{ entry.mark_to_string() }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endblock content %}
+  
+  {% block my_javascripts %}
+    {{super()}}
+    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+  {% endblock my_javascripts %}
