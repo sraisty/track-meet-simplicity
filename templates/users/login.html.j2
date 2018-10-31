@@ -1,0 +1,14 @@
+{% extends "/users/__login_reg_form.html.j2" %}
+
+{% block ask_user_to %}<h1>Please log in:</h1>{% endblock ask_user_to %}
+
+{% block post_route %}
+    <form action="/do-login" method="POST">
+{% endblock post_route %}
+
+{# {% block get_school %}{% endblock %} #}
+
+{% block refer_user %}
+    Don't have an account?  
+    <a href="{{ url_for('show_register_form') }}">Sign up!</a>
+{% endblock refer_user %}

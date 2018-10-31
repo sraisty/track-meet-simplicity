@@ -1,0 +1,79 @@
+{% macro MACRO_MAKE_TAB(TAB_ID, ACTIVE, TAB_NAME) %}
+{# tab}
+{# id, href, aria-controls values all change based on the NAME.#}
+{# derives name of tab-content block from the Tab ID #}
+    <li class="nav-item">
+        <a class="nav-link tms-tab {% if ACTIVE %}active{% endif %}" 
+           id="{{TAB_ID}}" data-toggle="tab" role="tab" 
+           href="#{{ TAB_ID }}-content" 
+           aria-controls="{{ TAB_ID }}-content" 
+           aria-select="{% if ACTIVE %}true{% else %}false{% endif %}">
+           {{ TAB_NAME }}
+        </a>
+    </li>
+{% endmacro %}
+
+
+
+{% macro MACRO_MAKE_TAB_CONTENT(TAB_ID, ACTIVE, TAB_CONTENT_FILE) %}
+{# changes id, area-labelled-by #}
+{# Use the name of the TAB, not the tab body, as the parameter #}
+  <div id="{{ TAB_ID }}-content"
+    class="tab-pane fade {% if ACTIVE %}show active{% endif %}" 
+    role="tabpanel" aria-labelledby="{{ TAB_ID }}">
+    {% set file = '/template-includes/'+ TAB_CONTENT_FILE %}
+    {% include file %}
+  </div>
+{% endmacro %}
+
+
+{% macro MACRO_SHOW_ADMIN_COG(admin_url) %}
+    <a href="{{ admin_url }}">
+       <i class="fas fa-cog fa"></i>
+    </a>
+{% endmacro %}
+
+
+{% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
+  <div class="card">
+      <div class="card-header" id="{{ event.name }}">
+          <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
+              <span class="mr-auto">{{ event.name }} :&nbsp;</span>
+              <span class-"badge badge-secondary">
+                  {{ meet.get_event_athlete_count_across_divs(event) }} athletes
+              </span>
+          </button>
+      </div>
+      <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
+          <div class="card-body">
+              <ul class="list-group">
+                  {% for mde in meet.get_event_mdes(event) %}
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
+                              {{ mde.division.name }}
+                          </a>
+                          <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+      </div>
+  </div>
+{% endmacro %}
+
+{% macro MACRO_GET_USER_SCHOOL() %}
+    <div class="form-group">
+        <label for="school">School:</label>
+        <select class="form-control" name="school_id" id="school_selector">
+            <option value="" disabled selected="selected">
+                Click to select your school
+            </option>
+            <option value="False">
+                &lt;My school is not listed&gt;
+            </option>
+            {% for school in school_list %}
+                <option value="{{school.id}}">{{school.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}

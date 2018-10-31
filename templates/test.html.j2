@@ -1,0 +1,29 @@
+{% extends "__tabnav.html.j2" %}
+{% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+
+
+{% block secondary_nav_title %}
+PLACEHOLDER SECONDARY NAV TITLE
+{% endblock secondary_nav_title %}
+
+{% block nav2_subtitle %}
+PLACEHOLDER SECONDARY NAV SUBTITLE
+{% endblock nav2_subtitle %}
+
+
+{% block tab_navs %}
+  {{ MACRO_MAKE_TAB("my-tab1", true, "Tab 1 Name") }}
+  {{ MACRO_MAKE_TAB("my-tab2", false, "Tab 2 Name") }}
+{% endblock tab_navs %}  
+
+
+
+{% block tab_content %}
+  {{ MACRO_MAKE_TAB_CONTENT("my-tab1", true, "test_tab1_content.html.js") }}
+  {{ MACRO_MAKE_TAB_CONTENT("my-tab2", false, "test_tab2_content.html.js") }}
+{% endblock tab_content %}
+
+
+{% block my_javascripts %}
+  {{ super() }}
+{% endblock my_javascripts %}

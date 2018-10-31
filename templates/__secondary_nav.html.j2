@@ -1,0 +1,34 @@
+{% extends "__base.html.j2" %}
+{% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
+
+{% block secondary_navbar %}
+    <div class="row mb-4">
+        <div class="col px-5">
+            <h1 class="d-flex justify-content-between align-items-center ">
+                {% block secondary_nav_title %}
+                    PLACEHOLDER
+                {% endblock secondary_nav_title %}
+
+                {% if 'user_email' in session %}
+                    {{ MACRO_SHOW_ADMIN_COG("#") }}   {# url is TODO #}
+                {% endif %}
+            </h1>
+            <h4>
+                {% block nav2_subtitle %}
+                    PLACEHOLDER
+                {% endblock nav2_subtitle %}
+            </h4>
+        </div>
+    </div>
+{% endblock secondary_navbar %}
+
+
+{% block content %}
+    {# The tabbed nav bar under the title of the secondary nav. #}
+    {# Will be filled in by tabnav_macros_html.j2 #}
+{% endblock content %}
+
+{% block my_javascripts %}
+{% endblock my_javascripts %}
+
+

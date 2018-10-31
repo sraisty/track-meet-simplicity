@@ -1,0 +1,67 @@
+{% from "__navbar_macro.html.j2" import MACRO_PRIMARY_NAV without context %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Track Meet Simplicity</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.11/css/all.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+
+
+{#     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css"> #}
+    <!-- Calendar picker at gijgo.com -->
+    <link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    {# NOTE: navbar won't appear on login or reg pages #}
+    {% block navbar_optional %}
+      {# {% include '/template-includes/tms-navbar.include.html.j2' %} #}
+      {{ MACRO_PRIMARY_NAV("tbd_selectedmenuitem") }}
+    {% endblock navbar_optional %} 
+
+
+    {% block secondary_navbar %}
+        {# WILL BE REPLACED BY CONTENTS OF SECONDARY_NAV2 if applicable #}
+    {% endblock secondary_navbar %}
+
+    <div class="container-fluid">
+      
+      {# Display flashed messages #}
+      <div class="row mb5  justify-content-md-center">
+        <div class="col-md-auto">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+                    <h5><br>{{ message }}</h5>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
+      {% block content %}
+        PLACEHOLDER CONTENT
+      {% endblock content %}
+
+    </div>
+    <!-- PUT A FOOTER IN HERE -->
+    <!--  Bootstrap requires the following -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    {% block my_javascripts %}
+    {% endblock my_javascripts %}
+  </body>
+</html>
