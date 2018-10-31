@@ -19,8 +19,8 @@ PLACEHOLDER SECONDARY NAV SUBTITLE
 
 
 {% block tab_content %}
-  {{ MACRO_MAKE_TAB_CONTENT("my-tab1", true, "test_tab1_content.html.js") }}
-  {{ MACRO_MAKE_TAB_CONTENT("my-tab2", false, "test_tab2_content.html.js") }}
+  {{ MACRO_MAKE_TAB_CONTENT("my-tab1", true, "/test/test_tab1_content.html.j2") }}
+  {{ MACRO_MAKE_TAB_CONTENT("my-tab2", false, "/test/test_tab2_content.html.j2") }}
 {% endblock tab_content %}
 
 

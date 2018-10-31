@@ -33,10 +33,10 @@
 {# The expandable event cards that are on the accordions on   #}
 {# MeetDetail > Schedule of events  #}
 {% block tab_content %}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-events-tab", true, "event_accordion.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", true, "not_done.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", true, "not_done.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", true, "not_done.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-events-tab", true, "/meets/event_accordion.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", true, "/__not_done.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", true, "/__not_done.html.j2")}}
+    {{ MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", true, "/__not_done.html.j2")}}
 {% endblock tab_content %}
 
 

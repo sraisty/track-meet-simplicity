@@ -4,7 +4,7 @@ Some module docstring
 import os
 from flask import (Flask, render_template, redirect, request, flash,
                    session, url_for)
-from jinja2 import StrictUndefined
+from jinja2 import StrictUndefined, Environment, select_autoescape
 from flask_debugtoolbar import DebugToolbarExtension
 import requests
 
@@ -25,10 +25,32 @@ app.secret_key = os.environ['FLASK_APP_SECRET_KEY']
 # error.
 app.jinja_env.undefined = StrictUndefined
 
+# The following control the whitespace that is inserted into the HTML that the
+# templates produce, and make it easier for humans to understand/debug the HTML.
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
+app.jinja_env.strip_trailing_newlines = False
+
+app.jinja_env.autoescape = True
+# TODO Is the following needed (or correct), since my Jinja templates
+# end in "J2" to get syntax highlighting?
+
+# app.jinja_env.autoescape = select_autoescape(
+#         enabled_extensions=('html', 'xml', 'html', 'j2'),
+#         default_for_string=True)
+
+# jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+#                                autoescape = True,
+#                                extensions = ['jinja2.ext.autoescape'])
+#  See http://jinja.pocoo.org/docs/2.10/api/#the-context
+# env = Environment(autoescape=select_autoescape(
+#     enabled_extensions=('html', 'xml'),
+#     default_for_string=True,
+# ))
 
 @app.route('/test')
 def test_render():
-    return render_template('/test.html.j2')
+    return render_template('/test/test.html.j2')
 
 
 @app.route('/')
@@ -170,7 +192,7 @@ def do_change_profile():
 @app.route('/meets')
 def show_all_meets():
     meets = Meet.query.all()
-    return render_template('all_meets.html.j2', list=meets)
+    return render_template('/meets/all_meets.html.j2', list=meets)
 
 
 @app.route('/meets/<int:meet_id>')
@@ -184,12 +206,12 @@ def show_meet_detail(meet_id):
     #   button to see athlete assignments
     # else if meet.status == "Finished":
     # display the entries and the results to anyone
-    return render_template('meet_detail.html.j2', meet=meet)
+    return render_template('/meets/meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/new-meet')
 def show_new_meet_form():
-    return (render_template('new_meet.html.j2'))
+    return (render_template('/meets/new_meet.html.j2'))
 
 
 @app.route('/meets/do-new-meet', methods=['POST'])
@@ -254,7 +276,7 @@ def show_mde_detail(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
     # for this function, but maybe it should be in the URL anyway ?
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
-    return render_template('mde_detail.html.j2', mde=mde)
+    return render_template('/meets/mde_detail.html.j2', mde=mde)
 
 
 @app.route('/athletes')
@@ -262,13 +284,13 @@ def show_all_athletes():
     q = Athlete.query.order_by(Athlete.lname).order_by(Athlete.fname)
     athletes = q.all()
     # athletes = Athlete.query.all()
-    return render_template('all_athletes.html.j2', list=athletes)
+    return render_template('/athletes/all_athletes.html.j2', list=athletes)
 
 
 @app.route('/athletes/<int:athlete_id>')
 def show_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
-    return render_template('athlete_detail.html.j2', athlete=athlete)
+    return render_template('/athletes/athlete_detail.html.j2', athlete=athlete)
 
 
 @app.route('/athletes/<int:athlete_id>/edit')
@@ -281,13 +303,13 @@ def edit_athlete_detail(athlete_id):
 @app.route('/schools')
 def show_all_schools():
     schools = School.query.order_by(School.name).all()
-    return render_template('all_schools.html.j2', list=schools)
+    return render_template('/schools/all_schools.html.j2', list=schools)
 
 
 @app.route('/schools/<int:school_id>')
 def show_school_detail(school_id):
     school = School.query.get(school_id)
-    return render_template('school_detail.html.j2', school=school)
+    return render_template('/schools/school_detail.html.j2', school=school)
 
 
 @app.route('/schools/<int:school_id>/edit')
@@ -307,7 +329,7 @@ def edit_school_detail(school_id):
 
 @app.errorhandler(404)
 def page_not_found(err):
-    return render_template('page_not_found.html.j2'), 404
+    return render_template('/__page_not_found.html.j2'), 404
 
 
 if __name__ == '__main__':
