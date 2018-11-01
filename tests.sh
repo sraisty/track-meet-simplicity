@@ -8,5 +8,7 @@ rm .coverage*
 coverage run -p --source=. --omit="env/*" test_parse_hytek.py
 
 coverage run -p --source=. --omit="env/*" test_model.py
+coverage run -p --source=. --omit="env/*" test_server.py
+
 coverage combine
 coverage report --omit="test_*"

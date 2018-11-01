@@ -61,19 +61,5 @@
   </div>
 {% endmacro %}
 
-{% macro MACRO_GET_USER_SCHOOL() %}
-    <div class="form-group">
-        <label for="school">School:</label>
-        <select class="form-control" name="school_id" id="school_selector">
-            <option value="" disabled selected="selected">
-                Click to select your school
-            </option>
-            <option value="False">
-                &lt;My school is not listed&gt;
-            </option>
-            {% for school in school_list %}
-                <option value="{{school.id}}">{{school.name}}</option>
-            {% endfor %}
-        </select>
-    </div>
-{% endmacro %}
+
+

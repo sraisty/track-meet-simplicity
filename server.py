@@ -104,6 +104,9 @@ def do_login():
 @app.route('/do-logout', methods=['GET'])
 def do_logout():
     session.pop('user_id', None)
+    session.pop('user_email', None)
+    session.pop('user_school_id', None)
+    session.pop('user_school_name', None)
     flash("You've successfully logged out.", "success")
     return redirect(url_for('show_register_form'))
 
@@ -116,24 +119,16 @@ def show_register_form():
     return render_template("users/register.html.j2", school_list=schools)
 
 
+@app.route('/profile')
+def show_user_profile():
+    school_list = School.query.order_by(School.name).all()
+
+    return render_template('users/profile.html.j2', school_list=school_list)
+
+
 @app.route('/do-register', methods=['POST'])
 def do_register():
-    """Process user sign-up."""
-
-    # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-    school_id = request.form.get('school_id')
-
-    if school_id is None:
-        # user is entering a new school in the form
-        new_school_name = request.form.get('new_school_name')
-        new_school_code = request.form.get('new_school_code')
-        # Our form shouldn't allow illegal values for new_school_name or code
-        new_school = School(name=new_school_name, code=new_school_code)
-        db.session.add(new_school)
-        db.session.commit()
-        school_id = new_school.id
+    (email, password, school) = _get_user_details_and_school(request)
 
     # If user with the email already exists, don't allow registration
     user = User.query.filter_by(email=email).one_or_none()
@@ -144,7 +139,7 @@ def do_register():
             "danger")
         return redirect(url_for('show_register_form'))
 
-    new_user = User(email=email, password=password, school_id=school_id)
+    new_user = User(email=email, password=password, school_id=school.id)
     db.session.add(new_user)
     db.session.commit()
 
@@ -158,29 +153,22 @@ def do_register():
     return redirect(url_for("index"))
 
 
-@app.route('/profile')
-def show_user_profile():
-    school_list = School.query.order_by(School.name).all()
-
-    return render_template('users/profile.html.j2', school_list=school_list)
-
-
 @app.route('/do-change-profile', methods=['POST'])
 def do_change_profile():
 
-    school_id = request.form.get("school_id")
-    new_email = request.form.get("email")
-    new_password = request.form.get("password")
-    # TODO - Write new values to database
+    (new_email, new_password, school) = _get_user_details_and_school(request)
 
     # get our user record from the database and update it.
     user_id = session.get('user_id')
     user = User.query.get(user_id)
-    user.school_id = school_id
-    user.email = new_email
+
+    user.school_id = school.id
+    if new_email:
+        user.email = new_email
     if new_password:
         user.password = new_password
     db.session.commit()
+
     session['user_school_id'] = user.school.id
     session['user_school_name'] = user.school.name
     session['user_email'] = user.email
@@ -330,6 +318,27 @@ def edit_school_detail(school_id):
 @app.errorhandler(404)
 def page_not_found(err):
     return render_template('/__page_not_found.html.j2'), 404
+
+# ### HELPER FUNCTIONS ##########
+def _get_user_details_and_school(request):
+    new_email = request.form.get("email")
+    new_password = request.form.get("password")
+    school_id = request.form.get("school_id")
+
+    if school_id:
+        school = School.query.get(school_id)
+
+    else:
+        # user is entering a new school in the form.
+        # So, create the new school
+        new_school_name = request.form.get('new_school_name')
+        new_school_code = request.form.get('new_school_code')
+
+        school = School(name=new_school_name, code=new_school_code)
+        db.session.add(school)
+        db.session.flush()
+
+    return (new_email, new_password, school)
 
 
 if __name__ == '__main__':

@@ -2,8 +2,6 @@
 
 $(document).ready(function() {
 
-  $('body').addClass('tinted-image');
-
   $('#school_selector').on('change', function() {
     if (this.value == "") {
       $('.tms-get-school').removeClass("d-none");
@@ -12,7 +10,7 @@ $(document).ready(function() {
     }
   });
 
-  // $('#new_school_abbrev').on('change', () => {
+  // $('#new_school_code').on('change', () => {
   //   if 
   // })
 

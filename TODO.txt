@@ -2,14 +2,15 @@ TODO
 
 1. Modify to use  Flask logging instead of my own util.py
 
-2. Trigger automatic creation of "Unattached School" and Super user when the schools and users tables are created for the first time. 
+2. Trigger automatic creation of "Unattached School" and Super user when the 
+schools and users tables are created for the first time. 
     See: https://dzone.com/articles/how-to-initialize-database-with-default-values-in
 
 3. Move to React & use React Table
 
-4. Figure out how to better restructure all the JQuery code
+4. Figure out how to better restructure all the JQuery code and Jinja templates
 
-5. Optimize my queries
+
 
 6. Make certain pages inaccessible without being logged in, via "login-required" decorator:
 http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
@@ -22,15 +23,58 @@ http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
 
 10. Do better exceptions triggering and handling for the file parsing
 
-11. Refactor into better uses of classes for field vs track events, marks, 
-relays, etc.
+11. Refactor into better uses of multiple-inherited classes for field vs track events, marks, 
+relays, etc. 
+Look at: https://sqlalchemy-utils.readthedocs.io/en/latest/generic_relationship.html#inheritance
+https://sqlalchemy-utils.readthedocs.io/en/latest/generic_relationship.html#abstract-base-classes
 
 
 13. Trigger exceptions for unimplemented stuff (like Relays)
 
+14. Become better at list and set decomprehension
 
+15. Refactor my code to use sets where appropriate instead of lists?
 
-DONE:
+16. Use "generic_repr" in SQLAlchemy-Utils for my models:
+https://sqlalchemy-utils.readthedocs.io/en/latest/models.html#module-sqlalchemy_utils.models
 
+17. Add constraints to columns of my SQLAlchemy models
+
+18. Add create_database, database_exists, drop_database calls to my seed and tests stuff, instead of requring I go to the command line to dropdb and createdb.  https://sqlalchemy-utils.readthedocs.io/en/latest/database_helpers.html
+
+19. Explore using db.session.flush instead of db.session.commit within the 
+Athlete.add_athlete method, in order to make sure that the athlete's school 
+(if not already known to the database ) is only committed to the database at the 
+same time as the new athlete record.
+
+DONE
 12. Make some of my 'mark to string' and 'string to mark' methods private methods preceded by "_"
 (if I can still test them, that is)
+
+
+NO LONGER NEEDED
+
+5. Query optimization using utility "aggregated attribtes" or observers.  I managed to optimze the queries via regular joins that use distinct.
+
+    - 5a. Look at using "aggregated attributes" within sqlalchemy_utils package: 
+    https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html
+    "for when you need to dynamically calculate some aggregate value for a given model", like "average ratign for a movie" or "number of products in a catalog". While I could use SQLAlchemy column_property function, the aggregation is done on the fly and might have a perf hit.  This module lets you calculate these aggregate values automatically and efficiently at the time of modification rather than on the fly.
+
+    For most of my code, using aggregates.aggregated() should be preferable to using @observes(): https://sqlalchemy-utils.readthedocs.io/en/latest/observers.html
+
+
+19. 
+I managed to create a special joined query that goes 
+School --> Athlete --> Entries --> MDEs --> Meet and in reverse, so no longer to 
+complicate my data model with the following:
+
+ORIG: Create a relationship for School.invited_meets and Meet.invited_schools.
+For an athlete to get entered into a Meet, his school should need to be invited
+first. And if the school gets "uninvited" (i.e. deleted) from a meet, then all
+the meet's entries for athletes from that school should also get deleted. Look
+at "cascade="delete delete-orphan"  at 
+https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#tutorial-delete-cascade
+https://docs.sqlalchemy.org/en/latest/orm/cascades.html#unitofwork-cascades
+(Basically, create a parent/child relationship between an associate 
+MeetSchoolsEntered object/table and the Entries, where the MeetSchoolsEntered 
+is a parent and the Entries are children)

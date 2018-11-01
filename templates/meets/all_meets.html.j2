@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1 class="mb-5">Meets</h1>
-  {% include 'template-includes/meet_list.include.html.j2' %}
+  {% include '/meets/meet_list.include.html.j2' %}
 
   <a href="{{url_for('show_new_meet_form')}}">
     <button class="btn-warning btn">

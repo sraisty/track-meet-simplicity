@@ -1,0 +1,49 @@
+{% macro MACRO_GET_USER_SCHOOL(prompt_for_school) %}
+    <div class="form-group">
+        <label for="school">{{ prompt_for_school }}</label>
+        <select class="form-control" name="school_id" id="school_selector">
+            <option value="" disabled selected="selected">
+                Click to select your school
+            </option>
+            <option value="">
+                &lt;My school isn't listed&gt;
+            </option>
+            {% for school in school_list %}
+              {% if session.get('user_school_id') %}
+                {% if school.id == session['user_school_id'] %}
+                  <option value="{{ school.id }}" selected="selected">
+                    {{ school.name }}
+                  </option>
+                {% else %}
+                  <option value="{{ school.id }}">
+                    {{ school.name }}
+                  </option> 
+                  {% endif %}             
+              {% else %}
+                  <option value="{{ school.id }}">
+                    {{ school.name }}
+                  </option>
+              {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    {# add d-none to the class of these form-groups to hide them by default. #}
+    {# we use jQuery to unhide them if  user selects "My school isn't listed" #}
+    {#  earlier, so we can now collect the school information #}
+    <h5 class="tms-get-school d-none">
+        Add your school to TrackMeetSimplicity:
+    </h5>
+
+    <div class="form-group tms-get-school d-none">
+        <label for="new_school_name">School Name:</label>
+        <input type="text" id="new_school_name" name="new_school_name" class="form-control" placeholder="Enter the name of your school">
+    </div>
+
+    <div class="form-group tms-get-school d-none">     
+        <label for="new_school_code">School Code:</label>
+        <input type="text" id="new_school_code" name="new_school_code" class="form-control" placeholder="Enter the official track & field code for your school" aria-describedby="school_code_help" />
+        <small id="school_code_help" class="form-text text-muted">Don't know your school's 3 or 4-character code? <a href="#">Found out here.</a>
+        </small> 
+    </div>
+{% endmacro %}
