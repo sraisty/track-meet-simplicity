@@ -2,11 +2,14 @@
 
 
 {% block secondary_nav_title %}
-PLACEHOLDER SECONDARY NAV TITLE
+  PLACEHOLDER SECONDARY NAV TITLE
 {% endblock secondary_nav_title %}
 
+{% block admin_cog %}
+{% endblock admin_cog %}
+
 {% block nav2_subtitle %}
-PLACEHOLDER SECONDARY NAV SUBTITLE
+  PLACEHOLDER SECONDARY NAV SUBTITLE
 {% endblock nav2_subtitle %}
 
 {% block content %}
@@ -18,7 +21,7 @@ PLACEHOLDER SECONDARY NAV SUBTITLE
           <ul class="nav nav-tabs card-header-tabs">
             {% block tab_navs %}
               THIS IS ALL JUST A PLACEHOLDER FOR TABNAVS
-              {#
+              {#  Like the following:
               {{ MACRO_MAKE_TAB("my-tab1", true, "Tab 1 Name") }}
               {{ MACRO_MAKE_TAB("my-tab2", false, "Tab 2 Name") }}
               #}
@@ -26,10 +29,10 @@ PLACEHOLDER SECONDARY NAV SUBTITLE
           </ul>
         </div>
         <div class="card-body">
-          <div class="tab-content" id="FIXME-tab-content">
+          <div class="tab-content" id="tab-content">
             {% block tab_content %}
               THIS IS ALL JUST A PLACEHOLDER FOR TABCONTENT:
-              {#
+              {# Like the following:
               {{ MACRO_MAKE_TAB_CONTENT("my-tab1", true, "test_tab1_content.html.js") }}
               {{ MACRO_MAKE_TAB_CONTENT("my-tab2", false, "test_tab2_content.html.js") }}
               #}

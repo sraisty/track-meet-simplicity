@@ -1,0 +1,15 @@
+{% from "/meets/_inc_meet_list.html.j2" import MEET_LIST %}
+
+
+{% if school.meets_entered() %}
+    <p>{{school.name}} has athletes entered in the following meets:</p>
+    {% set meets = school.meets_entered() %}
+    {{ MEET_LIST(meets, school, "All") }}
+
+{% else %}
+    <p>{{school.name}} is not entered into any upcoming meets.</p>
+{% endif %}
+
+<a href="{{url_for('show_all_meets', status='Accepting Entries')}}">
+    <button class="btn btn-primary">Find More Meets to Enter </button>
+</a>

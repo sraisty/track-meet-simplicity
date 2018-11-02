@@ -6,16 +6,16 @@
         <div class="col px-5">
             <h1 class="d-flex justify-content-between align-items-center ">
                 {% block secondary_nav_title %}
-                    PLACEHOLDER
+                    PLACEHOLDER NAV2 TITLE
                 {% endblock secondary_nav_title %}
 
-                {% if 'user_email' in session %}
-                    {{ MACRO_SHOW_ADMIN_COG("#") }}   {# url is TODO #}
-                {% endif %}
+                {% block admin_cog %}
+                    PLACEHOLDER ADMIN_COG
+                {% endblock admin_cog %}
             </h1>
             <h4>
                 {% block nav2_subtitle %}
-                    PLACEHOLDER
+                    PLACEHOLDER NAV2 SUBTITLE
                 {% endblock nav2_subtitle %}
             </h4>
         </div>
@@ -29,6 +29,7 @@
 {% endblock content %}
 
 {% block my_javascripts %}
+    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
 {% endblock my_javascripts %}
 
 

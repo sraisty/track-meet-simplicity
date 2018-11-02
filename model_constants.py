@@ -35,6 +35,12 @@ TRACK_LANE_ASSIGN_METHOD = (
 FIELD_ORDER_ASSIGN_METHOD = (
         "best-to-worst", "worst-to-best", "teams alternate")
 
+DEFAULT_EVENT_ORDER = ["4x100M", "1600M", "100H", "110H", "65H", "400M",
+                        "100M", "800M", "300H", "200M", "3200M", "4x400M",
+                        "HJ", "PV", "LJ", "TJ", "DT", "SP"]
+
+DEFAULT_DIVISION_ORDER = ["6F", "7F", "8F", "6M", "7M", "8M"]
+
 EVENT_DEFS = (
         {
             "code": "60M",

@@ -1,0 +1,24 @@
+{% extends "__base.html.j2" %}
+{% from "users/__macros_users.html.j2" import MACRO_GET_USER_SCHOOL with context %}
+
+{% block content %}
+    <h1>User Profile: {{ user.email }}</h1>
+
+
+    <p>Email address: {{ user.email }}</p>
+    <p>School name: {{ user.school.name }}</p>
+    <p>School code: {{ user.school.code }}</p>
+    <a href="{{ url_for('show_edit_profile_form') }}">
+      <button class="btn btn-primary">Update my profile</button>
+    </a>
+
+
+    <a href="{{ url_for('show_edit_profile_form') }}">
+      <button class="btn btn-primary">Change my password</button>
+    <a>
+
+
+{% endblock content %}
+
+{% block my_javascripts %}
+{% endblock my_javascripts %}

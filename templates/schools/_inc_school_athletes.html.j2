@@ -1,0 +1,10 @@
+    <p>Our school's athletes, sortable and filterable by event, gender, division </p>
+    <ul>
+        {% for athlete in school.athletes %}
+            <li>
+                <a href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
+                    {{ athlete.full_name() }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>

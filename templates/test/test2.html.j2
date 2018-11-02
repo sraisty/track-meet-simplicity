@@ -3,9 +3,7 @@
 {% from "__macros.html.j2" import MACRO_MAKE_TAB with context %}
 {% from "__macros.html.j2" import MACRO_MAKE_TAB_CONTENT with context %}
 {% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
-{% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
-{% from "__macros.html.j2" import MACRO_step_tab_content with context %}
-{% from "__macros.html.j2" import MACRO_step_tab_icons with context %}
+
 
 {% block secondary_nav_title %}
     TEST SECONDARY NAV TITLE
@@ -37,7 +35,4 @@
 
 {% block my_javascripts %}
   {{ super() }}
-  <script type="text/javascript" src="{{url_for('static', filename='js/jquery_wizard_bs4.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/new_meet.js')}}">
-  </script>
 {% endblock my_javascripts %}

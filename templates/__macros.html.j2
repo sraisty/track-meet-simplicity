@@ -2,25 +2,24 @@
 {# tab}
 {# id, href, aria-controls values all change based on the NAME.#}
 {# derives name of tab-content block from the Tab ID #}
-    <li class="nav-item">
-        <a class="nav-link tms-tab {% if ACTIVE %}active{% endif %}" 
-           id="{{TAB_ID}}" data-toggle="tab" role="tab" 
-           href="#{{ TAB_ID }}-content" 
-           aria-controls="{{ TAB_ID }}-content" 
-           aria-select="{% if ACTIVE %}true{% else %}false{% endif %}">
-           {{ TAB_NAME }}
-        </a>
-    </li>
+  <li class="nav-item">
+    <a class="nav-link tms-tab {% if ACTIVE %}active{% endif %}"
+    id="{{TAB_ID}}" data-toggle="tab" role="tab"
+    href="#{{ TAB_ID }}-content"
+    aria-controls="{{ TAB_ID }}-content"
+    aria-select="{% if ACTIVE %}true{% else %}false{% endif %}">
+      {{ TAB_NAME }}
+    </a>
+  </li>
 {% endmacro %}
-
 
 
 {% macro MACRO_MAKE_TAB_CONTENT(TAB_ID, ACTIVE, TAB_CONTENT_FILE) %}
 {# changes id, area-labelled-by #}
 {# Use the name of the TAB, not the tab body, as the parameter #}
   <div id="{{ TAB_ID }}-content"
-    class="tab-pane fade {% if ACTIVE %}show active{% endif %}" 
-    role="tabpanel" aria-labelledby="{{ TAB_ID }}">
+  class="tab-pane fade {% if ACTIVE %}show active{% endif %}"
+  role="tabpanel" aria-labelledby="{{ TAB_ID }}">
     {% set file =  TAB_CONTENT_FILE %}
     {% include file %}
   </div>
@@ -28,38 +27,68 @@
 
 
 {% macro MACRO_SHOW_ADMIN_COG(admin_url) %}
-    <a href="{{ admin_url }}">
-       <i class="fas fa-cog fa"></i>
-    </a>
+  <a href="{{ admin_url }}">
+    <i class="fas fa-cog fa"></i>
+  </a>
 {% endmacro %}
 
 
 {% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
-  <div class="card">
-      <div class="card-header" id="{{ event.name }}">
-          <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
-              <span class="mr-auto">{{ event.name }} :&nbsp;</span>
-              <span class-"badge badge-secondary">
-                  {{ meet.get_event_athlete_count_across_divs(event) }} athletes
-              </span>
-          </button>
-      </div>
-      <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
-          <div class="card-body">
-              <ul class="list-group">
-                  {% for mde in meet.get_event_mdes(event) %}
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
-                              {{ mde.division.name }}
-                          </a>
-                          <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
-                      </li>
-                  {% endfor %}
-              </ul>
-          </div>
-      </div>
-  </div>
+<div class="card">
+<div class="card-header" id="{{ event.name }}">
+<button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
+<span class="mr-auto">{{ event.name }} :&nbsp;</span>
+<span class-"badge badge-secondary">
+{{ meet.get_event_athlete_count_across_divs(event) }} athletes
+</span>
+</button>
+</div>
+<div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
+<div class="card-body">
+<ul class="list-group">
+{% for mde in meet.get_event_mdes(event) %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
+      {{ mde.division.name }}
+    </a>
+    <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
+  </li>
+{% endfor %}
+</ul>
+</div>
+</div>
+</div>
 {% endmacro %}
 
 
+{% macro MACRO_step_tab_icons(id_str, step_name, icon_str, active) %}
+  <li role="presentation" class="nav-item">
+    <a href="#{{id_str}}" data-toggle="tab" aria-controls="{{id_str}}" role="tab" title="{{step_name}}" class="nav-link {% if active %}active{% else %}disabled{% endif %}">
+      <span class="round-tab">
+        <i class="{{icon_str}}"></i>
+      </span>
+    </a>
+  </li>
+{% endmacro %}
 
+{% macro MACRO_step_tab_content(id_str, step_name, first, last, active) %}
+  <div class="tab-pane {% if active %}active{% endif %}" role="tabpanel" id="{{id_str}}">
+    <h1 class="text-md-center">{{ step_name }}</h1>
+      <div class="row">
+        <div class="col">
+          {# When calling this macro using call(), whatever you place inside the "%call black ends up here #}
+          {{ caller() }} 
+        </div>
+      </div>
+      <ul class="list-inline text-md-center">
+          {% if not first %}
+            <li><button type="button" class="btn btn-secondary prev-step prev-button">Prev Step &lt;&lt;</button></li>
+          {% endif %}
+          {% if not last %}
+            <li>
+              <button type="button" class="btn btn-secondary next-step next-button">Next Step &gt;&gt;</button>
+            </li>
+          {% endif %}
+      </ul>
+  </div>
+{% endmacro %}

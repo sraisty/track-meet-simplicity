@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy_utils import generic_repr
+from datetime import datetime, timedelta
+
 
 from util import warning, error, info
 
@@ -17,7 +19,8 @@ from model_constants import (
     MIDDLE_SCHOOL_GRADES, HIGH_SCHOOL_GRADES, MDE_STATUS,
     ADULT_CHILD, DIV_NAME_DICT, MIN_ATHLETES_PER_HEAT, EVENT_TYPES,
     MEET_STATUS, MARK_TYPES, HEAT_FLIGHT_ASSIGN_METHOD,
-    TRACK_LANE_ASSIGN_METHOD, FIELD_ORDER_ASSIGN_METHOD, EVENT_DEFS)
+    TRACK_LANE_ASSIGN_METHOD, FIELD_ORDER_ASSIGN_METHOD, EVENT_DEFS,
+    DEFAULT_DIVISION_ORDER, DEFAULT_EVENT_ORDER)
 
 # This is a hack. It's a number of seconds that is greater than any track meeet
 # event would possibly take, so I can get the database to do sorting of marks
@@ -108,14 +111,14 @@ class Meet(db.Model):
             "EventDefinition", secondary="meet_division_events", uselist=True,
             backref="meets")
     event_orderings = db.relationship(
-            "EventOrdering", uselist=True,
+            "EventOrdering", uselist=True, order_by="EventOrdering.seq_num",
             back_populates="meet")
 
     divisions = db.relationship(
             "Division", secondary="meet_division_events", uselist=True,
             )
     div_orderings = db.relationship(
-            "DivOrdering", uselist=True,
+            "DivOrdering", uselist=True, order_by="DivOrdering.seq_num",
             back_populates="meet")
 
     entries = db.relationship(
@@ -179,7 +182,8 @@ class Meet(db.Model):
         # If ev_code_order is None, then createEventOrders assumes the
         # meet includes all possible events in alpha order by code.
         events = EventOrdering.create_events_in_order(
-                        meet, meet_info_dict.get('event_order'))
+                        meet,
+                        meet_info_dict.get('event_order', DEFAULT_EVENT_ORDER))
 
         # associate this meet with the selected divisions for athletes
         # (i.e. "6th Grade Girls"), and specify the order in which divisions
@@ -187,7 +191,8 @@ class Meet(db.Model):
         # If ev_code_order is none, then createDivOrders assumes the
         # meet includes all possible events in alpha order by code.
         divs = DivOrdering.create_divs_in_order(
-                meet, meet_info_dict.get('division_order'))
+                meet,
+                meet_info_dict.get('division_order', DEFAULT_DIVISION_ORDER))
 
         # With the events and divisions selected for this meet, now generate
         # the "MeetDivisionEvents" for the whole meet and each "MDE's" sequence
@@ -228,12 +233,28 @@ class Meet(db.Model):
             info(f"\t\t\t{s.name}, {s.code}")
         return schools
 
-    def get_athletes(self):
+    def get_athletes(self, school_id=None):
         q = db.session.query(Athlete).join(Athlete.entries).join(Entry.meet)
         q = q.filter(Meet.id == self.id).distinct()
+        if school_id:
+            q = q.filter(Athlete.school_id == school_id)
+
         q = q.order_by(Athlete.fname).order_by(Athlete.lname)
+
         athletes = q.all()
         return athletes
+
+    def get_entries(self, school_id=None):
+        # q = db.session.query(Athlete).join(Athlete.entries).join(Entry.meet)
+        # q = q.filter(Meet.id == self.id).distinct()
+        # if school_id:
+        #     q = q.filter(Athlete.school_id == school_id)
+
+        # q = q.order_by(Athlete.fname).order_by(Athlete.lname)
+
+        # athletes = q.all()
+        # return athletes
+        pass
 
     @classmethod
     def reorder_mdes(cls):
@@ -339,7 +360,7 @@ class Athlete(db.Model):
                 return ath
         return
 
-    def meets(self):
+    def get_meets(self, meet_status, include_past_meets):
         """ Returns a list of all the meet objects that this athlete is
         entered into. If athlete is not entered into any meets, returns None.
         """
@@ -843,19 +864,21 @@ class School(db.Model):
             db.session.add(new_unattached_school)
             db.session.commit()
 
-    def meets_entered(self):
+    def meets_entered(self, meet_status=None, include_past_meets=False):
         """ Returns a list of meets where this school has any athletes entered
         """
-
         q = db.session.query(Meet).join(Meet.entries).join(Entry.school)
         q = q.filter(School.id == self.id).distinct()
+        if meet_status:
+            q = q.filter(Meet.status == meet_status)
+        if not include_past_meets:
+            q = q.filter(Meet.date > datetime.now() - timedelta(days=1))
         q = q.order_by(Meet.date)
         meets = q.all()
         num_meets = q.count()
         info(f"School {self.name} is in **{num_meets}** meets:")
         for m in meets:
             info(f"\t\t\t{m.name}, {m.date}")
-
         return meets
 
 
@@ -939,7 +962,6 @@ class EventOrdering(db.Model):
 
     @classmethod
     def create_events_in_order(cls, meet, ev_code_order):
-
         events = []
         seq_num = 1
         if not ev_code_order:           # None or empty list
@@ -960,6 +982,9 @@ class EventOrdering(db.Model):
         db.session.commit()
         return events
 
+    @staticmethod
+    def get_default_event_order_codes():
+        return DEFAULT_EVENT_ORDER
 
 # #######################  DIVISION CLASS #####################
 gender_enum = Enum(*GENDERS, name="gender")
@@ -1131,6 +1156,9 @@ class DivOrdering(db.Model):
         db.session.commit()
         return divs
 
+    @staticmethod
+    def get_default_division_order_codes():
+        return DEFAULT_DIVISION_ORDER
 
 # #######################  USER  CLASS #####################
 

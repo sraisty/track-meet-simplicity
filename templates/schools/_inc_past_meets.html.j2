@@ -1,0 +1,21 @@
+    {# <p>Meets this schools has entered</p> #}
+    {# {% for meet in school.meets() %} #}
+        {# <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}"> #}
+            {# {{ meet.name }} #}
+        {# </a> #}
+    {# {% endfor %} #}
+
+{#     {% if school.meets_entered() %}
+        <p>Meets this school has entered</p>
+        {% set list = school.meets_entered() %}
+        {% for meet in list %}
+            <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                {{ meet.name }}
+            </a>
+        {% endfor %}
+
+        {% include '/meets/_inc_meet_list.html.j2' %}
+    {% else %}
+        <p>{{school.name}} has no entries or results from past meets.</p>
+    {% endif %}
+ #}

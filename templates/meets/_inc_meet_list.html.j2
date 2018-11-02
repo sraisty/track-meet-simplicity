@@ -1,0 +1,82 @@
+{% macro MEET_LIST(meets, school, meet_status) %}
+
+{# We need school here in order to reduce the show how many entries & athletes 
+   in each meet are from my school. If we are not looking for a school with a particular meet_status, give it null #}
+<div class="row mb-5">
+  <div class="col">
+    <table id="meet_table" class="display" data-order='[[ 1, "asc" ]]' data-paging='false'>
+      <thead>
+        <tr>
+          <th>Meet Name</th>
+          <th>Date</th>
+          <th>Host School</th>
+          <th>Status</th>
+          <th>All<br>Athletes</th>
+          {% if school %}
+            <th>{{ school.code }}<br>Athletes</th>
+          {% endif %}
+          <th>Entries</th>
+          <th>% Full</th>
+          <th>MDEs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for meet in meets %}
+          {% if meet.status == meet_status or meet_status=="All" %}
+            <tr>
+              <td>
+                <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                  {{ meet['name'] }}
+                </a>
+              </td>
+              <td data-order="{{ meet.date }}">
+                {{ meet.date.strftime("%B %d, %Y") }}
+              </td>
+              <td>
+                {% if meet['host_school'] %}
+                  {{ meet.host_school.name }}
+                {% endif %}
+              </td>
+              <td>
+                {% if meet.status == 'Accepting Entries' %}
+                  <a href="{{ url_for('show_enter_meet_form', meet_id=meet.id) }}">
+                    <button type="button" class="btn btn-warning">
+                    Accepting Entries
+                    </button>
+                  </a>
+                {% else %}
+                  {{ meet.status }}
+                {% endif %}
+              </td>
+              <td>
+                {{ meet.get_athletes() | length }}
+              </td>
+              {% if school %}
+                <td>
+                  {{ meet.get_athletes(school_id=school.id) | length }}
+                </td>
+              {% endif %}
+              <td>
+                {{ meet.entries | length }}
+              </td>
+              <td>
+                % Full TBD
+              </td>
+              <td>
+                {% if meet.status == "Accepting Entries" %}
+                  <a href="{{ url_for('edit_meet_entries', meet_id=meet.id, school_id=school.id ) }}">
+                    <button type="button" class="btn btn-warning">
+                    Revise My Entries
+                    </button>
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endmacro %}
