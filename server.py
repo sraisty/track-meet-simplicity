@@ -328,6 +328,15 @@ def show_mde_detail(meet_id, mde_id):
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
     return render_template('/meets/mde_detail.html.j2', mde=mde)
 
+@app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/edit')
+def show_mde_edit_form(meet_id, mde_id):
+    # TO DO - Don't think I really need BOTH the meet_id and the mde_id
+    # for this function, but maybe it should be in the URL anyway ?
+    # TODO Make this 
+    mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
+    # return render_template('/meets/mde_detail.html.j2', mde=mde)
+    return "Edit form for mde# {} in meet# {}.".format(mde_id, meet_id)
+
 # ##########  DISPLAY AND EDIT ATHLETES  ###########
 @app.route('/athletes')
 def show_all_athletes():

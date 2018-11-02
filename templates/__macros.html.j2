@@ -20,8 +20,10 @@
   <div id="{{ TAB_ID }}-content"
   class="tab-pane fade {% if ACTIVE %}show active{% endif %}"
   role="tabpanel" aria-labelledby="{{ TAB_ID }}">
-    {% set file =  TAB_CONTENT_FILE %}
-    {% include file %}
+    {% if TAB_CONTENT_FILE is defined %}
+      {% include TAB_CONTENT_FILE %}
+    {% endif %}
+    {{ caller() }}
   </div>
 {% endmacro %}
 

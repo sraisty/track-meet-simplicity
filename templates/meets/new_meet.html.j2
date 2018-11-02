@@ -5,111 +5,106 @@
 
 {% block content %}
   <h1 class="mb-5">Create New Meet</h1>
-<form class="form cf" action="{{ url_for('do_new_meet_form') }}" method=post>
-  <div class="wizard">
-    <div class="wizard-inner">
-      <div class="connecting-line"></div>
-      <ul class="nav nav-tabs" role="tablist">
-        {{ MACRO_step_tab_icons("step1", "Step 1: Meet Info", "fas fa-info", true) }}
-        {{ MACRO_step_tab_icons("step2", "Step 2: Meet Rules", "fas fa-book", false) }}
-        {{ MACRO_step_tab_icons("step3", "Step 3: Events", "fas fa-running", false) }}
-        {{ MACRO_step_tab_icons("step4", "Step 4: Divisions", "fas fa-list-ol", false) }}
-        {{ MACRO_step_tab_icons("step5", "Step 5: Finish", "fas fa-check", false) }}
-      </ul>
-    </div>
-    <div class="tab-content">
-      {% call MACRO_step_tab_content("step1", "Step 1: Meet Information", true, false, true) %}
-        {# whatever is in here will  inend up the macro's {{caller()}} line  #}
-        <div class="form-group">
-          <label for="meet-name">Meet Name</label>
-          <input type="text" class="form-control" id="meet-name" placeholder="Enter name of meet" name="name" required>
-        </div>
-        <div class="form-group">
-          <label for="meet-date">Meet Date</label>
-          <input class="form-control" id="meet-date" width="200" name="date" placeholder="MM/DD/YYYY" required />
-        </div>
-        <div class="form-group">
-          <label form="meet-host">Host School</label>
-          <select class="form-control" id="meet-host" width="200" name="host_school" disabled>
-            <option>{{session['user_school_name']}}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label form="meet-status">Meet Status</label>
-          <select class="form-control" id="meet-status" width="200" name="status" disabled>
-            {% if meet is defined %}
-              <option>{{meet.status}}</option>
-              {% else %}
-              <option>Unpublished</option>
-            {% endif %}
-          </select>
-        </div>
-        <div class="form-group">
-            <label for="meet-description">Description</label>
-            <textarea class="form-control" id="meet-description" name="description" rows="3" placeholder="Tell us the important information that teams entering your meet need to know, such as location, start time, divisions, events, and any special rules.">
-            </textarea>
-        </div>
+  <form class="form cf" action="{{ url_for('do_new_meet_form') }}" method=post>
+    <div class="wizard">
+      <div class="wizard-inner">
+        <div class="connecting-line"></div>
+        <ul class="nav nav-tabs" role="tablist">
+          {{ MACRO_step_tab_icons("step1", "Step 1: Meet Info", "fas fa-info", true) }}
+          {{ MACRO_step_tab_icons("step2", "Step 2: Meet Rules", "fas fa-book", false) }}
+          {{ MACRO_step_tab_icons("step3", "Step 3: Events", "fas fa-running", false) }}
+          {{ MACRO_step_tab_icons("step4", "Step 4: Divisions", "fas fa-list-ol", false) }}
+          {{ MACRO_step_tab_icons("step5", "Step 5: Finish", "fas fa-check", false) }}
+        </ul>
+      </div>
+      <div class="tab-content">
+        {% call MACRO_step_tab_content("step1", "Step 1: Meet Information", true, false, true) %}
+          {# whatever is in here will  inend up the macro's {{caller()}} line  #}
+          <div class="form-group">
+            <label for="meet-name">Meet Name</label>
+            <input type="text" class="form-control" id="meet-name" placeholder="Enter name of meet" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="meet-date">Meet Date</label>
+            <input class="form-control" id="meet-date" width="200" name="date" placeholder="MM/DD/YYYY" required />
+          </div>
+          <div class="form-group">
+            <label form="meet-host">Host School</label>
+            <select class="form-control" id="meet-host" width="200" name="host_school" disabled>
+              <option>{{session['user_school_name']}}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label form="meet-status">Meet Status</label>
+            <select class="form-control" id="meet-status" width="200" name="status" disabled>
+              {% if meet is defined %}
+                <option>{{meet.status}}</option>
+                {% else %}
+                <option>Unpublished</option>
+              {% endif %}
+            </select>
+          </div>
+          <div class="form-group">
+              <label for="meet-description">Description</label>
+              <textarea class="form-control" id="meet-description" name="description" rows="3" placeholder="Tell us the important information that teams entering your meet need to know, such as location, start time, divisions, events, and any special rules.">
+              </textarea>
+          </div>
+        {% endcall %}
 
-      {% endcall %}
-      {% call MACRO_step_tab_content("step2", "Step 2: Meet Rules", false, false, false) %}
-       <div class="form-group">
-          <label for="max-entries-per-athlete">Max number of events per athlete</label>
-          <input type="text" class="form-control" id="max-entries-per-athlete" value="4" name="max_entries_per_athlete">
-        </div>
-        <div class="form-group">
-          <label for="max-team-entries">
-            Max athletes per team allowed in each event
-          </label>
-          <input type="text" class="form-control" id="max-team-entries" value="3" name="max_teammates_per_event" aria-describedby="athletes-per-team-help">
-          <small id="ahletes-per-team-help" class="form-text text-muted">
-          By "event", we really mean "in each division within an event". So, enter
-          3 if you allow 3 kids from the same team in the same division to compete in the 100m.
-          </small>
-        </div>
-        <div class="form-group">
-          <label for="max-heats-per-mde">For each event, max number of heats per division</label>
-          <input type="text" class="form-control" id="max-heats-per-mde" value="3" name="max_heats_per_mde">
-        </div>
-      {% endcall %}
+        {% call MACRO_step_tab_content("step2", "Step 2: Meet Rules", false, false, false) %}
+         <div class="form-group">
+            <label for="max-entries-per-athlete">Max number of events per athlete</label>
+            <input type="text" class="form-control" id="max-entries-per-athlete" value="4" name="max_entries_per_athlete">
+          </div>
+          <div class="form-group">
+            <label for="max-team-entries">
+              Max athletes per team allowed in each event
+            </label>
+            <input type="text" class="form-control" id="max-team-entries" value="3" name="max_teammates_per_event" aria-describedby="athletes-per-team-help">
+            <small id="ahletes-per-team-help" class="form-text text-muted">
+            By "event", we really mean "in each division within an event". So, enter
+            3 if you allow 3 kids from the same team in the same division to compete in the 100m.
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="max-heats-per-mde">For each event, max number of heats per division</label>
+            <input type="text" class="form-control" id="max-heats-per-mde" value="3" name="max_heats_per_mde">
+          </div>
+        {% endcall %}
 
-      {% call MACRO_step_tab_content("step3", "Select & Order Events", false, false, false) %}
-        <p>Within each event, how should the heats/flights for each division be ordered? Drag and drop to put them in the right order. </p>
-        {% if event_order is defined %}
-          <ol id="meet-eventlist" class="meet-ordered-list">
-            {% for event_code in event_order %}   {# FIX THIS TO USE EventNAME #}
-              <li class="card">{{event_code}}</li>
-            {% endfor %}
-          </ol>
-        {% endif %}
-      {% endcall %}
+        {% call MACRO_step_tab_content("step3", "Select & Order Events", false, false, false) %}
+          <p>Within each event, how should the heats/flights for each division be ordered? Drag and drop to put them in the right order. </p>
+          {% if event_order is defined %}
+            <ol id="meet-eventlist" class="meet-ordered-list">
+              {% for event_code in event_order %}   {# FIX THIS TO USE EventNAME #}
+                <li class="card">{{event_code}}</li>
+              {% endfor %}
+            </ol>
+          {% endif %}
+        {% endcall %}
 
 
-      {% call MACRO_step_tab_content("step4", "Select & Order Divisions", false, false, false) %}
-        <p>Within each event, how should the heats/flights for each division be ordered? Drag and drop to put them in the right order. </p>
-        {% if div_order is defined %}
-          <ol id="meet-divlist" class="meet-ordered-list">
-            {% for div_code in div_order %}   {# FIX THIS TO USE DivisionNAME #}
-              <li class="card">{{div_code}}</li>
-            {% endfor %}
-          </ol>
-        {% endif %}
-      {% endcall %}
+        {% call MACRO_step_tab_content("step4", "Select & Order Divisions", false, false, false) %}
+          <p>Within each event, how should the heats/flights for each division be ordered? Drag and drop to put them in the right order. </p>
+          {% if div_order is defined %}
+            <ol id="meet-divlist" class="meet-ordered-list">
+              {% for div_code in div_order %}   {# FIX THIS TO USE DivisionNAME #}
+                <li class="card">{{div_code}}</li>
+              {% endfor %}
+            </ol>
+          {% endif %}
+        {% endcall %}
 
-      {% call MACRO_step_tab_content("step5", "Finish", false, true, false) %}
-{#         {% if event_order is defined %}
-          <ol id="meet-eventlist" class="meet-ordered-list">
-            {% for event_code in event_order %}   {# FIX THIS TO USE EventNAME #}
-{#               <li class="card">{{event_code}}</li>
-            {% endfor %}
-        {% endif %} #}
-        <button type="submit" class="btn btn-primary btn-lg">Create New Meet</button>
-      {% endcall %}
+        {% call MACRO_step_tab_content("step5", "Finish", false, true, false) %}
+          <button type="submit" class="btn btn-primary btn-lg">Create New Meet</button>
+        {% endcall %}
 
-      <div class="clearfix"></div>
-    </div>
-  </div>  
-</form>
+        <div class="clearfix"></div>
+      </div>
+    </div>  
+  </form>
 {% endblock content %}
+
 
 {% block my_javascripts %}
   {{ super() }}

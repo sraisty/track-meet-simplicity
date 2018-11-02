@@ -29,7 +29,9 @@
 {% endblock content %}
 
 {% block my_javascripts %}
-    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+  {{super()}}
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 {% endblock my_javascripts %}
 
 

@@ -33,35 +33,45 @@
 {# The expandable event cards that are on the accordions on   #}
 {# MeetDetail > Schedule of events  #}
 {% block tab_content %}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-events-tab", true, "/meets/event_accordion.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", true, "/__not_done.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", true, "/__not_done.html.j2")}}
-    {{ MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", true, "/__not_done.html.j2")}}
+    {% call MACRO_MAKE_TAB_CONTENT(
+        "mdetail-events-tab", true, "/meets/event_accordion.html.j2") %}
+    {% endcall %}
+
+    {% call MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", false) %}
+        {% for school in meet.schools_entered() %}
+            <p>
+                <a href="{{url_for('show_school_detail', school_id=school.id)}}">
+                    {# TODO FIX:- This is returning a count of ALL entries and athletes, not just this meet #}
+                    {{ school.name }}
+                </a>, 
+                {{school.athletes | length }} Athletes, 
+                {{school.entries | length}} Entries 
+
+            </p>
+        {% endfor %} 
+    {% endcall %}
+
+    {% call MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", false) %}
+        {% if meet.get_athletes() %}
+            <ul>
+            {% for athlete in meet.get_athletes() %}
+                <li>
+                    <a href="{{url_for('show_athlete_detail', athlete_id=athlete.id)}}">
+                        {{ athlete.full_name() }}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endcall %}
+
+    {% call MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", false) %}
+        <p>{{meet.description}}</p>
+    {% endcall %}
+
 {% endblock tab_content %}
 
 
-{# TAB2
-    {% for school in meet.schools_entered() %}
-        <p>
-            <a href="{{url_for('show_school_detail', school_id=school.id)}}">
-                {{ school.name }}
-            </a>
-        </p>
-    {% endfor %} #}
-
-
-
-{# TAB3 ATHLETES
-    {% for athlete in meet.get_athletes() %}
-        <p>{{athlete.full_name() }}</p>
-    {% endfor %}
- #}
-
-
-{# TAB4 MEETINFO 
-{% block tab4_content %}
-    <p>{{meet.description}}</p>
-#}
 
 
 {% block my_javascripts %}

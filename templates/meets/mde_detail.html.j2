@@ -1,49 +1,92 @@
-{% extends "__base.html.j2" %}
-{% block content %}
-  <h1>
+{% extends "__tabnav.html.j2" %}
+{# Detail info about a particular MDE within a meet, at /meets/<meet-id>/mde/<mde-id> #}
+
+{% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+
+{% block secondary_nav_title %}
   <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
     {{ mde.meet.name }}
   </a>
-  : {{ mde.meet.date.strftime("%B %d, %Y") }}
-  </h1>
-  <h2>{{ mde.event.name }}: {{ mde.division.name }}</h2>
-  <div class="card">
-    <div class="card-body">
-      {% if mde.event.is_track() %}
-        <table id="mde_table" class="display" data-paging='false'
-          data-order='[[ 3, "asc" ]]' >
-      {% else %}
-        <table id="mde_table" class="display" data-paging='false'
-          data-order='[[ 3, "desc" ]]' >
-      {% endif %}
-          <thead>
-            <tr>
-              <th>Seed #<br>(pending)</th>
-              <th>Athlete name</th>
-              <th>School</th>
-              <th>Seed Mark</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for entry in mde.entries %}
+  {{ mde.meet.date.strftime("%B %d, %Y") }}
+{% endblock secondary_nav_title %}
+
+{% block nav2_admin_url %}
+    href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}"
+{% endblock nav2_admin_url %}>
+
+{% block nav2_subtitle %}
+  Event #{{mde.seq_num}}: {{ mde.event.name }}: {{ mde.division.name }}
+  <p>Status: {{mde.status}}, 
+    Maximum Heats: {{mde.meet.max_heats_per_mde}}, 
+    Maximum Athletes Per Heat: {{ mde.meet.max_heats_per_mde }}
+  </p>
+  {# mde.event.max_per_heat * mde.meet.max_heats_per_mde #}
+{% endblock nav2_subtitle %}
+
+{% block tab_navs %}
+    {{ MACRO_MAKE_TAB("mde-entries-tab", true, "Entries") }}
+    {{ MACRO_MAKE_TAB("mde-assign-tab", false, "Assignments") }}
+    {{ MACRO_MAKE_TAB("mde-results-tab", false, "Results") }}
+    {{ MACRO_MAKE_TAB("mde-settings-tab", false, "Settings") }}
+{% endblock tab_navs %} 
+
+{% block tab_content %}
+  {% call MACRO_MAKE_TAB_CONTENT("mde-entries-tab", true) %}
+    <div class="card">
+      <div class="card-body">
+        <button class="btn btn-warning btn-large id="mde-assign-button">
+          Make Athlete Assignments
+        </button>
+
+        {% if mde.event.is_track() %}
+          <table id="mde_table" class="display" data-paging='false'
+            data-order='[[ 3, "asc" ]]' >
+        {% else %}
+          <table id="mde_table" class="display" data-paging='false'
+            data-order='[[ 3, "desc" ]]' >
+        {% endif %}
+            <thead>
               <tr>
-                <td>TBD</td>
-                <td>
-                  <a href="/athletes/{{ entry.athlete.id }}">
-                    {{ entry.athlete.fname }} {{ entry.athlete.lname }}
-                  </a>
-                </td>
-                <td>{{ entry.athlete.school.name }}</td>
-                <td data-order="{{entry.mark}}">
-                      {{ entry.mark_to_string() }}
-                </td>
+                <th>Seed #<br>(pending)</th>
+                <th>Athlete name</th>
+                <th>School</th>
+                <th>Seed Mark</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for entry in mde.entries %}
+                <tr>
+                  <td>TBD</td>
+                  <td>
+                    <a href="/athletes/{{ entry.athlete.id }}">
+                      {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+                    </a>
+                  </td>
+                  <td>{{ entry.athlete.school.name }}</td>
+                  <td data-order="{{entry.mark}}">
+                      {{ entry.mark_to_string() }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  {% endblock content %}
+  {% endcall %}
+
+  {% call MACRO_MAKE_TAB_CONTENT("mde-assign-tab", false) %}
+    No assignments yet
+  {% endcall %}
+
+  {% call MACRO_MAKE_TAB_CONTENT("mde-results-tab", false) %}
+    No results yet
+  {% endcall %}
+
+  {% call MACRO_MAKE_TAB_CONTENT("mde-settings-tab", false) %}
+    See your MDE settings here and edit them.
+  {% endcall %}
+
+{% endblock tab_content %}
   
   {% block my_javascripts %}
     {{super()}}
