@@ -87,7 +87,7 @@
 
   {% call MACRO_MAKE_TAB_CONTENT("athlete-profile-tab", false) %}
     
-    <form action="{{url_for('do_edit_athlete_detail', athlete_id=athlete.id)}}" method=POST>
+{#     <form action="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id)}}" method=POST> #}
       First name: {{ athlete.fname }}<br>
       Middle name: {{athlete.minitial }}<br>
       Last name: {{ athlete.lname }}<br>
@@ -100,11 +100,12 @@
       Problem: {{ athlete.problem }}<br>
       Coach notes: {{ athlete.coach_notes }}<br>
 
-      <button type="submit" class="btn btn-primary">
-        Edit Athlete Profile
-      </button>
-      
-    </form>
+      <a href="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id) }}">
+        <button  class="btn btn-primary">
+          Edit Athlete Profile
+        </button>
+      </a>
+    {# </form> #}
   {% endcall %}
 
 

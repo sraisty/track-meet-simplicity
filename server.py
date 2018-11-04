@@ -10,7 +10,7 @@ from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 # import requests
 
-from model import (connect_to_db, db, User, Meet, Athlete, Entry,
+from model import (connect_to_db, db, User, Meet, Athlete, Entry, Division,
                    School, MeetDivisionEvent, EventOrdering, DivOrdering,
                    DEFAULT_EVENT_ORDER, DEFAULT_DIVISION_ORDER)
 
@@ -324,6 +324,7 @@ def show_mde_detail(meet_id, mde_id):
     mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
     return render_template('/meets/mde_detail.html.j2', mde=mde)
 
+
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/edit')
 def show_mde_edit_form(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
@@ -348,12 +349,22 @@ def show_athlete_detail(athlete_id):
     return render_template('/athletes/athlete_detail.html.j2', athlete=athlete)
 
 
-@app.route('/athletes/<int:athlete_id>/edit', methods=['POST'])
+@app.route('/athletes/<int:athlete_id>/edit')
+def show_edit_athlete_detail(athlete_id):
+    athlete = Athlete.query.get(athlete_id)
+    school_list = School.query.all()
+    division_list = Division.query.all()
+    return render_template(
+        '/athletes/_athlete_detail_edit_form.html.j2',
+        athlete=athlete, school_list=school_list, division_list=division_list)
+
+
+@app.route('/athletes/<int:athlete_id>/do_edit', methods=['POST'])
 def do_edit_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
-    # return render_template('athlete_detail.html.j2', athlete=athlete)
-    return '<p>Edit athlete {}</p>'.format(athlete.id)
-
+    # TODO - get and save data from form
+    flash("Saving changes to athletes is not implemented yet.", "danger")
+    return redirect(url_for('show_athlete_detail', athlete_id=athlete.id))
 
 # @app.route('/display-info-from-server.json')
 # def example_json():
