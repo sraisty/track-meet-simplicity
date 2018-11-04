@@ -27,6 +27,10 @@
       {{ MACRO_PRIMARY_NAV("tbd_selectedmenuitem") }}
     {% endblock navbar_optional %} 
 
+    {% block myschool_indicator %}
+      <div class="row mb-4">
+      </div>
+    {% endblock %}
 
     {% block secondary_navbar %}
         {# WILL BE REPLACED BY CONTENTS OF SECONDARY_NAV2 if applicable #}
@@ -35,7 +39,7 @@
     <div class="container-fluid">
       
       {# Display flashed messages #}
-      <div class="row mb5  justify-content-md-center">
+      <div class="row justify-content-md-center">
         <div class="col-md-auto">
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

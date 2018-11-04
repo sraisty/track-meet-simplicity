@@ -1,0 +1,75 @@
+{# School List #}
+{% macro MACRO_SCHOOL_LIST(schools, school_table_id) %}
+  <table id="{{school_table_id}}" class="display" data-order='[[ 0, "asc" ]]' data-page-length='100'>
+    <thead>
+      <tr>
+        <th>School Name</th>
+        <th>School Code</th>
+        <th>Upcoming Meets Hosted</th>
+        <th>Upcoming Meets Entered</th>
+        <th>League</th>
+        <th>Section</th>
+        <th>City</th>
+        <th>State</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for school in schools %}
+        <tr>
+          <td>
+            <a href="{{ url_for('show_school_detail', school_id=school.id) }}">
+              {{ school['name'] }}
+            </a>
+          </td>
+          <td>{{ school['code']}}</td>
+          <td>
+            {% if school.meets_hosted %}
+              <strong>
+                {{ school.meets_hosted | length }} Meets<br>
+              </strong>
+              {% for meet in school.meets_hosted %}
+                <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                  {{ meet.name }}
+                </a>
+                <br>
+              {% endfor %}
+            {% endif %}
+          </td>
+          <td>
+            {% if school.meets_entered() %}
+              <strong>
+                {{ school.meets_entered() | length }} Meets
+              </strong><br>
+              {% for meet in school.meets_entered() %}
+                <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+                  {{ meet.name }}
+                </a>
+                <br>
+              {% endfor %}
+            {% endif %}
+          </td>
+          <td>
+            {% if school['league'] %}
+              {{ school.league }}
+            {% endif %}
+          </td>
+          <td>
+            {% if school['section'] %}
+              {{ school.section }}
+            {% endif %}
+          </td>
+          <td>
+            {% if school['city'] %}
+              {{ school.city }}
+            {% endif %}
+          </td>
+          <td>
+            {% if school['state'] %}
+              {{ school.state }}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

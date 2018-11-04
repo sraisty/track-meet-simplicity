@@ -8,6 +8,13 @@
 {% block admin_cog %}
 {% endblock admin_cog %}
 
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+{% block myschool_indicator %}
+  <div class="row mb-4">
+  </div>
+{% endblock %}
+
 {% block nav2_subtitle %}
   PLACEHOLDER SECONDARY NAV SUBTITLE
 {% endblock nav2_subtitle %}
@@ -17,7 +24,7 @@
   <div class="row">
     <div class="col">
       <div class="card">
-        <div class="card-header bg-primary mb-3">
+        <div class="card-header bg-primary">
           <ul class="nav nav-tabs card-header-tabs">
             {% block tab_navs %}
               THIS IS ALL JUST A PLACEHOLDER FOR TABNAVS

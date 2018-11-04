@@ -5,7 +5,7 @@
 
 {% block content %}
   <h1 class="mb-5">Create New Meet</h1>
-  <form class="form cf" action="{{ url_for('do_new_meet_form') }}" method=post>
+  <form class="form cf" action="{{ url_for('do_new_meet_form') }}" method=POST>
     <div class="wizard">
       <div class="wizard-inner">
         <div class="connecting-line"></div>
@@ -61,14 +61,14 @@
               Max athletes per team allowed in each event
             </label>
             <input type="text" class="form-control" id="max-team-entries" value="3" name="max_teammates_per_event" aria-describedby="athletes-per-team-help">
-            <small id="ahletes-per-team-help" class="form-text text-muted">
+            <small id="athletes-per-team-help" class="form-text text-muted">
             By "event", we really mean "in each division within an event". So, enter
             3 if you allow 3 kids from the same team in the same division to compete in the 100m.
             </small>
           </div>
           <div class="form-group">
             <label for="max-heats-per-mde">For each event, max number of heats per division</label>
-            <input type="text" class="form-control" id="max-heats-per-mde" value="3" name="max_heats_per_mde">
+            <input type="text" class="form-control" id="max-heats-per-mde" value="1" name="max_heats_per_mde">
           </div>
         {% endcall %}
 

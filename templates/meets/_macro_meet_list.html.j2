@@ -1,10 +1,12 @@
-{% macro MEET_LIST(meets, school, meet_status) %}
+{% macro MEET_LIST(meets, school, meet_status, meet_table_id) %}
 
 {# We need school here in order to reduce the show how many entries & athletes 
    in each meet are from my school. If we are not looking for a school with a particular meet_status, give it null #}
+
+{# HACK to fix: action parameter can be "Edit Entries", "Manage Meet", "Enter Meet" or none #}
 <div class="row mb-5">
   <div class="col">
-    <table id="meet_table" class="display" data-order='[[ 1, "asc" ]]' data-paging='false'>
+    <table id="{{meet_table_id}}" class="display" data-order='[[ 1, "asc" ]]' data-paging='false'>
       <thead>
         <tr>
           <th>Meet Name</th>
@@ -17,7 +19,7 @@
           {% endif %}
           <th>Entries</th>
           <th>% Full</th>
-          <th>MDEs</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -38,15 +40,7 @@
                 {% endif %}
               </td>
               <td>
-                {% if meet.status == 'Accepting Entries' %}
-                  <a href="{{ url_for('show_enter_meet_form', meet_id=meet.id) }}">
-                    <button type="button" class="btn btn-warning">
-                    Accepting Entries
-                    </button>
-                  </a>
-                {% else %}
-                  {{ meet.status }}
-                {% endif %}
+                {{ meet.status }}  
               </td>
               <td>
                 {{ meet.get_athletes() | length }}
@@ -60,16 +54,32 @@
                 {{ meet.entries | length }}
               </td>
               <td>
-                % Full TBD
+                % Full
               </td>
               <td>
-                {% if meet.status == "Accepting Entries" %}
-                  <a href="{{ url_for('edit_meet_entries', meet_id=meet.id, school_id=school.id ) }}">
+                {% set myschool_id=session.get('user_school_id') %}
+                {% if meet.host_school.id == myschool_id %}
+                  <a href="{{ url_for('show_edit_meet_form', meet_id=meet.id) }}">
+                    <button type="button" class="btn btn-primary">
+                      Manage Meet
+                    </button>
+                  </a>
+                {% elif meet.school_is_entered(myschool_id) and meet.status == "Accepting Entries" %}
+                 {# and action=="Edit Entries" and school %} #}
+                  <a href="{{ url_for('edit_meet_entries', meet_id=meet.id, school_id=myschool_id ) }}">
                     <button type="button" class="btn btn-warning">
-                    Revise My Entries
+                      Revise My Entries
+                    </button>
+                  </a>
+
+                {% elif meet.status == 'Accepting Entries' %}
+                  <a href="{{ url_for('show_enter_meet_form', meet_id=meet.id) }}">
+                    <button type="button" class="btn btn-success">
+                      Enter Meet
                     </button>
                   </a>
                 {% endif %}
+
               </td>
             </tr>
           {% endif %}

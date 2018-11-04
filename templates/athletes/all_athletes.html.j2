@@ -1,9 +1,9 @@
 {% extends "__base.html.j2" %}
-
+{% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST with context%}
 
 {% block content %}
   <h1>Athletes</h1>
-  {% include '/athletes/athlete_list.include.html.j2' %}
+  {{ MACRO_ATHLETE_LIST("athlete_list")}}
 {% endblock content %}
 
 
@@ -11,6 +11,6 @@
   {{ super() }}
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-  <script type="text/javascript" src="static/js/tms-datatable.js"></script>
+  <script type="text/javascript" src="static/js/athlete_list.js"></script>
 {% endblock my_javascripts %}
 

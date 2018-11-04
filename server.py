@@ -234,7 +234,7 @@ def edit_school_info(school_id):
 @app.route('/meets')
 def show_all_meets():
     meets = Meet.query.all()
-    return render_template('/meets/all_meets.html.j2', list=meets)
+    return render_template('/meets/all_meets.html.j2', meets=meets)
 
 
 @app.route('/meets/<int:meet_id>')
@@ -290,7 +290,7 @@ def do_new_meet_form():
 @app.route('/meets/<int:meet_id>/edit_meet')
 def show_edit_meet_form(meet_id):
     meet = Meet.query.filter_by(id=meet_id).first_or_404()
-    if meet and session['user_school_id'] == meet.school_id:
+    if meet and session['user_school_id'] == meet.host_school.id:
         return '<p>NOT IMPLEMENTED YET</p><p>Edit Meet {}</p>'.format(meet.id)
     # reuse the same form from do_new_meet_form
     # add meet status field - they can now change it to the next stage?
@@ -343,7 +343,7 @@ def show_all_athletes():
     q = Athlete.query.order_by(Athlete.lname).order_by(Athlete.fname)
     athletes = q.all()
     # athletes = Athlete.query.all()
-    return render_template('/athletes/all_athletes.html.j2', list=athletes)
+    return render_template('/athletes/all_athletes.html.j2', athletes=athletes)
 
 
 @app.route('/athletes/<int:athlete_id>')
@@ -352,8 +352,8 @@ def show_athlete_detail(athlete_id):
     return render_template('/athletes/athlete_detail.html.j2', athlete=athlete)
 
 
-@app.route('/athletes/<int:athlete_id>/edit')
-def edit_athlete_detail(athlete_id):
+@app.route('/athletes/<int:athlete_id>/edit', methods=['POST'])
+def do_edit_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
     # return render_template('athlete_detail.html.j2', athlete=athlete)
     return '<p>Edit athlete {}</p>'.format(athlete.id)

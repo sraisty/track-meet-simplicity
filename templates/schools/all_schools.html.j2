@@ -1,12 +1,12 @@
 {% extends "__base.html.j2" %}
-
+{% from "/schools/_macro_schools_list.html.j2" import MACRO_SCHOOL_LIST %}
 
 {% block content %}
-    <h1 class="mb-5">Schools</h1>
+    <h1>Schools</h1>
 
     <h4>Number of schools: {{ num_schools }}</h4>
 
-    {% include '/schools/_inc_schools_list.html.j2' %}
+    {{ MACRO_SCHOOL_LIST(schools, "all_schools_table")}}
 {% endblock content %}
 
 

@@ -1,0 +1,46 @@
+{% macro MACRO_ATHLETE_LIST(athlete_list_id) %}
+<table id="{{athlete_list_id}}" class="display" data-order='[[ 0, "asc" ]]' data-page-length='100'>
+  <thead>
+    <tr>
+      <th>Athlete name</th>
+      <th>School</th>
+      <th>League</th>
+      <th>Division</th>
+      <th>Number of Events</th>
+      <th>Events</th>
+      {#         <th></th> #}
+    </tr>
+  </thead>
+  <tbody>
+    {% for athlete in athletes %}
+      <tr>
+        <td data-order="{{ athlete.lname}}">
+          <a href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
+            {{ athlete.full_name() }}
+          </a>
+        </td>
+        <td>
+          <a href="{{ url_for('show_school_detail', school_id=athlete.school.id) }}">
+            {{ athlete.school.name }}
+          </a>
+        </td>
+        <td>
+          {% if athlete.school.league %}
+            {{ athlete.school.league }}
+          {% endif %}
+        </td>
+        <td>{{ athlete.division.name }}</td>
+        <td>
+          {% set evs=athlete.get_events() %}
+          {{ evs | length }} events
+        </td>
+        <td>
+          {% for ev in evs %}
+            {{ev.name}},
+          {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endmacro %}

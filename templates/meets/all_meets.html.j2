@@ -1,15 +1,31 @@
 {% extends "__base.html.j2" %}
+{% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
 
 {% block content %}
-  <h1 class="mb-5">Meets</h1>
-  {% include '/meets/_inc_meet_list.html.j2' %}
 
-  <a href="{{url_for('show_new_meet_form')}}">
-    <button class="btn-warning btn">
-      <i class="fas fa-plus-circle"></i>
-      Create New Meet
-    </button>
-  </a>
+
+  <div class="row">
+    <h1 class="col">Meets</h1>
+    <div class="col">
+      <a href="{{url_for('show_new_meet_form')}}">
+        <button class="btn-warning btn">
+         <i class="fas fa-plus-circle"></i>
+         Create New Meet
+        </button>
+      </a>
+    </div>
+    <div class="col">
+      <a href="{{url_for('show_all_meets')}}">
+        <button class="btn-success btn">
+         <i class="fas fa-search"></i>
+         Find Meets to Enter
+        </button>
+      </a>
+    </div>
+  </div>
+
+  {{ MEET_LIST(meets, none, "All", "all-meets-list") }}
+
 {% endblock content %}
 
 

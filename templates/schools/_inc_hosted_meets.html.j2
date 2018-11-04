@@ -1,12 +1,11 @@
-{% from "/meets/_inc_meet_list.html.j2" import MEET_LIST %}
+{% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
 
-    {% if school.meets_hosted %}
-        <p>Meets that {{school.name}} is hosting:</p>
-        {% set meets = school.meets_hosted %}
-        {{ MEET_LIST(meets, school, "All") }}
-    {% else %}
-        <p>{{school.name}} is not hosting any upcoming meets.</p>
-    {% endif %}
+{% if school.meets_hosted %}
+    {% set meets = school.meets_hosted %}
+    {{ MEET_LIST(meets, school, "All", "hosted-meets-list") }}
+{% else %}
+    <p>{{school.name}} is not hosting any upcoming meets.</p>
+{% endif %}
 
  <a href="{{url_for('show_new_meet_form')}}">
     <button class="btn btn-primary">Create New Meet </button>

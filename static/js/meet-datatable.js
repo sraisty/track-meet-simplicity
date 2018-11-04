@@ -2,7 +2,15 @@
 
 $(document).ready(function() {
 
-    $('#meet_table').DataTable({
+    $('#all-meets-list').DataTable({
+        'ordering': true
+    });
+
+    $('#hosted-meets-list').DataTable({
+        'ordering': true
+    });
+
+    $('#entered-meets-list').DataTable({
         'ordering': true
     });
 

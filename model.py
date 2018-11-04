@@ -90,7 +90,7 @@ class Meet(db.Model):
     max_entries_per_athlete = db.Column(db.Integer, default=4, nullable=True)
     max_relays_per_athlete = db.Column(db.Integer, default=2, nullable=True)
     max_teammates_per_event = db.Column(db.Integer, default=12, nullable=True)
-    max_heats_per_mde = db.Column(db.Integer, default=None, nullable=True)
+    max_heats_per_mde = db.Column(db.Integer, default=1, nullable=True)
 
     # TODO  Invited Schools is a many-to-many relationship with Meets, and
     # requires an associative table or associative object.
@@ -110,6 +110,7 @@ class Meet(db.Model):
     events = db.relationship(
             "EventDefinition", secondary="meet_division_events", uselist=True,
             backref="meets")
+
     event_orderings = db.relationship(
             "EventOrdering", uselist=True, order_by="EventOrdering.seq_num",
             back_populates="meet")
@@ -117,6 +118,7 @@ class Meet(db.Model):
     divisions = db.relationship(
             "Division", secondary="meet_division_events", uselist=True,
             )
+
     div_orderings = db.relationship(
             "DivOrdering", uselist=True, order_by="DivOrdering.seq_num",
             back_populates="meet")
@@ -177,6 +179,8 @@ class Meet(db.Model):
         meet.max_heats_per_mde = meet_info_dict.get(
                 "max_heats_per_mde")
 
+
+
         # associate this meet with the selected events (i.e. "4x400 relay"),
         # and specify how the events should be ordered within this meet
         # If ev_code_order is None, then createEventOrders assumes the
@@ -218,6 +222,10 @@ class Meet(db.Model):
         for mde in mde_q:
             count += len(mde.entries)
         return count
+
+    def school_is_entered(self, school_id):
+        school = School.query.get(school_id)
+        return school in self.schools_entered()
 
     def schools_entered(self):
         """ returns a list of school objects, ordered alphabetically by the
@@ -272,10 +280,13 @@ class Athlete(db.Model):
     fname = db.Column(db.String(30), nullable=False)
     lname = db.Column(db.String(30), nullable=False)
     minitial = db.Column(db.String(1), nullable=True)
+    # gender = db.Column(gender_enum, nullable=False)
+    # grade = db.Column(grade_enum, nullable=True)
     phone = db.Column(db.String(12), nullable=True)
 
     school_id = db.Column(db.ForeignKey('schools.id'), nullable=True)
     div_id = db.Column(db.ForeignKey('divisions.id'), nullable=False)
+    problem = db.Column(db.String(64), nullable=True)
     coach_notes = db.Column(db.String(64), nullable=True)
 
     school = db.relationship(
@@ -305,12 +316,14 @@ class Athlete(db.Model):
         try:
             div = div_q.one()
         except NoResultFound:
+            # TODO set the problem field in the existing DB records
             print("SKIPPING {} {}. No Div for grade: {}, Gender:{}".format(
                     fname, lname, grade, gender))
             raise TmsError("BadAthleteRecord: {}, {}, gr:{} gender:{}".format(
-                        fname, lname, grade, gender))
+                    fname, lname, grade, gender))
         except MultipleResultsFound:
             # This should never happen? TODO eliminate this?
+            # TODO set the problem field in the existing DB records
             raise TmsError(
                     "Athlete matches >1 div: {} {}, gr:{} gen:{}".format(
                         fname, lname, grade, gender))
@@ -322,8 +335,10 @@ class Athlete(db.Model):
             warning("Athete {} {}: School ({}) not in database.".format(
                     fname, lname, school_code))
             warning(f"\nAssigning {fname} {lname} to 'Unattached' school.")
+            self.problem = "School {} not in DB. Ressigned to UNA".format(school_code)
             school = School.query.filter_by(code="UNA").one()
         self.school = school
+
 
     def __repr__(self):
         return "\n<ATHL# {}: {}, {}, {}>".format(
@@ -331,6 +346,7 @@ class Athlete(db.Model):
                 self.full_name(),
                 self.school.__repr__(),
                 self.division.__repr__())
+
 
     def full_name(self):
         return self._get_full_name(self.fname, self.minitial, self.lname)
@@ -360,15 +376,34 @@ class Athlete(db.Model):
                 return ath
         return
 
-    def get_meets(self, meet_status, include_past_meets):
+    def get_meets(self):
+        # def get_meets(self, meet_status, include_past_meets):
         """ Returns a list of all the meet objects that this athlete is
         entered into. If athlete is not entered into any meets, returns None.
         """
-        meets = set()
-        meets = {mde.meet for mde in self.mdes}
-        if len(meets) == 0:
-            return
-        return list(meets)
+        q = db.session.query(Meet.id, Meet.name, Meet.date)
+        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
+        q = q.filter(Athlete.id == self.id).distinct()
+        q = q.order_by(Meet.date)
+        meets = q.all()
+        return meets
+
+    def get_events(self):
+        q = db.session.query(EventDefinition)
+        q = q.join(Athlete.entries).join(Entry.event)
+        q = q.filter(Athlete.id == self.id).distinct()
+        events = q.all()
+        return events
+
+    @staticmethod
+    def get_tuples_all_athletes():
+        q = db.session.query(
+                Athlete.fname, Athlete.lname, Athlete.id, School.name,
+                School.id, EventDefinition.id, EventDefinition.name,
+                EventDefinition.code, Division.id, Division.name, Division.code,
+                Meet.id, Meet.name)
+        q = q.filter(Entry.meet_id == Meet.id)
+        q = q.filter(Entry.athlete_id == Athlete.id)
 
     @classmethod
     def add_athlete_to_db(cls, first_name, middle, last_name, gender,
@@ -450,9 +485,7 @@ class Entry(db.Model):
     """
     __tablename__ = "entries"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    athlete_id = db.Column(db.ForeignKey("athletes.id"),
-                           nullable=False)
+    athlete_id = db.Column(db.ForeignKey("athletes.id"), nullable=False)
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
     heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
@@ -478,23 +511,28 @@ class Entry(db.Model):
     athlete = db.relationship("Athlete",
                               uselist=False,
                               back_populates="entries")
+
     mde = db.relationship("MeetDivisionEvent",
                           uselist=False,
                           back_populates="entries")
+
     division = db.relationship("Division",
                                secondary="athletes",
                                uselist=False,
                                # back_populates="entries"
                                )
+
     event = db.relationship("EventDefinition",
                             secondary="meet_division_events",
                             uselist=False,
                             # back_populates="entries"
                             )
+
     school = db.relationship("School",
                              secondary="athletes",
                              uselist=False,
                              back_populates="entries")
+
     heat = db.relationship("Heat", uselist=False, back_populates="entries")
 
     # editor_users = db.relationship("User", secondary="schools")
@@ -502,7 +540,6 @@ class Entry(db.Model):
     def __init__(self, athlete, mde):
         self.athlete = athlete
         self.mde = mde
-
         if mde.event.is_track():
             self.mark = INFINITY_SECONDS
             self.mark_type = "seconds"
@@ -707,7 +744,8 @@ class MeetDivisionEvent(db.Model):
     status = db.Column(mde_status_enum, default="Unassigned", nullable=False)
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
-
+    # The MDE can override  the Meet's overall max_heats
+    max_heats = db.Column(db.Integer, nullable=True)  
     # @aggregated('athletes', db.Column(db.Integer))
     # def athletes_count(self):
     #     return db.func.count('1')
@@ -732,9 +770,6 @@ class MeetDivisionEvent(db.Model):
     heats = db.relationship(
             "Heat", secondary="entries", uselist=True, back_populates="mde")
 
-    # host_school = db.relationship(
-    #        "School", secondary="meets", uselist=False, backref="hosted_mdes")
-    # # editor_users = db.relationship("User", secondary="schools")
 
     def __repr__(self):
         return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(

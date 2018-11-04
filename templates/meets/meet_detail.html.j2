@@ -2,13 +2,19 @@
 {# Detail info about a particular meet, at /meets/<meet-id> #}
 
 {% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(meet.host_school)}}
+{% endblock %}
+
 
 {% block secondary_nav_title %}
     {{ meet.name }}
 {% endblock secondary_nav_title %}
 
 {% block nav2_admin_url %}
-    href="/meets/{{ meet.id }}/admin"
+    href="{{url_for('show_edit_meet_form', meet_id=meet.id) }}"
 {% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
@@ -17,6 +23,9 @@
             Host School: {{ meet.host_school.name }}
         </a>
     <div>{{ meet.date.strftime("%B %d, %Y") }}</div>
+    <div>{{ meet.get_athletes() | length }} Athletes</div>{{ meet.schools_entered() | length }} Schools</div>
+    <div>{{ meet.divisions |  length }} Divisoins</div><div>{{ meet.mdes | length }} MDEs</div>
+    <div>{{ meet.events | length }} events</div>
 {% endblock nav2_subtitle %}
 
 
@@ -37,7 +46,8 @@
         "mdetail-events-tab", true, "/meets/event_accordion.html.j2") %}
     {% endcall %}
 
-    {% call MACRO_MAKE_TAB_CONTENT("mdetail-schools-tab", false) %}
+    {% call MACRO_MAKE_TAB_CONTENT(
+            "mdetail-schools-tab", false) %}
         {% for school in meet.schools_entered() %}
             <p>
                 <a href="{{url_for('show_school_detail', school_id=school.id)}}">
@@ -76,5 +86,5 @@
 
 {% block my_javascripts %}
     {{super()}}
-    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+    <script type="text/javascript" src="/static/js/schools-datatable.js"></script>
 {% endblock my_javascripts %}

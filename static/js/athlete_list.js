@@ -2,7 +2,7 @@
 
 $(document).ready(function() {
 
-    $('#all_schools_table').DataTable({
+    $('#athlete_list').DataTable({
         'ordering': true
     });
 

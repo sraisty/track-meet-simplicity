@@ -1,14 +1,18 @@
 {# Detail info about a particular athlete, at /athletes/<athlete-id> #}
+{% extends "__tabnav.html.j2" %}
+{% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
 
-{% extends "__secondary_nav.html.j2" %}
-
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(athlete.school)}}
+{% endblock %}
 
 {% block secondary_nav_title %}
-    {{ athlete.fname }} {{ athlete.lname }}
+  {{ athlete.fname }} {{ athlete.lname }}
 {% endblock secondary_nav_title %}
 
 {% block athlete_admin_url %}
-    href="{{ url_for('')}}athlete.id }}/admin"
+  href="{{ url_for('')}}athlete.id }}/admin"
 {% endblock athlete_admin_url %}>
 
 {% block nav2_subtitle %}
@@ -16,7 +20,7 @@
     <div>Division: {{ athlete.division.name }}</div>
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
-      School: 
+      School:
       <a href="/schools/{{ athlete.school.id }}">
         {{ athlete.school.name }}
       </a>
@@ -25,76 +29,84 @@
 {% endblock nav2_subtitle %}
 
 
+{% block tab_navs %}
+  {{ MACRO_MAKE_TAB("athlete-entries-tab", true, "Entries") }}
+  {{ MACRO_MAKE_TAB("athlete-meets-tab", false, "Meets") }}
+  {{ MACRO_MAKE_TAB("athlete-profile-tab", false, "Athlete Profile") }}
+{% endblock tab_navs %}
 
-{% block tab1_name %}
-    Upcoming Meets
-{% endblock tab1_name %}
 
-{% block tab2_name %}
-    Past Meets
-{% endblock tab2_name %}
-
- {% block tab3_name %}
-    Events
-{% endblock tab3_name %}
+{% block tab_content %}   
  
-{% block tab4_name %}
-    Athlete Profile
-{% endblock tab4_name %}
+  {% call MACRO_MAKE_TAB_CONTENT("athlete-entries-tab", true) %}
+    {% if athlete.entries %} 
+      <ul>
+        {% for entry in athlete.entries %}
+          <li>
+            <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+              mde_id=entry.mde.id) }}">
+              {{ entry.event.name }}
+            </a>
+            ===
+            <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+              mde_id=entry.mde.id) }}">
+              {{ entry.division.name }}
+            </a>
+            ==
+            <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+              {{ entry.mde.meet.name }}
+            </a>
+            == Seed Mark: {{ entry.mark_to_string() }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      This athlete has no entries
+    {% endif %}
+  {% endcall %}
 
-{% block tab1_content %}
-    <p>This lists the upcoming Meets the athlete is entered into</p>
-    <ul>
-      {% for meet in athlete.meets() %}
-        <li>
-          <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
-            {{meet.name}}
-          </a>
-          {{meet.date}}
-        </li>
-      {% endfor %}
-    </ul>
-{% endblock tab1_content %}
-                        
+
+  {% call MACRO_MAKE_TAB_CONTENT("athlete-meets-tab", false) %}
+    {% set athlete_meets=athlete.get_meets() %}
+    {% if athlete_meets %}
+      <ul>
+        {% for meet in athlete_meets %}
+          <li>
+            <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+              {{meet.name}}
+            </a>
+            {{meet.date}}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      This athlete is not in any meets.
+    {% endif %}
+  {% endcall %}
 
 
-{# The expandable event cards that are on the accordions on   #}
-{# MeetDetail > Schedule of events  #}
-{% block tab2_content %}
-  <p> This lists the Athlete's results at past meets.</p>
-{% endblock tab2_content %} 
+  {% call MACRO_MAKE_TAB_CONTENT("athlete-profile-tab", false) %}
+    
+    <form action="{{url_for('do_edit_athlete_detail', athlete_id=athlete.id)}}" method=POST>
+      First name: {{ athlete.fname }}<br>
+      Middle name: {{athlete.minitial }}<br>
+      Last name: {{ athlete.lname }}<br>
+      {# Gender: {{ athlete.gender }}<br> #}
+      {# Grade: {{ athlete.grade }}<br> #}
+      School: {{ athlete.school.name }}<br>
+      Division: {{ athlete.division.name }}<br>
+      Div Code: {{ athlete.division.code }}<br>
+      Phone: {{ athlete.phone }}<br>
+      Problem: {{ athlete.problem }}<br>
+      Coach notes: {{ athlete.coach_notes }}<br>
+
+      <button type="submit" class="btn btn-primary">
+        Edit Athlete Profile
+      </button>
+      
+    </form>
+  {% endcall %}
 
 
-{% block tab3_content %}
-    <p>This lists the athletes performances by Event, sorted for either the 
-    best mark or by date.</p>
-
-    <ul>
-      {% for entry in athlete.entries %}
-        <li>
-          <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id, 
-                              mde_id=entry.mde.id) }}">
-            {{ entry.event.name }}
-          </a>
-          <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id, 
-                              mde_id=entry.mde.id) }}">
-            {{ entry.division.name }}
-          </a>
-          ==
-          <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
-            {{ entry.mde.meet.name }}
-          </a>
-          == Seed Mark: {{ entry.mark_to_string() }}
-        </li>
-      {% endfor %}
-    </ul>
-{% endblock tab3_content %}
-              
-
-{% block tab4_content %}
-    <p>On this tab, users can see other the details about this athlete, such 
-      as phone number, previous schools, etc.  In real life, this would not be 
-      viewable except by the coach and athlete.
-    </p>
-{% endblock tab4_content %}
+{% endblock tab_content %}
 

@@ -35,6 +35,17 @@
 {% endmacro %}
 
 
+{% macro SHOW_MY_SCHOOL_INDICATOR(school) %}
+  {% if school.id == session.user_school_id %}
+  <div class="row mb-4">
+    <div class="card bg-warning col-12">
+      <h4 class="text-md-center">Managed by {{ school.name }}</h4>
+    </div>
+  </div>
+  {% endif %}
+{% endmacro %}
+
+
 {% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
 <div class="card">
 <div class="card-header" id="{{ event.name }}">

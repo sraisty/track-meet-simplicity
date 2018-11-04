@@ -2,12 +2,25 @@
 {# Detail info about a particular MDE within a meet, at /meets/<meet-id>/mde/<mde-id> #}
 
 {% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+{% set num_entries = mde.entries | length %}
+
+{% if mde.max_heats %}
+  {% set heats = mde.max_heats %}
+{% else %}
+  {% set heats = mde.meet.max_heats_per_mde %}
+{% endif %}
+
+{% set max_athletes = mde.event.max_per_heat * heats %} 
+
+
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(mde.meet.host_school)}}
+{% endblock %}
 
 {% block secondary_nav_title %}
-  <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
-    {{ mde.meet.name }}
-  </a>
-  {{ mde.meet.date.strftime("%B %d, %Y") }}
+  Event #{{mde.seq_num}}: {{ mde.event.name }}: {{ mde.division.name }}
 {% endblock secondary_nav_title %}
 
 {% block nav2_admin_url %}
@@ -15,12 +28,19 @@
 {% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
-  Event #{{mde.seq_num}}: {{ mde.event.name }}: {{ mde.division.name }}
-  <p>Status: {{mde.status}}, 
-    Maximum Heats: {{mde.meet.max_heats_per_mde}}, 
-    Maximum Athletes Per Heat: {{ mde.meet.max_heats_per_mde }}
+
+  <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
+    {{ mde.meet.name }}
+  </a>
+
+  {{ mde.meet.date.strftime("%B %d, %Y") }}
+    <p>Status: {{mde.status}}, 
+    Maximum Heats: {{  heats }}, 
+    Maximum Athletes Per Heat: {{ mde.event.max_per_heat }}
+    Max Athletes Allowed:   {{ max_athletes }}<br>
+    Num Athletes Entered: {{ num_entries}}<br>
+    % Full: 
   </p>
-  {# mde.event.max_per_heat * mde.meet.max_heats_per_mde #}
 {% endblock nav2_subtitle %}
 
 {% block tab_navs %}
@@ -32,8 +52,8 @@
 
 {% block tab_content %}
   {% call MACRO_MAKE_TAB_CONTENT("mde-entries-tab", true) %}
-    <div class="card">
-      <div class="card-body">
+{#     <div class="card">
+      <div class="card-body"> #}
         <button class="btn btn-warning btn-large id="mde-assign-button">
           Make Athlete Assignments
         </button>
@@ -70,8 +90,8 @@
               {% endfor %}
             </tbody>
           </table>
-        </div>
-      </div>
+{#         </div>
+      </div> #}
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-assign-tab", false) %}
@@ -83,7 +103,21 @@
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-settings-tab", false) %}
-    See your MDE settings here and edit them.
+    Status: {{ mde.status }}<br>
+    Notes: {{ mde.mde_notes}}<br>
+    Max Number of Heats: {{ heats }}<br>
+    Overall Meet Setting: Max # Heats Allowed: {{mde.meet.max_heats_per_mde}}<br>
+    MDE Override: Maximum # of Heats Allowed: {{ mde.max_heats }}<br>
+    Maximum Athletes per Heat: {{ mde.event.max_per_heat }}<br><br>
+
+    Maximum Athletes Allowed: 
+    {% if mde.max_heats %}
+      {{ mde.event.max_per_heat * mde.max_heats }} 
+    {% else %}
+      {{ mde.event.max_per_heat * mde.meet.max_heats_per_mde }}
+    {% endif %}
+    <br>
+    Num Athletes Entered: {{ num_entries}}, 
   {% endcall %}
 
 {% endblock tab_content %}
