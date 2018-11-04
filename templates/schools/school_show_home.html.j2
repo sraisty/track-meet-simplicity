@@ -3,6 +3,8 @@
 {% from "__macros.html.j2" import MACRO_MAKE_TAB_CONTENT with context %}
 {% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+{% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST with context %}
+
 
 {% block myschool_indicator %}
   {{SHOW_MY_SCHOOL_INDICATOR(school)}}
@@ -36,8 +38,8 @@
     {{ school.athletes | length }} athletes<br>
     {{ school.divisions | length }} divisions<br>
     {{ school.entries | length }} entries<br>
-    {{school.meets_entered() | length }} meets entered<br>
-    {{school.meets_hosted | length }} meets hosted<br>
+    {{ school.meets_entered() | length }} meets entered<br>
+    {{ school.meets_hosted | length }} meets hosted<br>
   </div>
 
 {% endblock nav2_subtitle %}
@@ -47,9 +49,9 @@
   {{ MACRO_MAKE_TAB("hosted-meets-tab", false, "Meets Hosted") }}
   {{ MACRO_MAKE_TAB("entered-meets-tab", true, "Meets Entered") }}
   {{ MACRO_MAKE_TAB("school-athletes-tab", false, "Athletes") }}
-  {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
   {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }}
   {{ MACRO_MAKE_TAB("school-past-meets-tab", false, "Past Meets") }}
+  {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
 {% endblock tab_navs %}
 
 
@@ -64,28 +66,10 @@
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("school-athletes-tab", false) %}
-    {% include "/schools/_inc_school_athletes.html.j2" %}
+{#     <h1>Athletes</h1> #}
+    {{ MACRO_ATHLETE_LIST(school.athletes, "school-athletes-table" ) }} #}
   {% endcall %}
 
-  {% call MACRO_MAKE_TAB_CONTENT("school-info-tab", false) %}
-    <div>
-      School Name: {{ school.name }}<br>
-      School Code: {{ school.code }}<br>
-      School ID#: {{ school.id }}<br>
-      Location: 
-      {% if school.city %}{{ school.city }}{% else %}no city set{% endif %}, 
-      {% if school.state %}{{ school.state }}{% else %}no state set{% endif %}<br>
-      League: 
-      {% if school.league %}{{ school.league }}{% else %}no league set{% endif %}<br>
-      Section:
-      {% if school.section %}{{ school.section }}{% else %}no section set{% endif %}
-    </div>
-    <div>
-      <a href="#-NOT-IMPLEMENTED-YET">
-        <button class="btn btn-primary">Edit School Info</button>
-      </a>
-    </div>
-  {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("school-problems-tab", false) %}
     <div>
@@ -103,11 +87,38 @@
     TODO - Not implemented yet.
   {% endcall %}
 
+
+  {% call MACRO_MAKE_TAB_CONTENT("school-info-tab", false) %}
+    <div>
+      School Name: {{ school.name }}<br>
+      School Code: {{ school.code }}<br>
+      School ID#: {{ school.id }}<br>
+      Location: 
+      {% if school.city %}{{ school.city }}{% else %}no city set{% endif %}, 
+      {% if school.state %}{{ school.state }}{% else %}no state set{% endif %}<br>
+      League: 
+      {% if school.league %}{{ school.league }}{% else %}no league set{% endif %}<br>
+      Section:
+      {% if school.section %}{{ school.section }}{% else %}no section set{% endif %}
+      <br>
+      TrackMeetSimplicity users:<br>
+      {% for user in school.coaches %}
+        {{ user.email}}
+      {% endfor %}
+    </div>
+    <div>
+      <a href="#-NOT-IMPLEMENTED-YET">
+        <button class="btn btn-primary">Edit School Info</button>
+      </a>
+    </div>
+  {% endcall %}
+
+
 {% endblock tab_content %}
 
 
 {% block my_javascripts %}
   {{ super() }}
-  <script type="text/javascript" src="static/js/athlete_list.js"></script>
+  <script type="text/javascript" src="/static/js/athlete_list.js"></script>
   <script type="text/javascript" src="/static/js/meet-datatable.js"></script>
 {% endblock %}

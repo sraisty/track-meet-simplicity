@@ -4,9 +4,11 @@ Some module docstring
 import os
 from flask import (Flask, render_template, redirect, request, flash,
                    session, url_for)
-from jinja2 import StrictUndefined, Environment, select_autoescape
+from jinja2 import StrictUndefined
+from jinja2 import select_autoescape
+from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
-import requests
+# import requests
 
 from model import (connect_to_db, db, User, Meet, Athlete, Entry,
                    School, MeetDivisionEvent, EventOrdering, DivOrdering,
@@ -17,8 +19,8 @@ from util import error, warning, info
 
 
 app = Flask(__name__)
+# login = LoginManager(app)
 
-# Required to use Flask sessions and the debug toolbar
 app.secret_key = os.environ['FLASK_APP_SECRET_KEY']
 
 # Normally, if you use an undefined variable in Jinja2, it fails
@@ -32,13 +34,13 @@ app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 app.jinja_env.strip_trailing_newlines = False
 
-app.jinja_env.autoescape = True
+# app.jinja_env.autoescape = True
 # TODO Is the following needed (or correct), since my Jinja templates
 # end in "J2" to get syntax highlighting?
 
-# app.jinja_env.autoescape = select_autoescape(
-#         enabled_extensions=('html', 'xml', 'html', 'j2'),
-#         default_for_string=True)
+app.jinja_env.autoescape = select_autoescape(
+        enabled_extensions=('html', 'xml', 'html', 'j2'),
+        default_for_string=True)
 
 # jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 #                                autoescape = True,
@@ -279,8 +281,6 @@ def do_new_meet_form():
     # seeding tiebreakers
     # heat assignment method
     # lane/position assignment method
-    # meet status = unpublished?
-
     meet = Meet.init_meet(mi)
     meet.status = "Unpublished"
     flash("New meet created!", "success")
@@ -316,10 +316,6 @@ def edit_meet_entries(meet_id, school_id=None):
             meet.id)
     # return render_template('meet_detail.html.j2', meet=meet)
 
-@app.route('/meets/<int:meet_id>/schools/<int:school_id>/entries/edit')
-def edit_entries(meet_id, school_id=None):
-
-    entries = Entries.query.filter_by()
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
 def show_mde_detail(meet_id, mde_id):

@@ -3,6 +3,7 @@
 
 {% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+{% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST %}
 
 {% block myschool_indicator %}
   {{SHOW_MY_SCHOOL_INDICATOR(meet.host_school)}}
@@ -24,8 +25,14 @@
         </a>
     <div>{{ meet.date.strftime("%B %d, %Y") }}</div>
     <div>{{ meet.get_athletes() | length }} Athletes</div>{{ meet.schools_entered() | length }} Schools</div>
-    <div>{{ meet.divisions |  length }} Divisoins</div><div>{{ meet.mdes | length }} MDEs</div>
+    <div>{{ meet.divisions |  length }} Divisions</div><div>{{ meet.mdes | length }} MDEs</div>
     <div>{{ meet.events | length }} events</div>
+
+  {% if session.user_school_id not in meet.schools_entered() %}
+      <button class="btn btn-success">Enter Meet</button>
+  {% else %}
+      <button class="btn btn-primary">Revise My Meet Entries</button> 
+  {% endif %}
 {% endblock nav2_subtitle %}
 
 
@@ -62,9 +69,10 @@
     {% endcall %}
 
     {% call MACRO_MAKE_TAB_CONTENT("mdetail-athletes-tab", false) %}
-        {% if meet.get_athletes() %}
+      {{ MACRO_ATHLETE_LIST(meet.get_athletes(), "meet-athlete-list")}}
+{#         {% if meet.get_athletes() %}
             <ul>
-            {% for athlete in meet.get_athletes() %}
+            {% for athlete in  %}
                 <li>
                     <a href="{{url_for('show_athlete_detail', athlete_id=athlete.id)}}">
                         {{ athlete.full_name() }}
@@ -72,7 +80,7 @@
                 </li>
             {% endfor %}
             </ul>
-        {% endif %}
+        {% endif %} #}
     {% endcall %}
 
     {% call MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", false) %}
@@ -87,4 +95,5 @@
 {% block my_javascripts %}
     {{super()}}
     <script type="text/javascript" src="/static/js/schools-datatable.js"></script>
+    <script type="text/javascript" src="/static/js/athlete_list.js"></script>
 {% endblock my_javascripts %}

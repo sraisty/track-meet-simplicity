@@ -6,5 +6,13 @@ $(document).ready(function() {
         'ordering': true
     });
 
+    $('#school-athletes-table').DataTable({
+        'ordering': true
+    });
+
+    $('#meet-athlete-list').DataTable({
+        'ordering': true
+    });
+
 });
     

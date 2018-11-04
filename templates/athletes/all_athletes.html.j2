@@ -1,9 +1,9 @@
 {% extends "__base.html.j2" %}
-{% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST with context%}
+{% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST %}
 
 {% block content %}
   <h1>Athletes</h1>
-  {{ MACRO_ATHLETE_LIST("athlete_list")}}
+  {{ MACRO_ATHLETE_LIST(athletes, "athlete_list")}}
 {% endblock content %}
 
 

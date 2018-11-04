@@ -9,8 +9,8 @@
         <th>Upcoming Meets Entered</th>
         <th>League</th>
         <th>Section</th>
-        <th>City</th>
-        <th>State</th>
+{#         <th>City</th>
+        <th>State</th> #}
       </tr>
     </thead>
     <tbody>
@@ -58,7 +58,7 @@
               {{ school.section }}
             {% endif %}
           </td>
-          <td>
+{#           <td>
             {% if school['city'] %}
               {{ school.city }}
             {% endif %}
@@ -67,7 +67,7 @@
             {% if school['state'] %}
               {{ school.state }}
             {% endif %}
-          </td>
+          </td> #}
         </tr>
       {% endfor %}
     </tbody>
