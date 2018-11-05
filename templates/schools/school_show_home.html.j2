@@ -107,7 +107,7 @@
       {% endfor %}
     </div>
     <div>
-      <a href="#-NOT-IMPLEMENTED-YET">
+      <a href="{{url_for('show_edit_school_detail', school_id=school.id) }}">
         <button class="btn btn-primary">Edit School Info</button>
       </a>
     </div>
@@ -119,6 +119,6 @@
 
 {% block my_javascripts %}
   {{ super() }}
-  <script type="text/javascript" src="/static/js/athlete_list.js"></script>
-  <script type="text/javascript" src="/static/js/meet-datatable.js"></script>
+
+  <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
 {% endblock %}

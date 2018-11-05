@@ -2,7 +2,6 @@
 separated format.  Details on this file format follow:
 """
 
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from model import (Athlete, Entry, MeetDivisionEvent, TmsError, db)
@@ -19,20 +18,16 @@ def parse_hytek_file(filename, meet):
     Opens a hytek entry file, parses it and writes the records to the database
     """
     with open(filename) as file:
-
         for line in file:
             tokens = line.strip().split(';')
             linetype = tokens[0]
 
             if linetype == "I":
                 parse_athlete(tokens)
-
             elif linetype == "D":
                 parse_entry(tokens, meet)
-
             elif linetype == "Q":
                 parse_relay(tokens)
-
             else:
                 warning(f"Ignoring unknown line type: {line}")
 

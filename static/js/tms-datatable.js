@@ -2,51 +2,61 @@
 
 $(document).ready(function() {
 
-    $('#meet_table').DataTable({
-        'ordering': true
-    });
-
-    // $('#all_athlete_table').DataTable({
-    //     'ordering': true
-    // });
-
-    $('#school_table').DataTable({
-        'ordering': true
-    });
-
+    /// Tables listing MDE entrants
     $('#mde_table').DataTable({
         'ordering': true
     });
+
+    //// Tables that list Athletes 
+
+
+    // // $('#all_athlete_table').DataTable({
+    // //     'ordering': true
+    // // });
+
+    $('#athlete_list').DataTable({
+        'ordering': true
+    });
+
+    $('#school-athletes-table').DataTable({
+        'ordering': true
+    });
+
+
+    $('#meet-athlete-list').DataTable({
+        'ordering': true
+    });
+
+    //// Tables that list meets
+
+    $('#all-meets-list').DataTable({
+        'ordering': true
+    });
+
+    // $('#meet_table').DataTable({
+    //     'ordering': true
+    // });
+
+    $('#hosted-meets-list').DataTable({
+        'ordering': true
+    });
+
+    $('#entered-meets-list').DataTable({
+        'ordering': true
+    });
+
+    $('#athlete-meets-table').DataTable({
+        'ordering': true
+    });
+
+    //// Tables that list schools
+    $('#all_schools_table').DataTable({
+        'ordering': true
+    });
+
+    // $('#school_table').DataTable({
+    //     'ordering': true
+    // });
+
 });
     
-
-    // $.fn.dataTable.ext.type.order['date-pre'] = function ( d ) {
-    // return Date.parse( d ) || Infinity;
-// }
-
-
-
-// $(document).ready(function() {
-//     $('#athlete_table').DataTable( {
-//         initComplete: function () {
-//             this.api().columns().every( function () {
-//                 let column = this;
-//                 let select = $('<select><option value=""></option></select>')
-//                     .appendTo( $(column.footer()).empty() )
-//                     .on( 'change', function () {
-//                         var val = $.fn.dataTable.util.escapeRegex(
-//                             $(this).val()
-//                         );
- 
-//                         column
-//                             .search( val ? '^'+val+'$' : '', true, false )
-//                             .draw();
-//                     } );
- 
-//                 column.data().unique().sort().each( function ( d, j ) {
-//                     select.append( '<option value="'+d+'">'+d+'</option>' )
-//                 } );
-//             } );
-//         }
-//     } );
-// } );

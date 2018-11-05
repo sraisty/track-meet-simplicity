@@ -1,0 +1,90 @@
+{% extends "__secondary_nav.html.j2" %}
+{% from "users/__macros_users.html.j2" import MACRO_GET_USER_SCHOOL with context %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(athlete.school)}}
+{% endblock %}
+
+{% block secondary_nav_title %}
+    Edit > {{ athlete.full_name() }}
+{% endblock secondary_nav_title %}
+
+{% block admin_cog %}
+{% endblock admin_cog %}
+
+{% block nav2_subtitle %}
+{% endblock nav2_subtitle %}
+
+
+{% block content %}
+  <form action="{{ url_for('do_edit_athlete_detail', athlete_id=athlete.id) }}" method="POST">
+    
+    <div class="form-group">
+      <label for="fname">First Name:</label>
+      <input type="text" class="form-control" name="fname"  placeholder="Enter athlete's first name" value="{{ athlete.fname }}" required>
+    </div>
+    <div class="form-group">
+      <label for="minitial">Middle Initial:</label>
+      <input type="text" class="form-control" name="minitial" placeholder="" 
+      {% if athlete.minitial %}
+        value="{{ athlete.minitial }}"
+      {% endif %} />
+    </div>
+    <div class="form-group">
+      <label for="lname">Last Name:</label>
+      <input type="text" class="form-control" name="lname" placeholder="Enter athlete's last name" 
+      value="{{ athlete.lname }}" required />
+    </div>
+  {#   <div class="form-group">
+      <label for="lname">Gender:</label>
+      <input type="radio" class="form-control" name="gender" placeholder="Enter athlete's gender" value="{{athlete.gender}}" required />
+    </div>
+    <div class="form-group">
+      <label for="grade">Grade:</label>
+      <input type="radio" class="form-control" name="grade" placeholder="Enter athlete's grade" value="{{athlete.grade}}" />
+    </div> #}
+    <div class="form-group">
+      <label for="division">Division:</label>
+      <select  class="form-control" name="division_id" id="division_id">
+        {% for division in division_list %}
+          {% if division.id == athlete.division.id %}
+            <option value="{{ athlete.division.id }}" selected="selected">
+              {{ athlete.division.name }}
+            </option>
+          {% else %}
+            <option value="{{ division.id }}">
+              {{ division.name }}
+            </option> 
+          {% endif %}
+        {% endfor %}
+      </select>
+    </div>
+
+
+
+    {{ MACRO_GET_USER_SCHOOL("Enter athlete's school")}}
+    <div class="form-group">
+      <label for="phone">Phone:</label>
+      <input type="text" class="form-control" name="phone" placeholder="Enter athlete's phone" 
+      {% if athlete.phone %}
+        value="{{ athlete.phone }}" 
+      {% endif %} />
+    </div>
+
+    <div class="form-group">
+      <label for="coach_notes">Coach Notes:</label>
+      <input type="text" class="form-control" name="coach_notes" id="coach_notes" placeholder="Enter your notes about this athlete" 
+      {% if athlete.coach_notes %}
+        value="{{ athlete.coach_notes }}" 
+      {% endif %} />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  <a href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
+    <button class="btn btn-secondary">Cancel</button>
+  </a>
+
+{% endblock %}

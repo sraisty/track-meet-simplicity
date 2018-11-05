@@ -347,7 +347,6 @@ class Athlete(db.Model):
                 self.school.__repr__(),
                 self.division.__repr__())
 
-
     def full_name(self):
         return self._get_full_name(self.fname, self.minitial, self.lname)
 
@@ -368,8 +367,8 @@ class Athlete(db.Model):
         in the database if the athlete's fname, middle initial, lname, gender,
         and school_code all match.
         """
-        athletes_same_name = Athlete.query.filter_by(fname=fname, lname=lname,
-                                                     minitial=middle).all()
+        athletes_same_name = Athlete.query.filter_by(
+            fname=fname, lname=lname, minitial=middle).all()
         for ath in athletes_same_name:
             if (ath.school.code == school_code and
                     ath.division.gender == gender):
@@ -381,7 +380,7 @@ class Athlete(db.Model):
         """ Returns a list of all the meet objects that this athlete is
         entered into. If athlete is not entered into any meets, returns None.
         """
-        q = db.session.query(Meet.id, Meet.name, Meet.date)
+        q = db.session.query(Meet)
         q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
         q = q.filter(Athlete.id == self.id).distinct()
         q = q.order_by(Meet.date)

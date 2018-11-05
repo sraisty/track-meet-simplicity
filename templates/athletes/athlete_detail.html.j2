@@ -1,6 +1,9 @@
 {# Detail info about a particular athlete, at /athletes/<athlete-id> #}
 {% extends "__tabnav.html.j2" %}
 {% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
+{% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
+
+
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
 
 {% block myschool_indicator %}
@@ -69,16 +72,7 @@
   {% call MACRO_MAKE_TAB_CONTENT("athlete-meets-tab", false) %}
     {% set athlete_meets=athlete.get_meets() %}
     {% if athlete_meets %}
-      <ul>
-        {% for meet in athlete_meets %}
-          <li>
-            <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
-              {{meet.name}}
-            </a>
-            {{meet.date}}
-          </li>
-        {% endfor %}
-      </ul>
+      {{ MEET_LIST(athlete_meets, false, "All", "athlete-meets-table") }}
     {% else %}
       This athlete is not in any meets.
     {% endif %}
@@ -86,8 +80,7 @@
 
 
   {% call MACRO_MAKE_TAB_CONTENT("athlete-profile-tab", false) %}
-    
-{#     <form action="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id)}}" method=POST> #}
+
       First name: {{ athlete.fname }}<br>
       Middle name: {{athlete.minitial }}<br>
       Last name: {{ athlete.lname }}<br>
@@ -105,9 +98,13 @@
           Edit Athlete Profile
         </button>
       </a>
-    {# </form> #}
   {% endcall %}
 
 
 {% endblock tab_content %}
+
+{% block my_javascripts %}
+  {{super()}}
+  <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+{% endblock my_javascripts %}
 

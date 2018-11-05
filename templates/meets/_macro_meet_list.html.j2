@@ -24,7 +24,7 @@
       </thead>
       <tbody>
         {% for meet in meets %}
-          {% if meet.status == meet_status or meet_status=="All" %}
+          {% if meet_status=="All" or meet.status == meet_status %}
             <tr>
               <td>
                 <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
@@ -36,7 +36,9 @@
               </td>
               <td>
                 {% if meet['host_school'] %}
-                  {{ meet.host_school.name }}
+                  <a href="{{url_for('show_school_detail', school_id=meet.host_school.id) }}">
+                    {{ meet.host_school.name }}
+                  </a>
                 {% endif %}
               </td>
               <td>

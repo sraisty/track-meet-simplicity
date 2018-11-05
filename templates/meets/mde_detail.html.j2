@@ -34,12 +34,12 @@
   </a>
 
   {{ mde.meet.date.strftime("%B %d, %Y") }}
-    <p>Status: {{mde.status}}, 
+    <p>Status: {{mde.status}}<br>
     Maximum Heats: {{  heats }}, 
-    Maximum Athletes Per Heat: {{ mde.event.max_per_heat }}
+    Maximum Athletes Per Heat: {{ mde.event.max_per_heat }}<br>
     Max Athletes Allowed:   {{ max_athletes }}<br>
     Num Athletes Entered: {{ num_entries}}<br>
-    % Full: 
+    % Full: {{ num_entries * 100 / max_athletes }}%
   </p>
 
 {% endblock nav2_subtitle %}
@@ -83,7 +83,8 @@
                       {{ entry.athlete.fname }} {{ entry.athlete.lname }}
                     </a>
                   </td>
-                  <td>{{ entry.athlete.school.name }}</td>
+                  <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
+                  {{ entry.athlete.school.name }}</a></td>
                   <td data-order="{{entry.mark}}">
                       {{ entry.mark_to_string() }}
                   </td>

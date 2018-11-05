@@ -224,11 +224,28 @@ def show_school_detail(school_id):
 
 
 @app.route('/schools/<int:school_id>/edit')
-def edit_school_info(school_id):
+def show_edit_school_detail(school_id):
     school = School.query.get(school_id)
     # return '<p>Edit athlete {}</p>'.format(school.id)
     return render_template(
-            '/schools/school_edit_detail.html.j2', school=school)
+            '/schools/_school_detail_edit_form.html.j2', school=school)
+
+
+@app.route('/schools/<int:school_id>/do_edit', methods=['POST'])
+def do_edit_school_detail(school_id):
+    school = School.query.get(school_id)
+
+    school.name = request.form.get('name', school.name)
+    school.code = request.form.get('code', school.code)
+    school.league = request.form.get('league', school.league)
+    school.section = request.form.get('section', school.section)
+    school.city = request.form.get('city', school.city)
+    school.state = request.form.get('state', school.state)
+
+    db.session.commit()
+    flash(f"Updated details for school {school.name}.", "success")
+    return redirect(url_for('show_school_detail', school_id=school.id))
+
 
 
 # ########   MEET LIST, EDIT, CREATE, SEED #########################
@@ -362,9 +379,18 @@ def show_edit_athlete_detail(athlete_id):
 @app.route('/athletes/<int:athlete_id>/do_edit', methods=['POST'])
 def do_edit_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
+
+    athlete.fname = request.form.get('name', athlete.fname)
+    athlete.minitial = request.form.get('minitial', athlete.minitial)
+    athlete.lname = request.form.get('lname', athlete.lname)
+    athlete.div_id = request.form.get('division_id', athlete.div_id)
+    athlete.phone = request.form.get('phone', athlete.phone)
+    athlete.coach_notes = request.form.get('coach_notes', athlete.coach_notes)
     # TODO - get and save data from form
-    flash("Saving changes to athletes is not implemented yet.", "danger")
+    db.session.commit()
+    flash(f"Updated details for school {athlete.full_name()}.", "success")
     return redirect(url_for('show_athlete_detail', athlete_id=athlete.id))
+
 
 # @app.route('/display-info-from-server.json')
 # def example_json():

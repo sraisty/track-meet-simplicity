@@ -23,9 +23,15 @@
         <a href="{{ url_for('show_school_detail', school_id=meet.host_school.id) }}">
             Host School: {{ meet.host_school.name }}
         </a>
+    <div>
+        {{ meet.status }}
+    </div>
+    </div>
     <div>{{ meet.date.strftime("%B %d, %Y") }}</div>
-    <div>{{ meet.get_athletes() | length }} Athletes</div>{{ meet.schools_entered() | length }} Schools</div>
-    <div>{{ meet.divisions |  length }} Divisions</div><div>{{ meet.mdes | length }} MDEs</div>
+    <div>{{ meet.get_athletes() | length }} Athletes</div>
+    <div>{{ meet.schools_entered() | length }} Schools</div>
+    <div>{{ meet.divisions | length }} Divisions</div>
+    <div>{{ meet.mdes | length }} MDEs</div>
     <div>{{ meet.events | length }} events</div>
 
   {% if session.user_school_id not in meet.schools_entered() %}
@@ -94,6 +100,6 @@
 
 {% block my_javascripts %}
     {{super()}}
-    <script type="text/javascript" src="/static/js/schools-datatable.js"></script>
-    <script type="text/javascript" src="/static/js/athlete_list.js"></script>
+    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+
 {% endblock my_javascripts %}
