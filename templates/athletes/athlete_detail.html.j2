@@ -24,7 +24,7 @@
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
       School:
-      <a href="/schools/{{ athlete.school.id }}">
+      <a href="{{url_for('show_school_detail', school_id= athlete.school.id) }}">
         {{ athlete.school.name }}
       </a>
     </div>

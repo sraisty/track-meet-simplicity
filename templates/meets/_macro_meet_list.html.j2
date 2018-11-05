@@ -75,7 +75,8 @@
                   </a>
 
                 {% elif meet.status == 'Accepting Entries' %}
-                  <a href="{{ url_for('show_enter_meet_form', meet_id=meet.id) }}">
+                  <a href="{{ 
+                  url_for('show_enter_meet_upload_form', meet_id=meet.id) }}">
                     <button type="button" class="btn btn-success">
                       Enter Meet
                     </button>

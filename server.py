@@ -4,6 +4,7 @@ Some module docstring
 import os
 from flask import (Flask, render_template, redirect, request, flash,
                    session, url_for)
+from werkzeug.utils import secure_filename
 from jinja2 import StrictUndefined
 from jinja2 import select_autoescape
 from flask_login import LoginManager
@@ -15,17 +16,19 @@ from model import (connect_to_db, db, User, Meet, Athlete, Entry, Division,
                    DEFAULT_EVENT_ORDER, DEFAULT_DIVISION_ORDER)
 
 from util import error, warning, info
-# from model import more stuff
+from parse_hytek import parse_hytek_file
+
+UPLOAD_FOLDER = "./entry_file_uploads"
+ALLOWED_EXTENSIONS = set(['txt', 'hyv'])
 
 
 app = Flask(__name__)
 # login = LoginManager(app)
-
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = os.environ['FLASK_APP_SECRET_KEY']
 
 # Normally, if you use an undefined variable in Jinja2, it fails
-# silently. This is horrible. Fix this so that, instead, it raises an
-# error.
+# silently. This is horrible. Fix so that it raises an error.
 app.jinja_env.undefined = StrictUndefined
 
 # The following control the whitespace that is inserted into the HTML that the
@@ -37,11 +40,9 @@ app.jinja_env.strip_trailing_newlines = False
 # app.jinja_env.autoescape = True
 # TODO Is the following needed (or correct), since my Jinja templates
 # end in "J2" to get syntax highlighting?
-
 app.jinja_env.autoescape = select_autoescape(
         enabled_extensions=('html', 'xml', 'html', 'j2'),
         default_for_string=True)
-
 # jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 #                                autoescape = True,
 #                                extensions = ['jinja2.ext.autoescape'])
@@ -81,17 +82,12 @@ def show_login_form():
 @app.route('/do-login', methods=['POST'])
 def do_login():
     """ Receive the login credentials from form user filled in """
-
-    # get the user_id and login from the form
     email = request.form['email']
     password = request.form['password']
-    # Test whether this user_id and password match the database.
-
     user = User.query.filter_by(email=email, password=password).one_or_none()
-
     if user is None:
         # bad login
-        flash("Try again, or <a href='/register'>sign up</a> as a new user.",
+        flash("Try again, or <a href=\"{{url_for('show_register_form')}}\">sign up</a> as a new user.",
               "danger")
         return redirect(url_for('show_login_form'))
 
@@ -100,8 +96,6 @@ def do_login():
     session['user_email'] = user.email
     session['user_school_id'] = user.school.id
     session['user_school_name'] = user.school.name
-    # session['user_role'] = user.role
-
     flash("Successfully logged in. Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for('index'))
 
@@ -116,9 +110,9 @@ def do_logout():
     return redirect(url_for('show_register_form'))
 
 
-@app.route('/register', methods=['GET'])
+@app.route('/register')
 def show_register_form():
-    """Show form for user signup."""
+    """ Show form for user signup. """
     # Get the list of schools to populate the drop-down
     schools = School.query.order_by("name").all()
     return render_template("users/register.html.j2", school_list=schools)
@@ -146,8 +140,6 @@ def do_register():
     session['user_email'] = new_user.email
     session['user_school_id'] = new_user.school.id
     session['user_school_name'] = new_user.school.name
-
-    flash("Welcome to TrackMeetSimplicity!", "success")
     return redirect(url_for("index"))
 
 
@@ -168,7 +160,6 @@ def show_edit_profile_form():
 
 @app.route('/do-change-profile', methods=['POST'])
 def do_change_profile():
-
     # get our existing user record from the database and update it.
     user_id = session.get('user_id')
     user = User.query.get(user_id)
@@ -194,9 +185,7 @@ def do_change_password():
     # get our existing user record from the database and update it.
     user_id = session.get('user_id')
     user = User.query.get(user_id)
-
     new_password = request.form.get("password")
-
     user.password = new_password
 
     db.session.commit()
@@ -226,7 +215,6 @@ def show_school_detail(school_id):
 @app.route('/schools/<int:school_id>/edit')
 def show_edit_school_detail(school_id):
     school = School.query.get(school_id)
-    # return '<p>Edit athlete {}</p>'.format(school.id)
     return render_template(
             '/schools/_school_detail_edit_form.html.j2', school=school)
 
@@ -234,7 +222,6 @@ def show_edit_school_detail(school_id):
 @app.route('/schools/<int:school_id>/do_edit', methods=['POST'])
 def do_edit_school_detail(school_id):
     school = School.query.get(school_id)
-
     school.name = request.form.get('name', school.name)
     school.code = request.form.get('code', school.code)
     school.league = request.form.get('league', school.league)
@@ -245,7 +232,6 @@ def do_edit_school_detail(school_id):
     db.session.commit()
     flash(f"Updated details for school {school.name}.", "success")
     return redirect(url_for('show_school_detail', school_id=school.id))
-
 
 
 # ########   MEET LIST, EDIT, CREATE, SEED #########################
@@ -287,14 +273,14 @@ def do_new_meet_form():
     mi['host_school_id'] = session['user_school_id']
     mi['max_entries_per_athlete'] = int(
             request.form.get("max_entries_per_athlete", 4))
-    mi['max_relays_per_athlete'] = int(request.form.get("max_relays_per_athlete", 2))
+    mi['max_relays_per_athlete'] = int(
+            request.form.get("max_relays_per_athlete", 2))
     mi['max_teammates_per_event'] = int(
             request.form.get("max_team_entries_per_event", 12))
     mi['max_heats_per_mde'] = int(request.form.get("max_heats_per_mde", 3))
-
     mi['ev_code_list'] = request.form.get("ev_code_list", DEFAULT_EVENT_ORDER)
-    mi['div_code_list'] = request.form.get("div_code_list", DEFAULT_DIVISION_ORDER)
-
+    mi['div_code_list'] = request.form.get(
+            "div_code_list", DEFAULT_DIVISION_ORDER)
     # seeding tiebreakers
     # heat assignment method
     # lane/position assignment method
@@ -304,9 +290,9 @@ def do_new_meet_form():
     return (redirect(url_for('show_meet_detail', meet_id=meet.id)))
 
 
-@app.route('/meets/<int:meet_id>/edit_meet')
+@app.route('/meets/<int:meet_id>/edit-meet')
 def show_edit_meet_form(meet_id):
-    meet = Meet.query.filter_by(id=meet_id).first_or_404()
+    meet = Meet.query.get(meet_id)
     if meet and session['user_school_id'] == meet.host_school.id:
         return '<p>NOT IMPLEMENTED YET</p><p>Edit Meet {}</p>'.format(meet.id)
     # reuse the same form from do_new_meet_form
@@ -314,21 +300,83 @@ def show_edit_meet_form(meet_id):
     # return render_template('meet_detail.html.j2', meet=meet)
 
 
-@app.route('/meets/<int:meet_id>/enter_meet')
-def show_enter_meet_form(meet_id):
-    meet = Meet.query.filter_by(id=meet_id).first_or_404()
-    return'<p>Enter my school {} into Meet {}</p>'.format(
-        session['user_school_name'], meet.id)
-    # return render_template('meet_detail.html.j2', meet=meet)
+@app.route('/meets/<int:meet_id>/do-edit-meet', methods=['POST'])
+def do_edit_meet_form(meet_id):
+
+    # meet.host_school_id = session['user_school_id']
+    meet = Meet.query.get(meet_id)
+    meet.name = request.form.get('name', meet.name)
+    meet.date = request.form.get('date', meet.date)
+    meet.description = request.form.get("description")
+
+    meet.max_entries_per_athlete = int(request.form.get(
+            "max_entries_per_athlete", meet.max_entries_per_athlete))
+    meet.max_relays_per_athlete = int(request.form.get(
+            "max_relays_per_athlete", meet.max_relays_per_athlete))
+    meet.max_teammates_per_event = int(request.form.get(
+            "max_team_entries_per_event", meet.max_teammates_per_event))
+    meet.max_heats_per_mde = int(request.form.get(
+            "max_heats_per_mde", meet.max_heats_per_mde))
+    meet.ev_code_list = request.form.get("ev_code_list", meet.ev_code_list)
+    meet.div_code_list = request.form.get(
+            "div_code_list", meet.div_code_list)
+    return (redirect(url_for('show_meet_detail', meet_id=meet.id)))
 
 
-@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit_entries')
-@app.route('/meets/<int:meet_id>/edit_entries')
+# ##### CREATE MDEs/ENTRIES, ASSIGNMENTS & EDIT ENTRIES / MDES
+
+@app.route('/meets/<int:meet_id>/enter-meet')
+def show_enter_meet_upload_form(meet_id):
+    meet = Meet.query.get(meet_id)
+    school = School.query.get(session['user_school_id'])
+
+    return render_template(
+            "/entries/_school_entry_into_meet.html.j2",     
+            meet=meet, school=school)
+    # return'<p>Enter my school {} into Meet {}</p>'.format(
+    #     session['user_school_name'], meet.id)
+
+
+@app.route('/meets/<int:meet_id>/enter-meet', methods=["POST"])
+def do_upload_school_entries(meet_id):
+    meet = Meet.query.get(meet_id)
+    import ipdb; ipdb.set_trace
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(url_for('show_enter_meet_upload_form', meet_id=meet_id))
+
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(url_for('show_enter_meet_upload_form', meet_id))
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # return redirect(url_for('uploaded_entry_file',
+        #                         filename=filename))
+        parse_hytek_file(filename, meet)
+
+
+# @app.route('/entry_file_uploads/<filename>')
+# def uploaded_entry_file(filename):
+#     return send_from_directory(app.config['UPLOAD_FOLDER'],
+#                                filename)
+
+    flash("TO BE IMPLEMENTED: Processed athlete entries in uploaded file", "success")
+    return redirect(url_for('show_meet_detail', meet_id=meet_id))
+
+
+@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit-entries')
+@app.route('/meets/<int:meet_id>/edit-entries')
 def edit_meet_entries(meet_id, school_id=None):
     if school_id is None:
         school_id = session['school.id']
 
-    meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
+    meet = Meet.query.get(meet_id)
     return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
             meet.id)
     # return render_template('meet_detail.html.j2', meet=meet)
@@ -338,18 +386,19 @@ def edit_meet_entries(meet_id, school_id=None):
 def show_mde_detail(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
     # for this function, but maybe it should be in the URL anyway ?
-    mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
-    return render_template('/meets/mde_detail.html.j2', mde=mde)
+    mde = MeetDivisionEvent.query.get(mde_id)
+    return render_template('/entries/mde_detail.html.j2', mde=mde)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/edit')
 def show_mde_edit_form(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
     # for this function, but maybe it should be in the URL anyway ?
-    # TODO Make this 
-    mde = MeetDivisionEvent.query.filter_by(id=mde_id).first_or_404()
+    # TODO Make this
+    mde = MeetDivisionEvent.query.get(mde_id)
     # return render_template('/meets/mde_detail.html.j2', mde=mde)
     return "Edit form for mde# {} in meet# {}.".format(mde_id, meet_id)
+
 
 # ##########  DISPLAY AND EDIT ATHLETES  ###########
 @app.route('/athletes')
@@ -425,6 +474,11 @@ def _get_user_details_and_school(request):
         db.session.flush()
 
     return (new_email, new_password, school)
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 if __name__ == '__main__':

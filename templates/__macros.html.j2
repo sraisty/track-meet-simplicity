@@ -61,7 +61,7 @@
 <ul class="list-group">
 {% for mde in meet.get_event_mdes(event) %}
   <li class="list-group-item d-flex justify-content-between align-items-center">
-    <a href="/meets/{{ meet.id }}/mdes/{{ mde.id }}">
+    <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
       {{ mde.division.name }}
     </a>
     <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
