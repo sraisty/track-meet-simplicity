@@ -39,8 +39,18 @@
     <div class="d-flex flex-row ">
       <div class="bg-info p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
       <div class="bg-secondary p-3 text-center">Athletes Entered: {{ num_entries }}</div>
-      <div class="bg-info p-3 text-center">Spots Remaining: {{ max_athletes - num_entries }}</div>
-      <div class="bg-secondary p-3 text-center">{{ num_entries * 100 / max_athletes }}% Full</div>
+      {% if max_athletes > num_entries #}
+        <div class="bg-info p-3 text-center">
+          Spots Remaining: {{ max_athletes - num_entries }}
+        </div>
+        <div class="bg-secondary p-3 text-center">
+          {{ num_entries * 100 / max_athletes }}% Full
+        </div>
+      {% else %}
+        <div class="bg-warning p-3 text-center">
+          Event is Oversubscribed: {{ num_entries - max_athletes }} too many athletes
+        </div>
+      {% endif %}
     </div>
   </h5>
   <p>

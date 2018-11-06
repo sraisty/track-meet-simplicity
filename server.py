@@ -7,7 +7,7 @@ from flask import (Flask, render_template, redirect, request, flash,
 from werkzeug.utils import secure_filename
 from jinja2 import StrictUndefined
 from jinja2 import select_autoescape
-from flask_login import LoginManager
+# from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 # import requests
 
@@ -15,7 +15,7 @@ from model import (connect_to_db, db, User, Meet, Athlete, Entry, Division,
                    School, MeetDivisionEvent, EventOrdering, DivOrdering,
                    DEFAULT_EVENT_ORDER, DEFAULT_DIVISION_ORDER, MEET_STATUS)
 
-from util import error, warning, info
+# from util import error, warning, info
 from parse_hytek import parse_hytek_file
 
 UPLOAD_FOLDER = "./entry_file_uploads"
@@ -32,7 +32,7 @@ app.secret_key = os.environ['FLASK_APP_SECRET_KEY']
 app.jinja_env.undefined = StrictUndefined
 
 # The following control the whitespace that is inserted into the HTML that the
-# templates produce, and make it easier for humans to understand/debug the HTML.
+# templates produce, making it easier for humans to understand/debug the HTML.
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 app.jinja_env.strip_trailing_newlines = False
@@ -191,7 +191,7 @@ def do_change_password():
     db.session.commit()
 
     flash("Your password has been updated.", "success")
-    return redirect((url_for("show_user_profile"))) 
+    return redirect((url_for("show_user_profile")))
 
 
 # ########   SCHOOL LIST, EDIT, CREATE #########################
@@ -294,7 +294,8 @@ def do_new_meet_form():
 def show_edit_meet_form(meet_id):
     meet = Meet.query.get(meet_id)
     if not meet:
-        flash("Meet with id# {meet_id} does not exist.".format(meet.id), "danger")
+        flash("Meet with id# {meet_id} does not exist.".format(meet.id),
+              "danger")
         return redirect(url_for('show_all_meets'))
     if session['user_school_id'] != meet.host_school.id:
         flash(
@@ -317,7 +318,8 @@ def do_edit_meet_form(meet_id):
     meet.name = request.form.get('name', meet.name)
     meet.date = request.form.get('date', meet.date)
     meet.status = request.form.get('status', meet.status)
-    meet.host_school_id = request.form.get('host_school_id', meet.host_school_id)
+    meet.host_school_id = request.form.get(
+            'host_school_id', meet.host_school_id)
     meet.description = request.form.get("description", meet.description)
 
     meet.max_entries_per_athlete = int(request.form.get(
@@ -333,12 +335,12 @@ def do_edit_meet_form(meet_id):
     # Get the new event ordering
     # Reassign the sequence numbers in the database event orderings for meet
     # Get the new division ordering
-    # Reassign the sequence numbers in the databases divisions orderings for meet
+    # Reassign sequence numbers in the databases divisions orderings for meet
     # redo the sequence numbers for all MDEs in the meet
-    # meet.event_orderings_list = request.form.get("ev_code_list", meet.ev_code_list)
+    # meet.event_orderings_list = request.form.get(
+    #       "ev_code_list", meet.ev_code_list)
     # meet.div_code_list = request.form.get(
     #         "div_code_list", meet.div_code_list)
-
     db.session.commit()
 
     return (redirect(url_for('show_meet_detail', meet_id=meet.id)))
@@ -350,12 +352,9 @@ def do_edit_meet_form(meet_id):
 def show_enter_meet_upload_form(meet_id):
     meet = Meet.query.get(meet_id)
     school = School.query.get(session['user_school_id'])
-
     return render_template(
             "/entries/_school_entry_into_meet.html.j2",
             meet=meet, school=school)
-    # return'<p>Enter my school {} into Meet {}</p>'.format(
-    #     session['user_school_name'], meet.id)
 
 
 @app.route('/meets/<int:meet_id>/do-enter-meet', methods=["POST"])
@@ -365,11 +364,12 @@ def do_upload_school_entries(meet_id):
     # check if the post request has the file part
     if 'entry_file' not in request.files:
         flash("You must upload a file containing track meet entries in Hytek file format")
-        return redirect(url_for('show_enter_meet_upload_form', meet_id=meet_id))
+        return redirect(url_for(
+                'show_enter_meet_upload_form', meet_id=meet_id))
 
     file = request.files['entry_file']
-    # if user does not select file, browser also
-    # submit an empty part without filename
+    # if user does not select file, browser submits an empty part
+    # without filename
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('show_enter_meet_upload_form', meet_id))
@@ -427,7 +427,6 @@ def do_edit_mde_detail(meet_id, mde_id):
 
     max_heats = request.form.get('mde_max_heats', mde.max_heats)
     if max_heats:
-        import ipdb; ipdb.set_trace()
         mde.max_heats = int(max_heats)
     mde.mde_notes = request.form.get('mde_notes', mde.mde_notes)
     db.session.commit()
@@ -441,7 +440,6 @@ def do_edit_mde_detail(meet_id, mde_id):
 def show_all_athletes():
     q = Athlete.query.order_by(Athlete.lname).order_by(Athlete.fname)
     athletes = q.all()
-    # athletes = Athlete.query.all()
     return render_template('/athletes/all_athletes.html.j2', athletes=athletes)
 
 
@@ -490,15 +488,15 @@ def do_edit_athlete_detail(athlete_id):
 def page_not_found(err):
     return render_template('/__page_not_found.html.j2'), 404
 
+
 # ### HELPER FUNCTIONS ##########
 def _get_user_details_and_school(request):
     new_email = request.form.get("email")
-    new_password = request.form.get("password")   #this might be None
+    new_password = request.form.get("password")
     school_id = request.form.get("school_id")
 
     if school_id:
         school = School.query.get(school_id)
-
     else:
         # user is entering a new school in the form.
         # So, create the new school
@@ -513,7 +511,7 @@ def _get_user_details_and_school(request):
 
 
 def allowed_file(filename):
-    # For the upload files 
+    # For the upload files
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 

@@ -54,7 +54,7 @@
   {{ MACRO_MAKE_TAB("entered-meets-tab", true, "Meets Entered") }}
   {{ MACRO_MAKE_TAB("school-athletes-tab", false, "Athletes") }}
   {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }}
-  {{ MACRO_MAKE_TAB("school-past-meets-tab", false, "Past Meets") }}
+  {# {{ MACRO_MAKE_TAB("school-past-meets-tab", false, "Past Meets") }} #}
   {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
 {% endblock tab_navs %}
 
@@ -86,10 +86,10 @@
     </div>
   {% endcall %}
 
-  {% call MACRO_MAKE_TAB_CONTENT("school-past-meets-tab", false) %}
+{#   {% call MACRO_MAKE_TAB_CONTENT("school-past-meets-tab", false) %}
     TODO - Not implemented yet.
   {% endcall %}
-
+ #}
 
   {% call MACRO_MAKE_TAB_CONTENT("school-info-tab", false) %}
     <div>
