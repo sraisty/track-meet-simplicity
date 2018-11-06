@@ -34,13 +34,17 @@
       {% endfor %}
     </div>
   </div>
-  <div class="d-flex justify-content-md-between flex-wrap">
-    {{ school.athletes | length }} athletes<br>
-    {{ school.divisions | length }} divisions<br>
-    {{ school.entries | length }} entries<br>
-    {{ school.meets_entered() | length }} meets entered<br>
-    {{ school.meets_hosted | length }} meets hosted<br>
-  </div>
+    <h5>
+    <div class="d-flex flex-row ">
+      <div class="bg-info p-3 text-center">{{ school.athletes | length }} Athletes</div>
+      <div class="bg-secondary p-3 text-center">{{ school.divisions | length }} Divisions</div>
+      <div class="bg-info p-3 text-center">{{ school.entries | length }} Entries</div>
+      <div class="bg-secondary p-3 text-center">{{ school.meets_entered() | length }} Meets Entered</div>
+
+      <div class="bg-info p-3 text-center">{{ school.meets_hosted | length }} Meets Hosted</div>
+
+    </div>
+  </h5>
 
 {% endblock nav2_subtitle %}
 
@@ -66,8 +70,7 @@
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("school-athletes-tab", false) %}
-{#     <h1>Athletes</h1> #}
-    {{ MACRO_ATHLETE_LIST(school.athletes, "school-athletes-table" ) }} #}
+    {{ MACRO_ATHLETE_LIST(school.athletes, "school-athletes-table") }} 
   {% endcall %}
 
 
@@ -90,21 +93,23 @@
 
   {% call MACRO_MAKE_TAB_CONTENT("school-info-tab", false) %}
     <div>
-      School Name: {{ school.name }}<br>
-      School Code: {{ school.code }}<br>
-      School ID#: {{ school.id }}<br>
-      Location: 
+      <p><strong>School Name:</strong> {{ school.name }}</p>
+      <p><strong>School Code:</strong> {{ school.code }}</p>
+      <p><strong>School ID#:</strong> {{ school.id }}</p>
+      <p><strong>Location:</strong> 
       {% if school.city %}{{ school.city }}{% else %}no city set{% endif %}, 
-      {% if school.state %}{{ school.state }}{% else %}no state set{% endif %}<br>
-      League: 
-      {% if school.league %}{{ school.league }}{% else %}no league set{% endif %}<br>
-      Section:
+      {% if school.state %}{{ school.state }}{% else %}no state set{% endif %}</p>
+      <p><strong>League:</strong> 
+      {% if school.league %}{{ school.league }}{% else %}no league set{% endif %}</p>
+      <p><strong>Section:</strong>
       {% if school.section %}{{ school.section }}{% else %}no section set{% endif %}
       <br>
-      TrackMeetSimplicity users:<br>
-      {% for user in school.coaches %}
-        {{ user.email}}
-      {% endfor %}
+      <p><strong>TrackMeetSimplicity users:</strong></p>
+      <ul>
+        {% for user in school.coaches %}
+          <li>{{ user.email}}</li>
+        {% endfor %}
+      </ul>
     </div>
     <div>
       <a href="{{url_for('show_edit_school_detail', school_id=school.id) }}">

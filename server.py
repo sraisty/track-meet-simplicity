@@ -13,7 +13,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Meet, Athlete, Entry, Division,
                    School, MeetDivisionEvent, EventOrdering, DivOrdering,
-                   DEFAULT_EVENT_ORDER, DEFAULT_DIVISION_ORDER)
+                   DEFAULT_EVENT_ORDER, DEFAULT_DIVISION_ORDER, MEET_STATUS)
 
 from util import error, warning, info
 from parse_hytek import parse_hytek_file
@@ -293,11 +293,19 @@ def do_new_meet_form():
 @app.route('/meets/<int:meet_id>/edit-meet')
 def show_edit_meet_form(meet_id):
     meet = Meet.query.get(meet_id)
-    if meet and session['user_school_id'] == meet.host_school.id:
-        return '<p>NOT IMPLEMENTED YET</p><p>Edit Meet {}</p>'.format(meet.id)
-    # reuse the same form from do_new_meet_form
-    # add meet status field - they can now change it to the next stage?
-    # return render_template('meet_detail.html.j2', meet=meet)
+    if not meet:
+        flash("Meet with id# {meet_id} does not exist.".format(meet.id), "danger")
+        return redirect(url_for('show_all_meets'))
+    if session['user_school_id'] != meet.host_school.id:
+        flash(
+            "You are not authorized. Only users from the host school may edit this meet.",
+            "danger")
+        return redirect(url_for('show_meet_detail', meet_id=meet_id))
+
+    school_list = School.query.all()
+    return render_template(
+            '/meets/show_edit_meet_form.html.j2',
+            meet=meet, school_list=school_list, meet_status_list=MEET_STATUS)
 
 
 @app.route('/meets/<int:meet_id>/do-edit-meet', methods=['POST'])
@@ -305,9 +313,12 @@ def do_edit_meet_form(meet_id):
 
     # meet.host_school_id = session['user_school_id']
     meet = Meet.query.get(meet_id)
+
     meet.name = request.form.get('name', meet.name)
     meet.date = request.form.get('date', meet.date)
-    meet.description = request.form.get("description")
+    meet.status = request.form.get('status', meet.status)
+    meet.host_school_id = request.form.get('host_school_id', meet.host_school_id)
+    meet.description = request.form.get("description", meet.description)
 
     meet.max_entries_per_athlete = int(request.form.get(
             "max_entries_per_athlete", meet.max_entries_per_athlete))
@@ -317,9 +328,19 @@ def do_edit_meet_form(meet_id):
             "max_team_entries_per_event", meet.max_teammates_per_event))
     meet.max_heats_per_mde = int(request.form.get(
             "max_heats_per_mde", meet.max_heats_per_mde))
-    meet.ev_code_list = request.form.get("ev_code_list", meet.ev_code_list)
-    meet.div_code_list = request.form.get(
-            "div_code_list", meet.div_code_list)
+    # For now, we're not changing the ordering of events or divisions
+    # Do this later.
+    # Get the new event ordering
+    # Reassign the sequence numbers in the database event orderings for meet
+    # Get the new division ordering
+    # Reassign the sequence numbers in the databases divisions orderings for meet
+    # redo the sequence numbers for all MDEs in the meet
+    # meet.event_orderings_list = request.form.get("ev_code_list", meet.ev_code_list)
+    # meet.div_code_list = request.form.get(
+    #         "div_code_list", meet.div_code_list)
+
+    db.session.commit()
+
     return (redirect(url_for('show_meet_detail', meet_id=meet.id)))
 
 
@@ -331,42 +352,38 @@ def show_enter_meet_upload_form(meet_id):
     school = School.query.get(session['user_school_id'])
 
     return render_template(
-            "/entries/_school_entry_into_meet.html.j2",     
+            "/entries/_school_entry_into_meet.html.j2",
             meet=meet, school=school)
     # return'<p>Enter my school {} into Meet {}</p>'.format(
     #     session['user_school_name'], meet.id)
 
 
-@app.route('/meets/<int:meet_id>/enter-meet', methods=["POST"])
+@app.route('/meets/<int:meet_id>/do-enter-meet', methods=["POST"])
 def do_upload_school_entries(meet_id):
     meet = Meet.query.get(meet_id)
-    import ipdb; ipdb.set_trace
+
     # check if the post request has the file part
-    if 'file' not in request.files:
-        flash('No file part')
+    if 'entry_file' not in request.files:
+        flash("You must upload a file containing track meet entries in Hytek file format")
         return redirect(url_for('show_enter_meet_upload_form', meet_id=meet_id))
 
-    file = request.files['file']
+    file = request.files['entry_file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
         flash('No selected file')
         return redirect(url_for('show_enter_meet_upload_form', meet_id))
-
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+
+        filename = "meet_{}_school_{}_{}".format(
+                meet_id, session['user_school_name'], file.filename)
+        filename = secure_filename(filename)
+
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        # return redirect(url_for('uploaded_entry_file',
-        #                         filename=filename))
-        parse_hytek_file(filename, meet)
-
-
-# @app.route('/entry_file_uploads/<filename>')
-# def uploaded_entry_file(filename):
-#     return send_from_directory(app.config['UPLOAD_FOLDER'],
-#                                filename)
-
-    flash("TO BE IMPLEMENTED: Processed athlete entries in uploaded file", "success")
+        parse_hytek_file(
+                os.path.join(app.config['UPLOAD_FOLDER'], filename),
+                meet)
+    flash("Successfully added athletes from file to meet.", "success")
     return redirect(url_for('show_meet_detail', meet_id=meet_id))
 
 
@@ -377,9 +394,10 @@ def edit_meet_entries(meet_id, school_id=None):
         school_id = session['school.id']
 
     meet = Meet.query.get(meet_id)
+    # TODO
     return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
             meet.id)
-    # return render_template('meet_detail.html.j2', meet=meet)
+    # return render_template('new_meet_detail.html.j2', meet=meet)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
@@ -392,12 +410,30 @@ def show_mde_detail(meet_id, mde_id):
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/edit')
 def show_mde_edit_form(meet_id, mde_id):
-    # TO DO - Don't think I really need BOTH the meet_id and the mde_id
-    # for this function, but maybe it should be in the URL anyway ?
-    # TODO Make this
+    # Technically, I can get the meet_id from teh mde_id, but this url format
+    # is more friendly to users.
     mde = MeetDivisionEvent.query.get(mde_id)
-    # return render_template('/meets/mde_detail.html.j2', mde=mde)
-    return "Edit form for mde# {} in meet# {}.".format(mde_id, meet_id)
+    school = School.query.get(mde.meet.host_school_id)
+    return render_template(
+            '/entries/mde_detail_edit_form.html.j2',
+            mde=mde, meet_id=meet_id, school=school)
+
+
+@app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/do-edit', methods=["POST"])
+def do_edit_mde_detail(meet_id, mde_id):
+    mde = MeetDivisionEvent.query.get(mde_id)
+    mde.status = request.form.get('mde_status', mde.status)
+    mde.seq_num = int(request.form.get('mde_seq_num', mde.seq_num))
+
+    max_heats = request.form.get('mde_max_heats', mde.max_heats)
+    if max_heats:
+        import ipdb; ipdb.set_trace()
+        mde.max_heats = int(max_heats)
+    mde.mde_notes = request.form.get('mde_notes', mde.mde_notes)
+    db.session.commit()
+    flash("Saved new settings for mde.event.name for mde.division.name",
+          "success")
+    return redirect(url_for('show_mde_detail', meet_id=meet_id, mde_id=mde.id))
 
 
 # ##########  DISPLAY AND EDIT ATHLETES  ###########
@@ -435,7 +471,7 @@ def do_edit_athlete_detail(athlete_id):
     athlete.div_id = request.form.get('division_id', athlete.div_id)
     athlete.phone = request.form.get('phone', athlete.phone)
     athlete.coach_notes = request.form.get('coach_notes', athlete.coach_notes)
-    # TODO - get and save data from form
+
     db.session.commit()
     flash(f"Updated details for school {athlete.full_name()}.", "success")
     return redirect(url_for('show_athlete_detail', athlete_id=athlete.id))
@@ -477,6 +513,7 @@ def _get_user_details_and_school(request):
 
 
 def allowed_file(filename):
+    # For the upload files 
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 

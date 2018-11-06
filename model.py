@@ -252,17 +252,14 @@ class Meet(db.Model):
         athletes = q.all()
         return athletes
 
-    def get_entries(self, school_id=None):
-        # q = db.session.query(Athlete).join(Athlete.entries).join(Entry.meet)
-        # q = q.filter(Meet.id == self.id).distinct()
-        # if school_id:
-        #     q = q.filter(Athlete.school_id == school_id)
+    def get_school_entries(self, school_id):
+        school_entries = set()
+        for entry in self.entries:
+            if entry.athlete.school_id == school_id:
+                school_entries.add(entry)
+        # order_by
+        return school_entries
 
-        # q = q.order_by(Athlete.fname).order_by(Athlete.lname)
-
-        # athletes = q.all()
-        # return athletes
-        pass
 
     @classmethod
     def reorder_mdes(cls):
@@ -547,9 +544,9 @@ class Entry(db.Model):
             self.mark_type = "inches"   # TODO one day handle meters
 
     def __repr__(self):
-        return ("\n<ENTRY #{}, Ath: {}, Event: {}, Div: {}, Meet: {}>"
+        return ("\n<ENTRY #{}, Ath: {}, school: {}, Event: {}, Div: {}, Meet: {}>"
                 .format(
-                    self.id, self.athlete.full_name(),
+                    self.id, self.athlete.full_name(), self.athlete.school.code,
                     self.event.code, self.division.code, self.meet.name))
 
     # SETTING MARKS
@@ -1035,22 +1032,8 @@ class Division(db.Model):
     code = db.Column(db.String(5), unique=True, nullable=False)
     name = db.Column(db.String(20), unique=True, nullable=False)
 
-    # mdes = db.relationship(
-    #         "MeetDivisionEvent", uselist=True, back_populates="division")
-    # meets = db.relationship(
-    #         "Meet", secondary="meet_division_events", uselist=True,
-    #         back_populates="divisions")
-    # events = db.relationship(
-    #        "EventDefinition", secondary="meet_division_events", uselist=True,
-    #         back_populates="divisions")
     athletes = db.relationship(
             "Athlete", uselist=True, back_populates="division")
-    # schools = db.relationship(
-    #         "School", secondary="athletes", uselist=True,
-    #         back_populates="divisions")
-    # entries = db.relationship(
-    #         "Entry", secondary="athletes", uselist=True,
-    #         back_populates="division")
 
     def __init__(self, gender, grade=None, adult_child='child',
                  name=None, code=None):

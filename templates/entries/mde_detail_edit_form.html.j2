@@ -1,0 +1,68 @@
+{% extends "__secondary_nav.html.j2" %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(school)}}
+{% endblock %}
+
+{% block secondary_nav_title %}
+    Edit >   Event #{{mde.seq_num}}: {{ mde.event.name }}: {{ mde.division.name }}
+{% endblock secondary_nav_title %}
+
+{% block admin_cog %}
+{% endblock admin_cog %}
+
+{% block nav2_subtitle %}
+{% endblock nav2_subtitle %}
+
+
+{% block content %}
+  <form action="{{ url_for('do_edit_mde_detail', mde_id=mde.id, meet_id=meet_id) }}" method="POST">
+    
+    <div class="form-group">
+      <label for="mde_status">Status:</label>
+      <input type="text" class="form-control" name="mde_status" id="mde_status" placeholder="Enter status of entries into this event for this division" value="{{ mde.status }}" required>
+    </div>
+    <div class="form-group">
+      <label for="mde_seq_num">Sequence Number within meet:</label>
+      <input type="text" class="form-control" name="mde_seq_num" placeholder="" value="{{ mde.seq_num }}" disabled required/>
+    </div>
+    <div class="form-group">
+      <label for="qualifying_mark">Qualifying mark:</label>
+      <input type="text" class="form-control" name="qualifying_mark" placeholder="Enter qualifying mark" disabled
+      {% if mde.qualifying_mark %}value="{{ mde.qualifying_mark }}"{% endif %}  />
+    </div>
+    <div class="form-group">
+      <label for="mde_max_heats">Max number of heats (override meet-wide setting of {{mde.meet.max_heats_per_mde}} heats max):</label>
+      <input type="text" class="form-control" name="mde_max_heats" placeholder="1" 
+      {% if mde.max_heats %} value="{{ mde.max_heats }}"{% endif %}  />
+    </div>
+    <div class="form-group">
+      <label for="Notes">Notes:</label>
+      <textarea class="form-control" name="mde_notes" placeholder="Enter notes about this specific event for this age-group division. Examples: opening height for the high jump, height of hurdles, size of shot put implement, meet records for this age group, etc.">{% if mde.mde_notes %}value="{{ mde.mde_notes }}"{% endif %}</textarea>
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  <a href="{{ url_for('show_school_detail', school_id=school.id) }}">
+    <button class="btn btn-secondary">Cancel</button>
+  </a>
+
+{% endblock %}
+
+
+    <p><strong>Status:</strong> {{ mde.status }}</p>
+    <p><strong>Sequence number within meet</strong>: {{ mde.seq_num }}</p>
+    <p><strong>Qualifying mark (if any)</strong>: {{ mde.qualifying_mark }}
+    <p><strong>Notes:</strong> {{ mde.mde_notes}}</p>
+    <p>
+    <p><strong>Max Number of Heats:</strong> {{ heats }}</p>
+    <ul><li><strong>Max # Heats Allowed</strong> (overall meet setting): {{mde.meet.max_heats_per_mde}}</li>
+      <li><strong>(Override) Max # of Heats Allowed</strong> (event-level override):{{ mde.max_heats }}</li></ul>
+
+    <p><strong>Maximum Athletes per Heat:</strong> {{ mde.event.max_per_heat }}</p>
+
+    <p><strong>Maximum Athletes for Event:</strong> {{max_athletes}}</p>

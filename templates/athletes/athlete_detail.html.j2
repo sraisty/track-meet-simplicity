@@ -81,17 +81,22 @@
 
   {% call MACRO_MAKE_TAB_CONTENT("athlete-profile-tab", false) %}
 
-      First name: {{ athlete.fname }}<br>
-      Middle name: {{athlete.minitial }}<br>
-      Last name: {{ athlete.lname }}<br>
+      <p><strong>First name:</strong> {{ athlete.fname }}</p>
+      <p><strong>Middle name:</strong> {{athlete.minitial }}</p>
+      <p><strong>Last name:</strong> {{ athlete.lname }}</p>
       {# Gender: {{ athlete.gender }}<br> #}
       {# Grade: {{ athlete.grade }}<br> #}
-      School: {{ athlete.school.name }}<br>
-      Division: {{ athlete.division.name }}<br>
-      Div Code: {{ athlete.division.code }}<br>
-      Phone: {{ athlete.phone }}<br>
-      Problem: {{ athlete.problem }}<br>
-      Coach notes: {{ athlete.coach_notes }}<br>
+      <p><strong>School:</strong>
+        <a href="{{url_for('show_school_detail', school_id= athlete.school.id) }}">
+          {{ athlete.school.name }}
+        </a>
+      </p>
+      <p>
+        <strong>Division:</strong> {{ athlete.division.name }}, 
+        <strong>Division Code:</strong> {{ athlete.division.code }}</p>
+      <p><strong>Phone:</strong> {{ athlete.phone }}</p>
+      <p><strong>Entry Problems:</strong> {{ athlete.problem }}</p>
+      <p><strong>Coach Notes:</strong> {{ athlete.coach_notes }}</p>
 
       <a href="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id) }}">
         <button  class="btn btn-primary">

@@ -1,7 +1,51 @@
+.bg-primary {
+  /* dark grey */
+  background-color: #2F4858!important;
+}
 
-/*#mschool-tab {
-    color: #ffffff;
-}*/
+.bg-info {
+  /* teal */
+  background-color: #348f9d!important;
+}
+
+.bg-secondary {
+  /* medium grey */
+  /* background-color: #6c757da1!important;*/
+  background-color: #bac1b8!important;
+}
+
+.bg-warning {
+  /* yellow */
+  background-color: #F6AE2D!important;
+}
+
+.bg-success {
+  background-color: #FF8552!important;
+}
+
+.btn-success{
+  background-color: #F26419!important;
+  border-color: #F26419!important;
+  /*color: #222222!important;*/
+}
+
+.btn-primary{
+  background-color: #2F4858!important;
+  border-color: #2F4858!important;
+  /*color: #222222!important;*/
+}
+
+.btn-warning {
+  /* yellow */
+  background-color: #F6AE2D!important;
+  border-color: #F6AE2D!important;
+}
+
+body {
+  color: #1A1F16;
+}
+/*  GREEN: #4DA167, azure blue #4381C1, bulgarian rose #4F0008;
+BLACK #1A1F16 Light Grey #C4BBB8*/
 
 a.tms-tab {
     color: #ffffff;

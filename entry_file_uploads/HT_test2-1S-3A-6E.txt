@@ -1,0 +1,9 @@
+I;Aldrich;Eric;;M;;PCS;Pacific Collegiate;;6;;;;;;;;;;;;
+I;Antonino;Kevin;;M;;PCS;Pacific Collegiate;;8;;;;;;;;;;;;
+I;Armstrong;Elizabeth;;F;10/18/2001;PCS;Pacific Collegiate;;6;;;;;;;;;;;;
+D;Armstrong;Elizabeth;;F;;PCS;Pacific Collegiate;;6;100;;M;1;;;;
+D;Armstrong;Elizabeth;;F;;PCS;Pacific Collegiate;;6;200;;M;1;;;;
+D;Antonino;Kevin;;M;;PCS;Pacific Collegiate;;8;200;;M;1;;;;
+D;Aldrich;Eric;;M;;PCS;Pacific Collegiate;;6;200;;M;1;;;;
+D;Aldrich;Eric;;M;;PCS;Pacific Collegiate;;6;400;1:01.76;M;1;;;;
+D;Antonino;Kevin;;M;;PCS;Pacific Collegiate;;8;800;2:25.30;M;1;;;;

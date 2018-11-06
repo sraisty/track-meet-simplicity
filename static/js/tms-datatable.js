@@ -54,9 +54,9 @@ $(document).ready(function() {
         'ordering': true
     });
 
-    // $('#school_table').DataTable({
-    //     'ordering': true
-    // });
+   $('#meet-school-list').DataTable({
+        'ordering': true
+    });
 
 });
     

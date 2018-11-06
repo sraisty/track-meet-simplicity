@@ -28,20 +28,27 @@
 {% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
-
-  <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
-    {{ mde.meet.name }}
-  </a>
-
-  {{ mde.meet.date.strftime("%B %d, %Y") }}
-    <p>Status: {{mde.status}}<br>
-    Maximum Heats: {{  heats }}, 
-    Maximum Athletes Per Heat: {{ mde.event.max_per_heat }}<br>
-    Max Athletes Allowed:   {{ max_athletes }}<br>
-    Num Athletes Entered: {{ num_entries}}<br>
-    % Full: {{ num_entries * 100 / max_athletes }}%
+  <div class="d-flex flex-row justify-content-between">
+    <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
+      {{ mde.meet.name }}
+    </a>
+    {{ mde.meet.date.strftime("%B %d, %Y") }}
+  </div>
+  <p>Status: {{mde.status}}<br>
+  <h5>
+    <div class="d-flex flex-row ">
+      <div class="bg-info p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
+      <div class="bg-secondary p-3 text-center">Athletes Entered: {{ num_entries }}</div>
+      <div class="bg-info p-3 text-center">Spots Remaining: {{ max_athletes - num_entries }}</div>
+      <div class="bg-secondary p-3 text-center">{{ num_entries * 100 / max_athletes }}% Full</div>
+    </div>
+  </h5>
+  <p>
+    <div class="d-flex flex-row ">
+      <div class="bg-secondary p-3 text-center">Max # Heats: {{ heats }}</div>
+      <div class="bg-info p-3 text-center">Max Athletes Per Heat: {{ mde.event.max_per_heat }}</div>
+    </div>
   </p>
-
 {% endblock nav2_subtitle %}
 
 {% block tab_navs %}
@@ -52,48 +59,45 @@
 {% endblock tab_navs %} 
 
 {% block tab_content %}
-  {% call MACRO_MAKE_TAB_CONTENT("mde-entries-tab", true) %}
-{#     <div class="card">
-      <div class="card-body"> #}
-        <button class="btn btn-warning btn-large id="mde-assign-button">
-          Make Athlete Assignments
-        </button>
 
-        {% if mde.event.is_track() %}
-          <table id="mde_table" class="display" data-paging='false'
-            data-order='[[ 3, "asc" ]]' >
-        {% else %}
-          <table id="mde_table" class="display" data-paging='false'
-            data-order='[[ 3, "desc" ]]' >
-        {% endif %}
-            <thead>
-              <tr>
-                <th>Seed #<br>(pending)</th>
-                <th>Athlete name</th>
-                <th>School</th>
-                <th>Seed Mark</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for entry in mde.entries %}
-                <tr>
-                  <td>TBD</td>
-                  <td>
-                    <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
-                      {{ entry.athlete.fname }} {{ entry.athlete.lname }}
-                    </a>
-                  </td>
-                  <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
-                  {{ entry.athlete.school.name }}</a></td>
-                  <td data-order="{{entry.mark}}">
-                      {{ entry.mark_to_string() }}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-{#         </div>
-      </div> #}
+  {% call MACRO_MAKE_TAB_CONTENT("mde-entries-tab", true) %}
+    <button class="btn btn-warning btn-large id="mde-assign-button">
+      Make Athlete Assignments
+    </button>
+
+    {% if mde.event.is_track() %}
+      <table id="mde_table" class="display" data-paging='false'
+        data-order='[[ 3, "asc" ]]' >
+    {% else %}
+      <table id="mde_table" class="display" data-paging='false'
+        data-order='[[ 3, "desc" ]]' >
+    {% endif %}
+        <thead>
+          <tr>
+            <th>Seed #<br>(pending)</th>
+            <th>Athlete name</th>
+            <th>School</th>
+            <th>Seed Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in mde.entries %}
+            <tr>
+              <td>TBD</td>
+              <td>
+                <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
+                  {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+                </a>
+              </td>
+              <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
+              {{ entry.athlete.school.name }}</a></td>
+              <td data-order="{{entry.mark}}">
+                  {{ entry.mark_to_string() }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-assign-tab", false) %}
@@ -105,21 +109,23 @@
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-settings-tab", false) %}
-    Status: {{ mde.status }}<br>
-    Notes: {{ mde.mde_notes}}<br>
-    Max Number of Heats: {{ heats }}<br>
-    Overall Meet Setting: Max # Heats Allowed: {{mde.meet.max_heats_per_mde}}<br>
-    MDE Override: Maximum # of Heats Allowed: {{ mde.max_heats }}<br>
-    Maximum Athletes per Heat: {{ mde.event.max_per_heat }}<br><br>
+    <p><strong>Status:</strong> {{ mde.status }}</p>
+    <p><strong>Sequence number within meet</strong>: {{ mde.seq_num }}</p>
+    <p><strong>Qualifying mark (if any)</strong>: {{ mde.qualifying_mark }}
+    <p><strong>Notes:</strong> {{ mde.mde_notes}}</p>
+    <p>
+    <p><strong>Max Number of Heats:</strong> {{ heats }}</p>
+    <ul><li><strong>Max # Heats Allowed</strong> (overall meet setting): {{mde.meet.max_heats_per_mde}}</li>
+      <li><strong>(Override) Max # of Heats Allowed</strong> (event-level override):{{ mde.max_heats }}</li></ul>
 
-    Maximum Athletes Allowed: 
-    {% if mde.max_heats %}
-      {{ mde.event.max_per_heat * mde.max_heats }} 
-    {% else %}
-      {{ mde.event.max_per_heat * mde.meet.max_heats_per_mde }}
-    {% endif %}
-    <br>
-    Num Athletes Entered: {{ num_entries}}, 
+    <p><strong>Maximum Athletes per Heat:</strong> {{ mde.event.max_per_heat }}</p>
+
+    <p><strong>Maximum Athletes for Event:</strong> {{max_athletes}}</p>
+
+    <a href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}">
+      <button class="btn btn-primary">Edit Settings: {{mde.event.name}} for {{mde.division.name}}</button>
+    </a>
+
   {% endcall %}
 
 {% endblock tab_content %}
