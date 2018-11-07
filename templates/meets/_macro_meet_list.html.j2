@@ -26,39 +26,39 @@
         {% for meet in meets %}
           {% if meet_status=="All" or meet.status == meet_status %}
             <tr>
-              <td>
+              <td class="align-top">
                 <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
                   {{ meet['name'] }}
                 </a>
               </td>
-              <td data-order="{{ meet.date }}">
+              <td class="align-top" data-order="{{ meet.date }}">
                 {{ meet.date.strftime("%B %d, %Y") }}
               </td>
-              <td>
+              <td class="align-top">
                 {% if meet['host_school'] %}
                   <a href="{{url_for('show_school_detail', school_id=meet.host_school.id) }}">
                     {{ meet.host_school.name }}
                   </a>
                 {% endif %}
               </td>
-              <td>
+              <td class="align-top">
                 {{ meet.status }}  
               </td>
-              <td>
+              <td class="align-top">
                 {{ meet.get_athletes() | length }}
               </td>
               {% if school %}
-                <td>
+                <td class="align-top">
                   {{ meet.get_athletes(school_id=school.id) | length }}
                 </td>
               {% endif %}
-              <td>
+              <td class="align-top">
                 {{ meet.entries | length }}
               </td>
-              <td>
+              <td class="align-top">
                 % Full
               </td>
-              <td>
+              <td class="align-top">
                 {% set myschool_id=session.get('user_school_id') %}
                 {% if meet.host_school.id == myschool_id %}
                   <a href="{{ url_for('show_edit_meet_form', meet_id=meet.id) }}">

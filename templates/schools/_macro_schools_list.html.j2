@@ -16,13 +16,13 @@
     <tbody>
       {% for school in schools %}
         <tr>
-          <td>
+          <td class="align-top">
             <a href="{{ url_for('show_school_detail', school_id=school.id) }}">
               {{ school['name'] }}
             </a>
           </td>
-          <td>{{ school['code']}}</td>
-          <td>
+          <td class="align-top">{{ school['code']}}</td>
+          <td class="align-top">
             {% if school.meets_hosted %}
               <strong>
                 {{ school.meets_hosted | length }} Meets<br>
@@ -35,7 +35,7 @@
               {% endfor %}
             {% endif %}
           </td>
-          <td>
+          <td class="align-top">
             {% if school.meets_entered() %}
               <strong>
                 {{ school.meets_entered() | length }} Meets
@@ -48,12 +48,12 @@
               {% endfor %}
             {% endif %}
           </td>
-          <td>
+          <td class="align-top">
             {% if school['league'] %}
               {{ school.league }}
             {% endif %}
           </td>
-          <td>
+          <td class="align-top">
             {% if school['section'] %}
               {{ school.section }}
             {% endif %}

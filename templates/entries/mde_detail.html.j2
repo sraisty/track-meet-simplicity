@@ -1,18 +1,13 @@
 {% extends "__tabnav.html.j2" %}
 {# Detail info about a particular MDE within a meet, at /meets/<meet-id>/mde/<mde-id> #}
-
 {% from "__macros.html.j2" import MACRO_MAKE_TAB, MACRO_MAKE_TAB_CONTENT with context %}
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
 
+
 {% set num_entries = mde.entries | length %}
-
-{% if mde.max_heats %}
-  {% set heats = mde.max_heats %}
-{% else %}
-  {% set heats = mde.meet.max_heats_per_mde %}
-{% endif %}
-
-{% set max_athletes = mde.event.max_per_heat * heats %} 
+{% set heats = mde.get_max_heats() %}
+{% set max_athletes = mde.get_max_athletes() %}
+{% set max_athletes_per_heat = mde.get_max_athletes_per_heat() %}
 
 
 {% block myschool_indicator %}
@@ -24,7 +19,7 @@
 {% endblock secondary_nav_title %}
 
 {% block nav2_admin_url %}
-    href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}"
+  href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}"
 {% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
@@ -34,113 +29,196 @@
     </a>
     {{ mde.meet.date.strftime("%B %d, %Y") }}
   </div>
-  <p>Status: {{mde.status}}<br>
+  <p>Status: {{mde.status}}</p>
+
   <h5>
-    <div class="d-flex flex-row ">
-      <div class="bg-info p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
-      <div class="bg-secondary p-3 text-center">Athletes Entered: {{ num_entries }}</div>
-      {% if max_athletes > num_entries #}
-        <div class="bg-info p-3 text-center">
-          Spots Remaining: {{ max_athletes - num_entries }}
-        </div>
-        <div class="bg-secondary p-3 text-center">
-          {{ num_entries * 100 / max_athletes }}% Full
-        </div>
-      {% else %}
-        <div class="bg-warning p-3 text-center">
-          Event is Oversubscribed: {{ num_entries - max_athletes }} too many athletes
-        </div>
-      {% endif %}
-    </div>
+  <div class="d-flex flex-row ">
+    <div class="bg-info p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
+    <div class="bg-secondary p-3 text-center">Athletes Entered: {{ num_entries }}</div>
+    {% if max_athletes == num_entries %}
+      <div class="bg-warning p-3 text-center">
+        Event is FULL
+      </div>
+    {% elif max_athletes > num_entries %}
+      <div class="bg-info p-3 text-center">
+        Spots Remaining: {{ max_athletes - num_entries }}
+      </div>
+      <div class="bg-secondary p-3 text-center">
+        {{ (num_entries * 100 / max_athletes) | int }}% Full
+      </div>
+    {% else %}
+      <div class="bg-warning p-3 text-center">
+        Event is over-subscribed by {{ num_entries - max_athletes }} athletes
+      </div>
+    {% endif %}
+  </div>
   </h5>
+
   <p>
     <div class="d-flex flex-row ">
-      <div class="bg-secondary p-3 text-center">Max # Heats: {{ heats }}</div>
-      <div class="bg-info p-3 text-center">Max Athletes Per Heat: {{ mde.event.max_per_heat }}</div>
+      <div class="bg-secondary p-3 text-center">
+        Max # Heats: {{ heats }}
+      </div>
+      <div class="bg-info p-3 text-center">
+        Max Athletes Per Heat: {{ mde.event.max_per_heat }}
+      </div>
     </div>
   </p>
 {% endblock nav2_subtitle %}
 
+
 {% block tab_navs %}
-    {{ MACRO_MAKE_TAB("mde-entries-tab", true, "Entries") }}
-    {{ MACRO_MAKE_TAB("mde-assign-tab", false, "Assignments") }}
-    {{ MACRO_MAKE_TAB("mde-results-tab", false, "Results") }}
-    {{ MACRO_MAKE_TAB("mde-settings-tab", false, "Settings") }}
-{% endblock tab_navs %} 
+  {{ MACRO_MAKE_TAB("mde-entries-tab", true, "Entries") }}
+  {{ MACRO_MAKE_TAB("mde-assign-tab", false, "Assignments") }}
+  {{ MACRO_MAKE_TAB("mde-results-tab", false, "Results") }}
+  {{ MACRO_MAKE_TAB("mde-settings-tab", false, "Settings") }}
+{% endblock tab_navs %}
 
 {% block tab_content %}
-
   {% call MACRO_MAKE_TAB_CONTENT("mde-entries-tab", true) %}
-    <button class="btn btn-warning btn-large id="mde-assign-button">
-      Make Athlete Assignments
-    </button>
 
-    {% if mde.event.is_track() %}
-      <table id="mde_table" class="display" data-paging='false'
-        data-order='[[ 3, "asc" ]]' >
-    {% else %}
-      <table id="mde_table" class="display" data-paging='false'
-        data-order='[[ 3, "desc" ]]' >
+  <a href="{{url_for('do_mde_assign_athletes', meet_id=mde.meet.id, mde_id=mde.id) }}">
+    {% if mde.status == "Unassigned" %}
+      <button class="btn btn-warning btn-large id="mde-assign-button">
+        Make Athlete Assignments
+      </button>   
     {% endif %}
+  </a>
+    
+  {% if mde.event.is_track() %}
+    <table id="mde_table" class="display" data-paging='false'
+       data-order='[[ 3, "asc" ]]' >
+  {% else %}
+    <table id="mde_table" class="display" data-paging='false'
+       data-order='[[ 3, "desc" ]]' >
+  {% endif %}
+
+    <thead>
+      <tr>
+        <th>Seed #<br>(pending)</th>
+        <th>Athlete name</th>
+        <th>School</th>
+        <th>Seed Mark</th>
+        <th>Problem</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in mde.entries %}
+        <tr>
+          <td data-order="{{ entry.seed_num }}">
+            {% if entry.seed_num %}
+              {{ entry.seed_num }}
+            {% else %}
+              {% if mde.status == "Unassigned" %}
+                Not seeded yet
+              {% else %}
+                Not assigned
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
+              {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+            </a>
+          </td>
+          <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
+          {{ entry.athlete.school.name }}</a></td>
+          <td data-order="{{entry.mark}}">
+            {{ entry.mark_to_string() }}
+          </td>
+          <td>
+            {% if entry.problem %}
+            <i class="fas fa-exclamation-triangle danger"></i>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endcall %}
+
+
+  {% call MACRO_MAKE_TAB_CONTENT("mde-assign-tab", false) %}  
+
+    {% if mde.status == "Unassigned" %}
+        No assignments yet
+    {% else %}
+      <a href="{{url_for('do_mde_assign_athletes', meet_id=mde.meet.id, mde_id=mde.id) }}">
+        <button class="btn btn-secondary btn-large id="mde-assign-button">
+          Re-do Athlete Assignments
+        </button> 
+      </a>    
+      <p></p>
+      <table id="mde_assigned" class="display" data-paging='false' data-order='[[ 0, "asc" ]]' >
         <thead>
           <tr>
-            <th>Seed #<br>(pending)</th>
+            <th>Seed #</th>
+            <th>Heat #</th>
             <th>Athlete name</th>
             <th>School</th>
             <th>Seed Mark</th>
+            <th>Problem</th>
           </tr>
         </thead>
         <tbody>
           {% for entry in mde.entries %}
-            <tr>
-              <td>TBD</td>
-              <td>
-                <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
-                  {{ entry.athlete.fname }} {{ entry.athlete.lname }}
-                </a>
-              </td>
-              <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
-              {{ entry.athlete.school.name }}</a></td>
-              <td data-order="{{entry.mark}}">
+            {% if entry.seed_num %}
+              <tr>
+                <td data-order="{{ entry.seed_num }}">
+                  {% if entry.seed_num %}
+                    {{ entry.seed_num }}
+                  {% else %}
+                    Not assigned
+                  {% endif %}
+                </td>
+                <td>
+                  {{ entry.get_heat_number( max_athletes_per_heat )}}
+                </td>
+                <td>
+                  <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
+                    {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+                  </a>
+                </td>
+                <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
+                {{ entry.athlete.school.name }}</a></td>
+                <td data-order="{{entry.mark}}">
                   {{ entry.mark_to_string() }}
-              </td>
-            </tr>
+                </td>
+                <td>
+                  {% if entry.problem %}
+                  <i class="fas fa-exclamation-triangle danger"></i>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endif %}
           {% endfor %}
         </tbody>
       </table>
-  {% endcall %}
-
-  {% call MACRO_MAKE_TAB_CONTENT("mde-assign-tab", false) %}
-    No assignments yet
+    {% endif %}
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-results-tab", false) %}
-    No results yet
+      No results yet
   {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("mde-settings-tab", false) %}
     <p><strong>Status:</strong> {{ mde.status }}</p>
     <p><strong>Sequence number within meet</strong>: {{ mde.seq_num }}</p>
-    <p><strong>Qualifying mark (if any)</strong>: {{ mde.qualifying_mark }}
+    <p><strong>Qualifying mark (if any)</strong>: {{ mde.qualifying_mark }}</p>
     <p><strong>Notes:</strong> {{ mde.mde_notes}}</p>
-    <p>
+    <p></p>
     <p><strong>Max Number of Heats:</strong> {{ heats }}</p>
     <ul><li><strong>Max # Heats Allowed</strong> (overall meet setting): {{mde.meet.max_heats_per_mde}}</li>
-      <li><strong>(Override) Max # of Heats Allowed</strong> (event-level override):{{ mde.max_heats }}</li></ul>
-
+    <li><strong>(Override) Max # of Heats Allowed</strong> (event-level override):{{ mde.max_heats }}</li></ul>
     <p><strong>Maximum Athletes per Heat:</strong> {{ mde.event.max_per_heat }}</p>
-
     <p><strong>Maximum Athletes for Event:</strong> {{max_athletes}}</p>
-
     <a href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}">
       <button class="btn btn-primary">Edit Settings: {{mde.event.name}} for {{mde.division.name}}</button>
     </a>
-
   {% endcall %}
-
 {% endblock tab_content %}
-  
-  {% block my_javascripts %}
-    {{super()}}
-    <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
-  {% endblock my_javascripts %}
+    
+{% block my_javascripts %}
+  {{super()}}
+  <script type="text/javascript" src="/static/js/tms-datatable.js"></script>
+{% endblock my_javascripts %}

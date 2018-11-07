@@ -1,6 +1,6 @@
 {% macro MACRO_PRIMARY_NAV(selected_menuitem) %}
   {# TODO - handle selecting the active tab in the navbar #}
-  <nav class="navbar navbar-expand-md navbar-dark sticky-top bg-dark mb-0">
+  <nav class="navbar navbar-expand-md navbar-dark sticky-top bg-primary mb-0">
     <a class="navbar-brand  ml-2" href="{{ url_for('index') }}">TrackMeetSimplicity</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -8,26 +8,30 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
+          <a class="nav-link" id="home_navbar" 
+              href="{{ url_for('show_school_detail',
+                       school_id=session.user_school_id) }}">
             {{session.user_school_name}} Home
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('show_all_meets') }}">Meets</a>
+          <a class="nav-link" id="meets_navbar" href="{{ url_for('show_all_meets') }}">Meets</a>
         </li>
         {# <li class="nav-item dropdown"> #}
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('show_all_schools') }}">Schools</a></li>
+          <a class="nav-link" id="schools_navbar" 
+             href="{{ url_for('show_all_schools') }}">Schools</a></li>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
+          <a class="nav-link" id="athletes_navbar" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
         </li>
 {#         <li class="nav-item">
           <a class="nav-link disabled" href="#">Divisions</a></li>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" href="#">Events</a></li>
-        </li> #}
+        </li> 
+#}
 
       </ul>
       <!-- The right-most profile menu -->

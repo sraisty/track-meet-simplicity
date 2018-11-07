@@ -10,6 +10,7 @@ from sqlalchemy import Enum
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy_utils import generic_repr
 from datetime import datetime, timedelta
+from random import shuffle
 
 
 from util import warning, error, info
@@ -485,6 +486,7 @@ class Entry(db.Model):
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
     heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
+    seed_num = db.Column(db.Integer, nullable=True)
 
     # An athlete's "mark" for a parituclar event is either his/her
     # time or distance thrown/jumped or height jumped. We store in seconds or
@@ -515,13 +517,11 @@ class Entry(db.Model):
     division = db.relationship("Division",
                                secondary="athletes",
                                uselist=False,
-                               # back_populates="entries"
                                )
 
     event = db.relationship("EventDefinition",
                             secondary="meet_division_events",
                             uselist=False,
-                            # back_populates="entries"
                             )
 
     school = db.relationship("School",
@@ -548,6 +548,7 @@ class Entry(db.Model):
                 .format(
                     self.id, self.athlete.full_name(), self.athlete.school.code,
                     self.event.code, self.division.code, self.meet.name))
+
 
     # SETTING MARKS
     def set_mark(self, mark_string=None, mark_measure_type=None):
@@ -699,6 +700,10 @@ class Entry(db.Model):
             feet_str = ""
         return feet_str + "{:.2f}".format(inches) + '"'
 
+    def get_heat_number(self, max_athletes_per_heat):
+        if self.seed_num:
+            return 1 + (self.seed_num - 1) // max_athletes_per_heat
+
 
 # #######################  HEAT CLASS #####################
 
@@ -741,7 +746,7 @@ class MeetDivisionEvent(db.Model):
     # notes about opening height, etc.
     mde_notes = db.Column(db.String(256), nullable=True)
     # The MDE can override  the Meet's overall max_heats
-    max_heats = db.Column(db.Integer, nullable=True)  
+    max_heats = db.Column(db.Integer, nullable=True)
     # @aggregated('athletes', db.Column(db.Integer))
     # def athletes_count(self):
     #     return db.func.count('1')
@@ -750,14 +755,16 @@ class MeetDivisionEvent(db.Model):
             "Meet", uselist=False, back_populates="mdes")
     division = db.relationship(
             "Division", uselist=False,
-            # back_populates="mdes"
             )
     event = db.relationship(
             "EventDefinition", uselist=False,
-            # back_populates="mdes"
             )
     entries = db.relationship(
-            "Entry", uselist=True, back_populates="mde")
+            # in ascending order, so in proper order for track event seeding
+            # need to reverse it for field events
+            "Entry", uselist=True, order_by="Entry.mark",
+            back_populates="mde")
+
 
     athletes = db.relationship(
             "Athlete", secondary="entries", uselist=True,
@@ -807,11 +814,64 @@ class MeetDivisionEvent(db.Model):
     #         schools.add(athlete)
     #     return list(schools)
 
-    def form_heats(self):
-        pass
+    def get_max_heats(self):
+        if self.max_heats:
+            # The MDE is using its own setting for max heats that is 
+            # overriding the meet-wide setting
+            return self.max_heats
+        else:
+            # this isn't set at the MDE level, so use the
+            # meet-wide setting
+            return self.meet.max_heats_per_mde
 
-    def assign_athletes(self):
-        pass
+    def get_max_athletes(self):
+        return self.get_max_heats() * self.event.max_per_heat
+
+    def get_max_athletes_per_heat(self):
+        return self.event.max_per_heat
+
+    def get_num_assigned_heats(self):
+        if len(self.entries) < self.get_max_athletes():
+            return 1 + (len(self.entries)-1) // self.get_max_athletes_per_heat()
+
+    def assign_seed_numbers(self):
+
+        # make a copy because sqlalchemy doesn't let me reorder it
+        entries = self.entries[:]
+        # put the entire entry list in random order so that for ties or no-mark 
+        # situations, that we don't pull in all kids from one school
+
+        shuffle(entries)
+
+        # now sort according to mark order. If marks are tied (as will be the case
+        # if no mark was submitted with the entry, it will still be in the random 
+        # order from previous step.
+        if self.event.is_track():
+            # track events. Best mark is the lowest num seconds.
+            entries.sort(key=lambda ent: ent.mark, reverse=False)
+        else:
+            # field events. Best mark is the most inches/meters.
+            entries.sort(key=lambda ent: ent.mark, reverse=True)
+
+        # self.entries should now be in sorted order for this event
+        # type, with ties randomly ordered. So now, assign seed numbers
+        seed_num = 1
+        max_athletes = self.get_max_athletes()
+
+        for entry in entries:
+            if seed_num <= max_athletes:
+                entry.seed_num = seed_num
+                seed_num += 1
+            else:
+                self.seed_num = None
+                entry.problem = (
+                    "Athlete not assigned to mde#{}: {} - {}".format(
+                        self.id, self.event.code,
+                        self.division.code))
+        self.status = "Assigned"
+        db.session.commit()
+
+
 
 
 # #######################  SCHOOL CLASS #####################

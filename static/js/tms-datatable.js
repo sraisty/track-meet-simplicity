@@ -3,16 +3,15 @@
 $(document).ready(function() {
 
     /// Tables listing MDE entrants
+    $('#mde_assigned').DataTable({
+        'ordering': true
+    });
+
     $('#mde_table').DataTable({
         'ordering': true
     });
 
     //// Tables that list Athletes 
-
-
-    // // $('#all_athlete_table').DataTable({
-    // //     'ordering': true
-    // // });
 
     $('#athlete_list').DataTable({
         'ordering': true
@@ -33,9 +32,6 @@ $(document).ready(function() {
         'ordering': true
     });
 
-    // $('#meet_table').DataTable({
-    //     'ordering': true
-    // });
 
     $('#hosted-meets-list').DataTable({
         'ordering': true

@@ -341,6 +341,10 @@ def do_edit_meet_form(meet_id):
     #       "ev_code_list", meet.ev_code_list)
     # meet.div_code_list = request.form.get(
     #         "div_code_list", meet.div_code_list)
+    
+    # TODO - warn if they reduce number of heats or athletes per heat
+    # after assignments have been made, that athletes will be kicked out.
+    # Maybe a confirmation message
     db.session.commit()
 
     return (redirect(url_for('show_meet_detail', meet_id=meet.id)))
@@ -387,19 +391,6 @@ def do_upload_school_entries(meet_id):
     return redirect(url_for('show_meet_detail', meet_id=meet_id))
 
 
-@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit-entries')
-@app.route('/meets/<int:meet_id>/edit-entries')
-def edit_meet_entries(meet_id, school_id=None):
-    if school_id is None:
-        school_id = session['school.id']
-
-    meet = Meet.query.get(meet_id)
-    # TODO
-    return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
-            meet.id)
-    # return render_template('new_meet_detail.html.j2', meet=meet)
-
-
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
 def show_mde_detail(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
@@ -433,6 +424,28 @@ def do_edit_mde_detail(meet_id, mde_id):
     flash("Saved new settings for mde.event.name for mde.division.name",
           "success")
     return redirect(url_for('show_mde_detail', meet_id=meet_id, mde_id=mde.id))
+
+
+# #### ASSIGNING ATHLETES, DETECTING PROBLEMS & ALLOWING EDITS OF ENTRIES
+@app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/do-assign')
+def do_mde_assign_athletes(meet_id, mde_id):
+    mde = MeetDivisionEvent.query.get(mde_id)
+    mde.assign_seed_numbers()
+    return redirect(
+        url_for('show_mde_detail', meet_id=mde.meet.id, mde_id=mde.id))
+
+
+@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit-entries')
+@app.route('/meets/<int:meet_id>/edit-entries')
+def edit_meet_entries(meet_id, school_id=None):
+    if school_id is None:
+        school_id = session['school.id']
+
+    meet = Meet.query.get(meet_id)
+    # TODO
+    return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
+            meet.id)
+    # return render_template('new_meet_detail.html.j2', meet=meet)
 
 
 # ##########  DISPLAY AND EDIT ATHLETES  ###########
