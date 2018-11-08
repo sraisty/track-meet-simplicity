@@ -624,24 +624,24 @@ def allowed_file(filename):
 
 
 if __name__ == '__main__':
-    # We have to set app.debug=True here, since it has to be True at the
-    # point that we invoke the DebugToolbarExtension
-    app.debug = True
-    # make sure templates, etc. are not cached in debug mode
-    app.jinja_env.auto_reload = app.debug
-
-    connect_to_db(app)
-
-    # Do I need this?
-    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-
-    # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    from sys import argv
+    if argv[-1] == "--debug":
+        app.debug = True
+        # We have to set app.debug=True here, since it has to be True at the
+        # point that we invoke the DebugToolbarExtension
+        # make sure templates, etc. are not cached in debug mode
+        app.jinja_env.auto_reload = True
+        connect_to_db(app, db_uri="tms-dev", debug=True)
+        # Use the DebugToolbar
+        app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+        DebugToolbarExtension(app)
+    else:
+        app.debug = False
+        app.jinja_env.auto_reload = True
+        connect_to_db(app, db_uri="tms-dev", debug=False)
+        # connect_to_db(app, db_uri="tms-prod", debug=False)
 
     from doctest import testmod
     if testmod().failed == 0:
         # Can't start Flask server until our doctests all pass
-        # app.run(port=5000, host='0.0.0.0')
-        # app.run(port=5000, host='0.0.0.0' debug=True)
-        # Is the following better?
         app.run(port=5000, host='0.0.0.0', debug=app.debug)
