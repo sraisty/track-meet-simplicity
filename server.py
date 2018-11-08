@@ -55,7 +55,8 @@ app.jinja_env.autoescape = select_autoescape(
 
 @app.route('/test')
 def test_render():
-    return render_template('/test/test.html.j2')
+    entry = Entry.query.get(7000)
+    return render_template('/test/test.html.j2', entry=entry)
 
 
 @app.route('/')
@@ -473,7 +474,7 @@ def show_entries(school_id=None, meet_id=None):
     entries = q.all()
 
     return render_template(
-        "/entries/show_meet_entries.html.j2", entries=entries, school=school)
+        "/entries/show_meet_entries.html.j2", entries=entries, meet=meet, school=school)
 
 
 @app.route('/meets/<int:meet_id>/school/<int:school_id>/entries')
@@ -494,26 +495,52 @@ def show_meet_entries(meet_id, school_id=None, problems=False):
 @app.route('/entries/problems')
 @app.route('/school/<int:school_id>/entries/problems')
 def show_school_entry_problems(school_id):
+    flash("To be implemented")
+    # TODO
     if school_id is None:
         school_id = session['school.id']
     school = School.query.get(school_id)
     q = Entry.query.filter_by(school=school).filter(Entry.problem is not None)
     problem_entries = q.all()
-    #TODO
+    # TODO
     return render_template("#", meet, school)
 
 
+@app.route('/entries/<int:entry_id>/edit')
 @app.route('/meets/<int:meet_id>/entries/<int:entry_id>/edit')
 def show_edit_entry_form(entry_id, meet_id=None):
     entry = Entry.query.get(entry_id)
     return render_template("/entries/show_edit_entry_form.html.j2", entry)
 
 
-@app.route('/meets/<int:meet_id>/entries/<int:entry_id>/do-edit')
-def do_edit_entry_form(meet_id, entry_id):
+@app.route('/entries/<int:entry_id>/do-edit', methods=['POST'])
+@app.route('/meets/<int:meet_id>/entries/<int:entry_id>/do-edit', methods=['POST'])
+def do_edit_entry(meet_id, entry_id):
+    entry = Entry.query.get(entry_id)
+    mark_string = request.form.get('mark')
+    mark_type = request.form.get('mark_type')
+    # TODO
+    flash("To be Implemented: Update entry.")
     return redirect(url_for(
-            'show_meet_entries', meet_id=meet_id, school_id=school_id))
+            'show_meet_entries', meet_id=meet_id, 
+            school_id=session.get('user_school_id')))
 
+
+@app.route('/entries/<int:entry_id>/delete', methods=['POST'])
+def delete_entry(entry_id):
+    flash("To be implemented.")
+    return redirect(url_for(
+            'show_meet_entries', meet_id=entry.meet.id, 
+            school_id=session.get('user_school_id')))
+
+
+@app.route('/entries/new', methods=['POST'])
+@app.route('/meets/<int:meet_id>/entries/new', methods=['POST'])
+def new_entry(meet_id=None):
+    flash("To be implemented.")
+    return redirect(url_for(
+            'show_meet_entries', meet_id=entry.meet.id, 
+            school_id=session.get('user_school_id')))
 
 # ##########  DISPLAY AND EDIT ATHLETES  ###########
 @app.route('/athletes')

@@ -718,7 +718,8 @@ class Entry(db.Model):
             feet_str = ""
         return feet_str + "{:.2f}".format(inches) + '"'
 
-    def get_heat_number(self, max_athletes_per_heat):
+    def get_heat_number(self):
+        max_athletes_per_heat = self.mde.get_max_athletes_per_heat()
         if self.seed_num:
             return 1 + (self.seed_num - 1) // max_athletes_per_heat
 

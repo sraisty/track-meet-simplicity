@@ -3,13 +3,68 @@
 
 {% block content %}
 
+<h1>Entries: 
+  {% if meet %}
+    {{meet.name}}
+  {% endif %}
+</h1>
+  <div class="row px-">
+    <div class="col">
 
-  <div class="row">
-    <h1 class="col">Entries</h1>
-
-  {% for entry in entries %}
-    #{{ entry.id}}: {{ entry.athlete.fname }} {{ entry.athlete.lname }}
-  {% endfor %}  
+      <table id ="meet_entry_table" class="display" data-order='[[3, "asc" ]]' data-page-length='100'>
+        <thead>
+          <tr>
+            <th>Contest#</th>
+            <th>Athlete</th>
+            <th>School</th>
+            <th>Division</th>
+            <th>Event</th>
+            <th class="text-center">Mark</th>
+            <th class="text-center">Seed Num</th>
+            <th class="text-center">Heat</th>
+            <th class="text-center">Problem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td>
+                {{ entry.mde.id }}
+              </td>
+              <td data-order="{{ entry.athlete.lname}}">
+                <a href="{{ url_for('show_athlete_detail', athlete_id=entry.athlete.id) }}">
+                  {{ entry.athlete.full_name() }}
+                </a>
+              </td>
+              <td>
+                <a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
+                {{ entry.athlete.school.name }}</a>
+              </td>
+              <td>
+                {{ entry.mde.division.name }}
+              </td>
+              <td>
+                {{ entry.mde.event.name}}
+              </td>
+              <td class="text-center" data-order="{{entry.mark}}">
+                {{ entry.mark_to_string() }}
+              </td>
+              <td class="text-center">
+                {{ entry.seed_num }}
+              </td>
+              <td class="text-center">
+                {{ entry.get_heat_number() }}
+              </td>
+              <td class="text-center">
+                {% if entry.problem %}
+                  <i class="fas fa-exclamation-triangle danger"></i>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}  
+        </tbody>     
+      </table>
+    </div>
   </div>
 
 {% endblock content %}

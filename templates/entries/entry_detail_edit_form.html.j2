@@ -1,0 +1,126 @@
+{% extends "__secondary_nav.html.j2" %}
+{% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
+
+
+{% block myschool_indicator %}
+  {{SHOW_MY_SCHOOL_INDICATOR(entry.athlete.school)}}
+{% endblock %}
+
+{% block secondary_nav_title %}
+    <div>Edit Athlete Entry into Meet
+    </div>
+{% endblock secondary_nav_title %}
+
+
+{% block nav2_subtitle %}
+  {{ entry.meet.name }}&nbsp;&nbsp;
+  <i class="fas fa-angle-double-right"></i>
+  &nbsp;&nbsp;{{ entry.athlete.full_name() }}&nbsp;&nbsp;
+  <i class="fas fa-angle-double-right"></i>
+    &nbsp;&nbsp;{{ entry.event.name }}
+{% endblock nav2_subtitle %}
+
+
+{% block content %}
+{#   <div class="row">
+    <div class="mb-3 col">
+      <button class="btn-warning btn btn-tms">
+        <i class="fas fa-trash"></i>&nbsp;&nbsp;
+        Delete Entry
+      </button>
+    </div>
+  </div> #}
+  <div class="row">
+    <div class="col-md-6">
+      <ul>
+        <li>
+          <strong>Entry id#: </strong>
+          {{ entry.id}}
+        </li>
+        <li>
+          <strong>Athlete name: </strong>
+          {{ entry.athlete.full_name() }}
+        </li>
+        <li>
+          <strong>Athlete's school: </strong>
+          {{ entry.athlete.school.name }}
+        </li>
+        <li>
+          <strong>Athlete's division: </strong>
+          {{ entry.athlete.division.name }}
+        </li>
+        <li>
+          <strong>Meet name: </strong>
+          {{ entry.meet.name }}
+        </li>
+        <li>
+          <strong>Event name: </strong>
+          {{ entry.event.name }}
+        </li>
+        <li>
+          <strong>Best mark: </strong>
+        </li>
+      </ul>
+
+      <form action="{{ url_for('do_edit_entry', meet_id=entry.meet.id, entry_id=entry.id) }}" method="POST">
+        <div class="form-group col">
+          {% if entry.event.is_track() %}
+            <label for="mark">Enter best time</label>
+            <input type="text" class="form-control" name="mark" placeholder="Enter athlete's best time for this event" 
+            {% if entry.mark %} value="{{ entry.mark_to_string() }}"{% endif %}  />
+            <input type="hidden" class="form-control" name="mark_type" placeholder="seconds" disabled 
+            {% if entry.mark_type %} value="{{ entry.mark_type }}"{% endif %} />
+          {% else %}
+            <label for="mark">Enter best distance or height:</label>
+            <input type="text" class="form-control" name="mark" placeholder="Enter athlete's best distance or height for this event" 
+            {% if entry.mark %} value="{{ entry.mark_to_string() }}"{% endif %}  />
+            <input type="hidden" class="form-control" name="mark_type" placeholder="seconds" disabled 
+            {% if entry.mark_type %} value="{{ entry.mark_type }}"{% endif %} />
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-edit"></i>&nbsp;&nbsp;
+          Edit Entry
+        </button>
+
+        <a href="#">
+        {# {{ url_for('do_delete_entry', entry_id=entry.id) }}" #}
+          <button class="btn btn-warning">
+            <i class="fas fa-trash"></i>&nbsp;&nbsp;
+            Delete Entry
+          </button>
+        </a>
+        <a href="#">
+          {# "{{ url_for('show_new_entry_form') }}" #}
+          <button class="btn btn-success">
+            <i class="fas fa-plus"></i>&nbsp;&nbsp;Create New Entry
+          </button>
+        </a>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% macro MACRO_FORM_DROPDOWN(existing_item, prompt, html_id, choice_list)%}
+  <div class="form-group">
+    <label for="{{html_id}}">{{ prompt }}</label>
+    <select class="form-control" name="{{html_id}}" id="{{html_id}}">
+      {# <option value="" disabled selected="selected">
+            Click to select the {{id}}
+         </option> #}
+      {% for item in choice_list %}
+        {% if existing_item.id == item.id %}
+          <option value="{{ item.id }}" selected="selected">
+            {{ item.name }}
+          </option>
+        {% else %}
+          <option value="{{ item.id }}">
+            {{ item.name }}
+          </option> 
+        {% endif %}             
+      {% endfor %}
+    </select>
+  </div>
+{% endmacro %}
