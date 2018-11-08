@@ -44,7 +44,7 @@
 {% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
   <div class="card">
     <div class="card-header" id="{{ event.name }}">
-      <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls="collapse{{event.code}}">
+      <button class="btn btn-link tms-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls="collapse{{event.code}}">
         <span class="mr-auto">{{ event.name }} :&nbsp;</span>
         <span class-"badge badge-secondary">
           {{ meet.get_event_athlete_count_across_divs(event) }} athletes
@@ -55,14 +55,54 @@
       <div class="card-body">
         <ul class="list-group">
           {% for mde in meet.get_event_mdes(event) %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
-                {{ mde.division.name }}
-              </a>
-              <span class="badge badge-secondary">
-                <strong>{{ mde.entries|length }} entries</strong>
-              </span>
-            </li>
+            {% set num_entries = mde.entries|length %}
+
+            {% if num_entries > mde.get_max_athletes() %}
+              {% set oversubscribed = true %}
+            {% else %}
+              {% set oversubscribed = false %}
+            {% endif %}
+
+            <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
+              {% if mde.status == "Assigned" %}
+                {% if oversubscribed %}
+                  <li class="d-flex list-group-item bg-warning justify-content-between align-items-center">
+                {% else %}  
+                  <li class="d-flex list-group-item bg-secondary justify-content-between align-items-center">
+                {% endif %}
+              {% else %}
+                <li class="d-flex list-group-item justify-content-between align-items-center">
+              {% endif %}
+                  <div class="flex-fill tms-link d-flex">
+                    {{ mde.division.name }}
+                  </div>
+                  <div class="d-flex flex-fill p-1">
+                    {% if oversubscribed %}
+                      <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    {% elif mde.status == "Unassigned" %}
+                      <i class="fas fa-hourglass-half fa-2x"></i>
+                    {% elif mde.status == "Assigned" %}
+                      <i class="fas fa-check-circle fa-2x"></i>
+                    {% endif %}
+                  </div>
+                  <div class="d-flex flex-fill p-1 flex-column">
+                    <span class="d-flex p-1">
+                      {{ num_entries}} entries for {{mde.get_max_athletes() }} slots
+                    </span>
+                    {% if mde.status == "Assigned" %}
+                      <span class="d-flex p-1">
+                        Assigned: {{ mde.get_num_assignments() }}
+                      </span>
+                      {% if oversubscribed %}
+                        <span class="d-flex p-1">
+                          Unassigned: {{ num_entries - mde.get_num_assignments() }}
+                        </span>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+
+              </li>
+            </a>
           {% endfor %}
         </ul>
       </div>

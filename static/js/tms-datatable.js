@@ -11,6 +11,9 @@ $(document).ready(function() {
         'ordering': true
     });
 
+    $('#meet_entry_table').DataTable({
+        'ordering': true
+    });
 
     $('#athlete_entry_table').DataTable({
         'ordering': true

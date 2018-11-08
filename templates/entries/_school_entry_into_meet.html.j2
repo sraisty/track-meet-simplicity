@@ -6,7 +6,9 @@
 {% endblock %}
 
 {% block secondary_nav_title %}
-  <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">{{meet.name}}</a>
+  <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}" class="tms-link">
+    {{meet.name}}
+  </a>
 {% endblock secondary_nav_title %}
 
 
@@ -22,7 +24,7 @@
   <form action="{{ url_for('do_upload_school_entries', meet_id=meet.id) }}" enctype="multipart/form-data" method="POST">
     <div class="form-group">
       <label for="state">Upload athlete entry file (HyTek semicolon delimited format):</label>
-      <input type="file" class="form-control" name="entry_file" placeholder="Upload file"  />
+      <input type="file" class="form-control tms-file-upload" name="entry_file" placeholder="Upload file"  />
     </div>
     <button type="submit" class="btn btn-primary">
       Upload

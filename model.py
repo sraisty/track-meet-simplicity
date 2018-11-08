@@ -268,6 +268,10 @@ class Meet(db.Model):
         # TODO if user changes order of meets and divisions
         pass
 
+    def assign_all_mdes(self):
+        for mde in self.mdes:
+            mde.assign_seed_numbers()
+
 
 # #######################  ATHLETE CLASS #####################
 
@@ -847,12 +851,11 @@ class MeetDivisionEvent(db.Model):
             return 1 + (len(self.entries)-1) // self.get_max_athletes_per_heat()
 
     def assign_seed_numbers(self):
-
         # make a copy because sqlalchemy doesn't let me reorder it
         entries = self.entries[:]
+
         # put the entire entry list in random order so that for ties or no-mark 
         # situations, that we don't pull in all kids from one school
-
         shuffle(entries)
 
         # now sort according to mark order. If marks are tied (as will be the case
@@ -884,6 +887,12 @@ class MeetDivisionEvent(db.Model):
         db.session.commit()
 
 
+    def get_num_assignments(self):
+        if self.status == "Unassigned":
+            return 0
+        if self.get_max_athletes() < len(self.entries):
+            return self.get_max_athletes()
+        return len(self.entries)
 
 
 # #######################  SCHOOL CLASS #####################

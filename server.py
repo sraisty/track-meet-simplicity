@@ -440,6 +440,8 @@ def do_mde_assign_athletes(meet_id, mde_id):
 @app.route('/meets/<int:meet_id>/do-assign')
 def do_meet_assignment_all_mdes(meet_id):
     meet = Meet.query.get(meet_id)
+    meet.assign_all_mdes()
+    flash("Assigned athletes to all contests.")
     return redirect(url_for('show_meet_detail', meet_id=meet.id))
 
 

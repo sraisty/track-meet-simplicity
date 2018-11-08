@@ -17,7 +17,7 @@ MIN_ATHLETES_PER_HEAT = 2
 EVENT_TYPES = ("sprint", "distance", "relay",
                "vertjump", "horzjump", "throw", "hurdle")
 
-MEET_STATUS = ("Unpublished", "Accepting Entries", "Awaiting Assignment",
+MEET_STATUS = ("Unpublished", "Accepting Entries", "Assignments Pending",
                "Assignments Done", "Meet In Progress", "Completed")
 
 MARK_TYPES = ("seconds", "inches", "meters")
