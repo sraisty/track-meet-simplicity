@@ -1,22 +1,17 @@
+{# show meet entries #}
 {% extends "__base.html.j2" %}
-{% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
 
 {% block content %}
 
 
   <div class="row">
-    <h1 class="col">Meets</h1>
+    <h1 class="col">Entries</h1>
+
+  {% for entry in entries %}
+    #{{ entry.id}}: {{ entry.athlete.fname }} {{ entry.athlete.lname }}
+  {% endfor %}  
   </div>
 
-  {{ MEET_LIST(meets, none, "All", "all-meets-list", true) }}
-    <div class="col">
-      <a href="{{url_for('show_new_meet_form')}}">
-        <button class="btn-warning btn">
-         <i class="fas fa-plus-circle"></i>
-         Create New Meet
-        </button>
-      </a>
-    </div>
 {% endblock content %}
 
 

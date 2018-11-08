@@ -1,30 +1,52 @@
 {% macro MACRO_PRIMARY_NAV(selected_menuitem) %}
   {# TODO - handle selecting the active tab in the navbar #}
   <nav class="navbar navbar-expand-md navbar-dark sticky-top bg-primary mb-0">
-    <a class="navbar-brand  ml-2" href="{{ url_for('index') }}">TrackMeetSimplicity</a>
+    <a class="navbar-brand  ml-2" href="{{ url_for('show_school_detail',
+                       school_id=session.user_school_id) }}">TrackMeetSimplicity</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
+
         <li class="nav-item">
           <a class="nav-link" id="home_navbar" 
-              href="{{ url_for('show_school_detail',
-                       school_id=session.user_school_id) }}">
-            {{session.user_school_name}} Home
+             href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
+            Home
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" id="meets_navbar" href="{{ url_for('show_all_meets') }}">Meets</a>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarMeetMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Meets
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarMeetMenuLink">
+            <a class="dropdown-item" href="{{ url_for('show_all_meets') }}">Browse</a>
+            <a class="dropdown-item" href="{{ url_for('show_new_meet_form') }}">Create New Meet</a>
+          </div>
+        </li>
+
         {# <li class="nav-item dropdown"> #}
         <li class="nav-item">
           <a class="nav-link" id="schools_navbar" 
              href="{{ url_for('show_all_schools') }}">Schools</a></li>
         </li>
         <li class="nav-item">
-          <a class="nav-link" id="athletes_navbar" href="{{ url_for('show_all_athletes') }}">Athletes</a></li>
+          <a class="nav-link" id="athletes_navbar" href="{{ url_for('show_all_athletes') }}">
+            Athletes
+          </a>
         </li>
+
+{#         <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarEntriesLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Entries
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarEntriesLink">
+            <a class="dropdown-item" href="{{ url_for('show_entries') }}">Edit Meet Entries</a>
+            <a class="dropdown-item" href="{{ url_for('show_school_entry_problems', school_id=session.get('user_school_id')) }}">Review Problems</a>
+          </div>
+        </li> #}
+
 {#         <li class="nav-item">
           <a class="nav-link disabled" href="#">Divisions</a></li>
         </li>

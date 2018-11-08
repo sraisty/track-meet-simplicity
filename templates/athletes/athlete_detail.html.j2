@@ -14,9 +14,6 @@
   {{ athlete.fname }} {{ athlete.lname }}
 {% endblock secondary_nav_title %}
 
-{% block athlete_admin_url %}
-  href="{{ url_for('')}}athlete.id }}/admin"
-{% endblock athlete_admin_url %}>
 
 {% block nav2_subtitle %}
   <div class="d-flex justify-content-md-between flex-wrap">
@@ -24,7 +21,7 @@
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
       School:
-      <a href="{{url_for('show_school_detail', school_id= athlete.school.id) }}">
+      <a href="{{url_for('show_school_detail', school_id=athlete.school.id) }}">
         {{ athlete.school.name }}
       </a>
     </div>
@@ -34,6 +31,7 @@
 
 {% block tab_navs %}
   {{ MACRO_MAKE_TAB("athlete-entries-tab", true, "Entries") }}
+  {{ MACRO_MAKE_TAB("athlete-assignments-tab", false, "Assignments") }}
   {{ MACRO_MAKE_TAB("athlete-meets-tab", false, "Meets") }}
   {{ MACRO_MAKE_TAB("athlete-profile-tab", false, "Athlete Profile") }}
 {% endblock tab_navs %}
@@ -42,37 +40,100 @@
 {% block tab_content %}   
  
   {% call MACRO_MAKE_TAB_CONTENT("athlete-entries-tab", true) %}
-    {% if athlete.entries %} 
-      <ul>
-        {% for entry in athlete.entries %}
-          <li>
-            <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+    {% if athlete.entries %}
+      <table id="athlete_entry_table" class="display" data-order='[[ 0, "asc" ]]' data-paging='false'>
+        <thead>
+          <tr>
+            <th>Meet</th>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Seed Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in athlete.entries %}   
+            <tr>
+              <td>
+                <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+                  {{ entry.mde.meet.name }}
+                </a>
+              </td>
+              <td class="align-top" data-order="{{ entry.mde.meet.date }}">
+                {{ entry.mde.meet.date.strftime("%B %d, %Y") }}
+              </td>
+              <td>
+                <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
               mde_id=entry.mde.id) }}">
-              {{ entry.event.name }}
-            </a>
-            ===
-            <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
-              mde_id=entry.mde.id) }}">
-              {{ entry.division.name }}
-            </a>
-            ==
-            <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
-              {{ entry.mde.meet.name }}
-            </a>
-            == Seed Mark: {{ entry.mark_to_string() }}
-          </li>
-        {% endfor %}
-      </ul>
+                  {{ entry.event.name }}
+                </a>
+              </td>
+
+              <td>
+                {{ entry.mark_to_string() }}
+              </td>
+            </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
     {% else %}
       This athlete has no entries
     {% endif %}
   {% endcall %}
 
+  {% call MACRO_MAKE_TAB_CONTENT("athlete-assignments-tab", false) %}
+    {% if athlete.entries %}
+      <h4>Assignments</h4>
+      <table id="athlete_assignments_table" class="display" data-order='[[ 0, "asc" ]]' data-paging='false'>
+        <thead>
+          <tr>
+            <th>Meet</th>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Seed Mark</th>
+            <th>Seed Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in athlete.entries %}   
+            <tr>
+              <td>
+                <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+                  {{ entry.mde.meet.name }}
+                </a>
+              </td>
+              <td class="align-top" data-order="{{ entry.mde.meet.date }}">
+                {{ entry.mde.meet.date.strftime("%B %d, %Y") }}
+              </td>
+              <td>
+                <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+              mde_id=entry.mde.id) }}">
+                  {{ entry.event.name }}
+                </a>
+              </td>
+
+              <td>
+                {{ entry.mark_to_string() }}
+              </td>
+              <td>
+                {{ entry.seed_num }}
+              </td>
+            </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+
+    {% else %}
+      This athlete has no assignments, out of {{ athlete.entries | length }} entries.
+    {% endif %}
+  {% endcall %}
 
   {% call MACRO_MAKE_TAB_CONTENT("athlete-meets-tab", false) %}
     {% set athlete_meets=athlete.get_meets() %}
     {% if athlete_meets %}
-      {{ MEET_LIST(athlete_meets, false, "All", "athlete-meets-table") }}
+      {{ MEET_LIST(athlete_meets, false, "All", "athlete-meets-table", false) }}
     {% else %}
       This athlete is not in any meets.
     {% endif %}
@@ -91,9 +152,8 @@
           {{ athlete.school.name }}
         </a>
       </p>
-      <p>
-        <strong>Division:</strong> {{ athlete.division.name }}, 
-        <strong>Division Code:</strong> {{ athlete.division.code }}</p>
+      <p><strong>Division:</strong> {{ athlete.division.name }}<p> 
+      <p><strong>Division Code:</strong> {{ athlete.division.code }}</p>
       <p><strong>Phone:</strong> {{ athlete.phone }}</p>
       <p><strong>Entry Problems:</strong> {{ athlete.problem }}</p>
       <p><strong>Coach Notes:</strong> {{ athlete.coach_notes }}</p>

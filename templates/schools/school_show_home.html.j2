@@ -1,7 +1,6 @@
 {% extends "__tabnav.html.j2" %}
 {% from "__macros.html.j2" import MACRO_MAKE_TAB with context %}
 {% from "__macros.html.j2" import MACRO_MAKE_TAB_CONTENT with context %}
-{% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
 {% from "/athletes/_macro_athlete_list.html.j2" import MACRO_ATHLETE_LIST with context %}
 
@@ -15,12 +14,6 @@
 {% endblock secondary_nav_title %}
 
 
-{% block admin_cog %}
-  {% if  school.code == session['user_school_name'] %}
-    {{ MACRO_SHOW_ADMIN_COG(url_for('edit_school_info', school_id=school.id)) }}
-  {% endif %}
-{% endblock admin_cog %}>
-
 
 {% block nav2_subtitle %}
   <div class="d-flex justify-content-md-between flex-wrap">
@@ -29,23 +22,21 @@
     </div>
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>Divisions:
-      {% for division in school.divisions %}
+      {% for division in school.divisions | sort(attribute='code') %}
         {{ division.code }},
       {% endfor %}
     </div>
   </div>
-    <h5>
-    <div class="d-flex flex-row ">
-      <div class="bg-info p-3 text-center">{{ school.athletes | length }} Athletes</div>
-      <div class="bg-secondary p-3 text-center">{{ school.divisions | length }} Divisions</div>
-      <div class="bg-info p-3 text-center">{{ school.entries | length }} Entries</div>
-      <div class="bg-secondary p-3 text-center">{{ school.meets_entered() | length }} Meets Entered</div>
-
-      <div class="bg-info p-3 text-center">{{ school.meets_hosted | length }} Meets Hosted</div>
-
+    <h6>
+    <div class="d-sm-flex flex-row ">
+      <div class="bg-secondary flex-fill p-3 text-center">{{ school.meets_entered() | length }} Meets Entered</div>
+      <div class="bg-info flex-fill p-3 text-center">{{ school.meets_hosted | length }} Meets Hosted</div>
+      <div class="bg-secondary flex-fill p-3 text-center">{{ school.athletes | length }} Athletes</div>
+      <div class="bg-info flex-fill p-3 text-center">{{ school.divisions | length }} Divisions</div>
+      <div class="bg-secondary flex-fill p-3 text-center">{{ school.entries | length }} Entries</div>
     </div>
-  </h5>
-
+  </h6>
+  <div class="mb-5"></div>
 {% endblock nav2_subtitle %}
 
 
@@ -54,7 +45,6 @@
   {{ MACRO_MAKE_TAB("entered-meets-tab", true, "Meets Entered") }}
   {{ MACRO_MAKE_TAB("school-athletes-tab", false, "Athletes") }}
   {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }}
-  {# {{ MACRO_MAKE_TAB("school-past-meets-tab", false, "Past Meets") }} #}
   {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
 {% endblock tab_navs %}
 
@@ -75,7 +65,7 @@
 
 
   {% call MACRO_MAKE_TAB_CONTENT("school-problems-tab", false) %}
-    <div>
+    <div class="mb-4">
       Problems with this school's entries are listed here, grouped by meet.
     </div>
 
@@ -86,10 +76,6 @@
     </div>
   {% endcall %}
 
-{#   {% call MACRO_MAKE_TAB_CONTENT("school-past-meets-tab", false) %}
-    TODO - Not implemented yet.
-  {% endcall %}
- #}
 
   {% call MACRO_MAKE_TAB_CONTENT("school-info-tab", false) %}
     <div>
@@ -104,12 +90,18 @@
       <p><strong>Section:</strong>
       {% if school.section %}{{ school.section }}{% else %}no section set{% endif %}
       <br>
-      <p><strong>TrackMeetSimplicity users:</strong></p>
-      <ul>
-        {% for user in school.coaches %}
-          <li>{{ user.email}}</li>
-        {% endfor %}
-      </ul>
+      <p>
+        <strong>TrackMeetSimplicity users:</strong>
+        {% if school.coaches %}
+          <ul>
+            {% for user in school.coaches %}
+              <li>{{ user.email}}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          No users
+        {% endif %}
+      </p>  
     </div>
     <div>
       <a href="{{url_for('show_edit_school_detail', school_id=school.id) }}">

@@ -87,7 +87,7 @@ def do_login():
     user = User.query.filter_by(email=email, password=password).one_or_none()
     if user is None:
         # bad login
-        flash("Try again, or <a href=\"{{url_for('show_register_form')}}\">sign up</a> as a new user.",
+        flash("User doesn't exist. Try again, or sign up as a new user.",
               "danger")
         return redirect(url_for('show_login_form'))
 
@@ -127,7 +127,7 @@ def do_register():
     if user:
         flash(
             f"ERROR: A user with email {email} already exists!\nTry again, " +
-            f"or <a href='/login'>log in</a> if you already have an account.",
+            f"or log in if you already have an account.",
             "danger")
         return redirect(url_for('show_register_form'))
 
@@ -297,13 +297,13 @@ def show_edit_meet_form(meet_id):
         flash("Meet with id# {meet_id} does not exist.".format(meet.id),
               "danger")
         return redirect(url_for('show_all_meets'))
-    if session['user_school_id'] != meet.host_school.id:
+    if session['user_school_id'] != meet.host_school_id:
         flash(
             "You are not authorized. Only users from the host school may edit this meet.",
             "danger")
         return redirect(url_for('show_meet_detail', meet_id=meet_id))
 
-    school_list = School.query.all()
+    school_list = School.query.order_by(School.name).all()
     return render_template(
             '/meets/show_edit_meet_form.html.j2',
             meet=meet, school_list=school_list, meet_status_list=MEET_STATUS)
@@ -311,15 +311,16 @@ def show_edit_meet_form(meet_id):
 
 @app.route('/meets/<int:meet_id>/do-edit-meet', methods=['POST'])
 def do_edit_meet_form(meet_id):
-
-    # meet.host_school_id = session['user_school_id']
     meet = Meet.query.get(meet_id)
 
     meet.name = request.form.get('name', meet.name)
     meet.date = request.form.get('date', meet.date)
     meet.status = request.form.get('status', meet.status)
-    meet.host_school_id = request.form.get(
-            'host_school_id', meet.host_school_id)
+
+    meet.host_school_id = session['user_school_id']
+
+    # meet.host_school_id = int(request.form.get(
+    #         'host_school_id', meet.host_school_id))
     meet.description = request.form.get("description", meet.description)
 
     meet.max_entries_per_athlete = int(request.form.get(
@@ -330,6 +331,7 @@ def do_edit_meet_form(meet_id):
             "max_team_entries_per_event", meet.max_teammates_per_event))
     meet.max_heats_per_mde = int(request.form.get(
             "max_heats_per_mde", meet.max_heats_per_mde))
+
     # For now, we're not changing the ordering of events or divisions
     # Do this later.
     # Get the new event ordering
@@ -394,14 +396,14 @@ def do_upload_school_entries(meet_id):
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>')
 def show_mde_detail(meet_id, mde_id):
     # TO DO - Don't think I really need BOTH the meet_id and the mde_id
-    # for this function, but maybe it should be in the URL anyway ?
+    # for this function, but it's in the URL for usability
     mde = MeetDivisionEvent.query.get(mde_id)
     return render_template('/entries/mde_detail.html.j2', mde=mde)
 
 
 @app.route('/meets/<int:meet_id>/mdes/<int:mde_id>/edit')
 def show_mde_edit_form(meet_id, mde_id):
-    # Technically, I can get the meet_id from teh mde_id, but this url format
+    # Technically, I can get the meet_id from the mde_id, but this url format
     # is more friendly to users.
     mde = MeetDivisionEvent.query.get(mde_id)
     school = School.query.get(mde.meet.host_school_id)
@@ -435,17 +437,81 @@ def do_mde_assign_athletes(meet_id, mde_id):
         url_for('show_mde_detail', meet_id=mde.meet.id, mde_id=mde.id))
 
 
-@app.route('/meets/<int:meet_id>/school/<int:school_id>/edit-entries')
-@app.route('/meets/<int:meet_id>/edit-entries')
-def edit_meet_entries(meet_id, school_id=None):
+@app.route('/meets/<int:meet_id>/do-assign')
+def do_meet_assignment_all_mdes(meet_id):
+    meet = Meet.query.get(meet_id)
+    return redirect(url_for('show_meet_detail', meet_id=meet.id))
+
+
+@app.route('/entries')
+@app.route('/school/<int:school_id>/entries')
+@app.route('/meets/<int:meet_id>/school/<int:school_id>/entries')
+@app.route('/meets/<int:meet_id>/entries')
+def show_entries(school_id=None, meet_id=None):
+
+    problems = request.args.get('problems')
+    # import ipdb; ipdb.set_trace()
+
+    q = Entry.query
+    # q = db.session.query(Entry.id, )
+    if school_id:
+        school = School.query.get(school_id)
+        q = q.filter_by(school=school)
+    else:
+        school = None
+
+    if meet_id:
+        meet = Meet.query.get(meet_id)
+        q = q.filter_by(meet=meet)
+
+    # if problems:
+    #     q = q.filter_by(problem is not None)
+
+    # q = q.order_by(event.code)
+    # q = q.options(joinedload())
+    entries = q.all()
+
+    return render_template(
+        "/entries/show_meet_entries.html.j2", entries=entries, school=school)
+
+
+@app.route('/meets/<int:meet_id>/school/<int:school_id>/entries')
+@app.route('/meets/<int:meet_id>/entries')
+def show_meet_entries(meet_id, school_id=None, problems=False):
+    """ if problems is True, the entries shown will ony be the ones with noted
+        problems
+    """
+    # TODO problems as parameter
     if school_id is None:
         school_id = session['school.id']
-
+    school = School.query.get(school_id)
     meet = Meet.query.get(meet_id)
-    # TODO
-    return "<p>View (and edit?) my school's entries for Meet {}</p>".format(
-            meet.id)
-    # return render_template('new_meet_detail.html.j2', meet=meet)
+    return render_template(
+            "/entries/show_meet_entries.html.j2", meet=meet, school=school)
+
+
+@app.route('/entries/problems')
+@app.route('/school/<int:school_id>/entries/problems')
+def show_school_entry_problems(school_id):
+    if school_id is None:
+        school_id = session['school.id']
+    school = School.query.get(school_id)
+    q = Entry.query.filter_by(school=school).filter(Entry.problem is not None)
+    problem_entries = q.all()
+    #TODO
+    return render_template("#", meet, school)
+
+
+@app.route('/meets/<int:meet_id>/entries/<int:entry_id>/edit')
+def show_edit_entry_form(entry_id, meet_id=None):
+    entry = Entry.query.get(entry_id)
+    return render_template("/entries/show_edit_entry_form.html.j2", entry)
+
+
+@app.route('/meets/<int:meet_id>/entries/<int:entry_id>/do-edit')
+def do_edit_entry_form(meet_id, entry_id):
+    return redirect(url_for(
+            'show_meet_entries', meet_id=meet_id, school_id=school_id))
 
 
 # ##########  DISPLAY AND EDIT ATHLETES  ###########

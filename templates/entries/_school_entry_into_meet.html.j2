@@ -6,27 +6,30 @@
 {% endblock %}
 
 {% block secondary_nav_title %}
-  Upload entries for meet {{meet.name}} from school {{ school.name }}
+  <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">{{meet.name}}</a>
 {% endblock secondary_nav_title %}
 
-{% block admin_cog %}
-{% endblock admin_cog %}
 
 {% block nav2_subtitle %}
-  {{ meet.date }}
+  {{ meet.date.strftime("%B %d, %Y") }}
+  <div>
+    Upload entries from {{ school.name }}
+  </div>
 {% endblock nav2_subtitle %}
 
 {% block content %}
+<div class="px-3">
   <form action="{{ url_for('do_upload_school_entries', meet_id=meet.id) }}" enctype="multipart/form-data" method="POST">
-  <div class="form-group">
-    <label for="state">Upload athlete entry file (HyTek semicolon delimited format):</label>
-    <input type="file" class="form-control" name="entry_file" placeholder="Upload file"  />
-  </div>
-  <button type="submit" class="btn btn-primary">
-  Upload
-  </button>
-</form>
-<a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
-  <button class="btn btn-secondary">Cancel</button>
-</a>
+    <div class="form-group">
+      <label for="state">Upload athlete entry file (HyTek semicolon delimited format):</label>
+      <input type="file" class="form-control" name="entry_file" placeholder="Upload file"  />
+    </div>
+    <button type="submit" class="btn btn-primary">
+      Upload
+    </button>
+    <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}">
+      <button class="btn btn-secondary">Cancel</button>
+    </a>
+  </form>
+</div>
 {% endblock %}

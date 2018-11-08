@@ -1,21 +1,32 @@
+tbody > tr > td > a {
+  color: #0e64c1;
+}
+
+.btn-link {
+  color: #0e64c1;
+}
+
+.tms-link {
+  color: #0e64c1;
+}
+
 .bg-primary {
-  /* dark grey */
+  /* dark slate grey */
   background-color: #2F4858!important;
 }
 
 .bg-info {
-  /* teal */
-  background-color: #348f9d!important;
+  /* iceberg blue */
+  background-color: #6EB4D1!important;
 }
 
 .bg-secondary {
-  /* medium grey */
-  /* background-color: #6c757da1!important;*/
+  /* medium grey (X11 Gray) */
   background-color: #bac1b8!important;
 }
 
 .bg-warning {
-  /* yellow */
+  /* saffron yellow */
   background-color: #F6AE2D!important;
 }
 
@@ -24,22 +35,38 @@
 }
 
 .btn-success{
+  /* orange */
   background-color: #F26419!important;
   border-color: #F26419!important;
   /*color: #222222!important;*/
 }
 
 .btn-primary{
+  /* dark slate grey */
   background-color: #2F4858!important;
   border-color: #2F4858!important;
-  /*color: #222222!important;*/
 }
 
 .btn-warning {
-  /* yellow */
+  /* saffron yellow */
   background-color: #F6AE2D!important;
   border-color: #F6AE2D!important;
 }
+
+.btn-info {
+  /* iceberg blue */
+  background-color: #6EB4D1!important;
+  color: #000;
+}
+
+.btn:hover{
+  filter: brightness(80%);
+}
+
+.tms-meet-btn {
+  width: 170px;
+}
+
 
 body {
   color: #1A1F16;

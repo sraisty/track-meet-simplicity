@@ -5,14 +5,12 @@
   PLACEHOLDER SECONDARY NAV TITLE
 {% endblock secondary_nav_title %}
 
-{% block admin_cog %}
-{% endblock admin_cog %}
 
 {% from "__macros.html.j2" import SHOW_MY_SCHOOL_INDICATOR %}
 
 {% block myschool_indicator %}
-  <div class="row mb-4">
-  </div>
+{#   <div class="row mb-4">
+  </div> #}
 {% endblock %}
 
 {% block nav2_subtitle %}
@@ -21,7 +19,7 @@
 
 {% block content %}
   {# The content and tab names in the secondary name bar #}
-  <div class="row">
+  <div class="row px-3">
     <div class="col">
       <div class="card">
         <div class="card-header bg-primary">

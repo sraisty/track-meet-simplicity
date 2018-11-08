@@ -2,11 +2,16 @@
 {% from "/schools/_macro_schools_list.html.j2" import MACRO_SCHOOL_LIST %}
 
 {% block content %}
-    <h1>Schools</h1>
+  <div class="row px-4">
+    <h1 class="col-12">Schools</h1>
 
-    <h4>Number of schools: {{ num_schools }}</h4>
-
-    {{ MACRO_SCHOOL_LIST(schools, "all_schools_table")}}
+    <h4 class="col-12">Number of schools: {{ num_schools }}</h4>
+  </div>
+  <div class="row px-4">
+    <div class="col-12">
+      {{ MACRO_SCHOOL_LIST(schools, "all_schools_table")}}
+    </div>
+  </div>
 {% endblock content %}
 
 

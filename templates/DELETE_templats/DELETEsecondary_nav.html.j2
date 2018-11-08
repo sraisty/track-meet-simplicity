@@ -8,12 +8,6 @@
                 {% block secondary_nav_title %}
                     PLACEHOLDER
                 {% endblock secondary_nav_title %}
-
-                {% if 'admin_user' in session %}
-                    <a {% block nav2_admin_url %}href="#PLACEHOLDER_ADMIN_URL"{% endblock nav2_admin_url %}>
-                       <i class="fas fa-cog fa"></i>
-                    </a>
-                {% endif %}
             </h1>
             <h4>{% block nav2_subtitle %}
                     PLACEHOLDER

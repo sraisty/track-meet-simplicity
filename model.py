@@ -224,6 +224,7 @@ class Meet(db.Model):
             count += len(mde.entries)
         return count
 
+
     def school_is_entered(self, school_id):
         school = School.query.get(school_id)
         return school in self.schools_entered()
@@ -384,6 +385,17 @@ class Athlete(db.Model):
         q = q.order_by(Meet.date)
         meets = q.all()
         return meets
+
+    def get_meet_count(self):
+        # def get_meets(self, meet_status, include_past_meets):
+        """ Returns a list of all the meet objects that this athlete is
+        entered into. If athlete is not entered into any meets, returns None.
+        """
+        q = db.session.query(Meet)
+        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
+        q = q.filter(Athlete.id == self.id).distinct()
+        q = q.order_by(Meet.date)
+        return q.count()
 
     def get_events(self):
         q = db.session.query(EventDefinition)

@@ -4,7 +4,10 @@
 {% from "__macros.html.j2" import MACRO_step_tab_icons with context %}
 
 {% block content %}
-  <h1 class="mb-5">Edit Meet: {{meet.name}}</h1>
+  <h1 class="mb-5">
+    Edit Meet&nbsp;&nbsp;
+    <i class="fas fa-double-right"></i>&nbsp;&nbsp;{{meet.name}}
+  </h1>
   <form class="form cf" action="{{ url_for('do_edit_meet_form', meet_id=meet.id) }}" method=POST>
     <div class="wizard">
       <div class="wizard-inner">
@@ -26,7 +29,7 @@
           </div>
           <div class="form-group">
             <label for="meet-date">Meet Date</label>
-            <input class="form-control" id="meet-date" width="200" name="date" placeholder="MM/DD/YYYY" value="{{meet.date}}"required />
+            <input class="form-control" id="meet-date" width="200" name="date" placeholder="MM/DD/YYYY" value="{{meet.date.strftime('%m/%d/%Y')}}"required />
           </div>
           <div class="form-group">
             <label form="meet-host">Host School</label>

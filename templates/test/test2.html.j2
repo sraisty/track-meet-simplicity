@@ -2,18 +2,12 @@
 
 {% from "__macros.html.j2" import MACRO_MAKE_TAB with context %}
 {% from "__macros.html.j2" import MACRO_MAKE_TAB_CONTENT with context %}
-{% from "__macros.html.j2" import MACRO_SHOW_ADMIN_COG with context %}
 
 
 {% block secondary_nav_title %}
     TEST SECONDARY NAV TITLE
 {% endblock secondary_nav_title %}
 
-{% block admin_cog %}
-  {% if 'user_email' in session %}
-    {{ MACRO_SHOW_ADMIN_COG("#") }}   {# url is TODO #}
-  {% endif %}
-{% endblock admin_cog %}
 
 {% block nav2_subtitle %}
     TEST SECONDARY NAV SUBTITLE

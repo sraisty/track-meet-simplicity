@@ -11,6 +11,14 @@ $(document).ready(function() {
         'ordering': true
     });
 
+
+    $('#athlete_entry_table').DataTable({
+        'ordering': true
+    });
+
+    $('#athlete_assignments_table').DataTable({
+        'ordering': true
+    });
     //// Tables that list Athletes 
 
     $('#athlete_list').DataTable({

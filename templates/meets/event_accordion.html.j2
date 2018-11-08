@@ -3,7 +3,7 @@
 
 <div class="row">
     <div id="track-event-accordion" class="col-lg-6 col">
-        <h5 class="card-header bg-info text-white">TrackEvents</h5>
+        <h5 class="card-header bg-info">TrackEvents</h5>
         {% for event in meet.events %}
             {% if event.is_track() %}
                 {{ MACRO_SHOW_EVENTS_CARD(meet, "track", event) }}
@@ -11,7 +11,7 @@
         {% endfor %}
     </div>    {# track-event-accordion #}
     <div id="field-event-accordion" class="col-lg-6 col">
-        <h5 class="card-header bg-info text-white">FieldEvents</h5>
+        <h5 class="card-header bg-info">FieldEvents</h5>
         {% for event in meet.events %}
             {% if event.is_field() %}
                 {{ MACRO_SHOW_EVENTS_CARD(meet, "field", event) }}

@@ -1,12 +1,20 @@
 {% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
 
+{% if school.id == session['user_school_id'] %}
+  {% set show_buttons = true %}
+{% else %}
+  {% set show_buttons = false %}
+{% endif %}
+
 {% if school.meets_entered() %}
     {% set meets = school.meets_entered() %}
-    {{ MEET_LIST(meets, school, "All", "entered-meets-list") }}
+
+    {{ MEET_LIST(meets, school, "All", "entered-meets-list", show_buttons) }}
 {% else %}
     <p>{{school.name}} is not entered into any upcoming meets.</p>
 {% endif %}
 
 <a href="{{url_for('show_all_meets', status='Accepting Entries')}}">
-    <button class="btn btn-success"><i class="fas fa-search"></i> Find More Meets to Enter </button>
+    <button class="btn btn-primary btn-lg"><i class="fas fa-search"></i>
+    &nbsp;&nbsp;Find More Meets to Enter </button>
 </a>

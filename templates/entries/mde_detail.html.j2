@@ -11,16 +11,20 @@
 
 
 {% block myschool_indicator %}
-  {{SHOW_MY_SCHOOL_INDICATOR(mde.meet.host_school)}}
+  {{ SHOW_MY_SCHOOL_INDICATOR(mde.meet.host_school) }}
 {% endblock %}
 
 {% block secondary_nav_title %}
-  Event #{{mde.seq_num}}: {{ mde.event.name }}: {{ mde.division.name }}
+  <div class="d-flex flex-row align-items-center mb-3">
+    <div class="badge bg-primary text-white mb-0 p-2  align-middle">
+      <h4 class="mb-0">#{{mde.seq_num}}</h4>
+    </div>
+    <div class="px-2 mb-0  align-middle">
+      {{ mde.event.name }}: {{ mde.division.name }}
+    </div>
+  </div>
 {% endblock secondary_nav_title %}
 
-{% block nav2_admin_url %}
-  href="{{url_for('show_mde_edit_form', meet_id=mde.meet.id, mde_id=mde.id)}}"
-{% endblock nav2_admin_url %}>
 
 {% block nav2_subtitle %}
   <div class="d-flex flex-row justify-content-between">
@@ -31,46 +35,44 @@
   </div>
   <p>Status: {{mde.status}}</p>
 
-  <h5>
-  <div class="d-flex flex-row ">
-    <div class="bg-info p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
-    <div class="bg-secondary p-3 text-center">Athletes Entered: {{ num_entries }}</div>
-    {% if max_athletes == num_entries %}
-      <div class="bg-warning p-3 text-center">
-        Event is FULL
-      </div>
-    {% elif max_athletes > num_entries %}
-      <div class="bg-info p-3 text-center">
-        Spots Remaining: {{ max_athletes - num_entries }}
-      </div>
-      <div class="bg-secondary p-3 text-center">
-        {{ (num_entries * 100 / max_athletes) | int }}% Full
-      </div>
-    {% else %}
-      <div class="bg-warning p-3 text-center">
-        Event is over-subscribed by {{ num_entries - max_athletes }} athletes
-      </div>
-    {% endif %}
-  </div>
-  </h5>
-
-  <p>
-    <div class="d-flex flex-row ">
-      <div class="bg-secondary p-3 text-center">
+  <h6>
+    <div class="d-sm-flex flex-row ">
+      <div class="bg-info flex-fill p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
+      <div class="bg-secondary flex-fill  p-3 text-center">Athletes Entered: {{ num_entries }}</div>
+      <div class="bg-info flex-fill p-3 text-center">
         Max # Heats: {{ heats }}
       </div>
-      <div class="bg-info p-3 text-center">
+      <div class="bg-secondary flex-fill p-3 text-center">
         Max Athletes Per Heat: {{ mde.event.max_per_heat }}
       </div>
     </div>
-  </p>
+    <div class="d-flex flex-row">
+      {% if max_athletes == num_entries %}
+        <div class="flex-fill bg-warning p-3 text-center">
+          Event is FULL
+        </div>
+      {% elif max_athletes > num_entries %}
+        <div class="flex-fill bg-info p-3 text-center">
+          Spots Remaining: {{ max_athletes - num_entries }}
+        </div>
+        <div class="flex-fill bg-secondary p-3 text-center">
+          {{ (num_entries * 100 / max_athletes) | int }}% Full
+        </div>
+      {% else %}
+        <div class="flex-fill bg-warning p-3 text-center">
+          Event is over-subscribed by {{ num_entries - max_athletes }} athletes
+        </div>
+      {% endif %}
+    </div>
+  </h6>
+
 {% endblock nav2_subtitle %}
 
 
 {% block tab_navs %}
   {{ MACRO_MAKE_TAB("mde-entries-tab", true, "Entries") }}
   {{ MACRO_MAKE_TAB("mde-assign-tab", false, "Assignments") }}
-  {{ MACRO_MAKE_TAB("mde-results-tab", false, "Results") }}
+  {# {{ MACRO_MAKE_TAB("mde-results-tab", false, "Results") }} #}
   {{ MACRO_MAKE_TAB("mde-settings-tab", false, "Settings") }}
 {% endblock tab_navs %}
 
@@ -95,17 +97,18 @@
 
     <thead>
       <tr>
-        <th>Seed #<br>(pending)</th>
+{#         <th>Seed #<br>(pending)</th> #}
+        <th>Seed Mark</th>
         <th>Athlete name</th>
         <th>School</th>
-        <th>Seed Mark</th>
+
         <th>Problem</th>
       </tr>
     </thead>
     <tbody>
       {% for entry in mde.entries %}
         <tr>
-          <td data-order="{{ entry.seed_num }}">
+{#           <td data-order="{{ entry.seed_num | int }}">
             {% if entry.seed_num %}
               {{ entry.seed_num }}
             {% else %}
@@ -115,6 +118,10 @@
                 Not assigned
               {% endif %}
             {% endif %}
+          </td> #}
+
+          <td data-order="{{entry.mark}}">
+            {{ entry.mark_to_string() }}
           </td>
           <td>
             <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
@@ -123,9 +130,7 @@
           </td>
           <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
           {{ entry.athlete.school.name }}</a></td>
-          <td data-order="{{entry.mark}}">
-            {{ entry.mark_to_string() }}
-          </td>
+
           <td>
             {% if entry.problem %}
             <i class="fas fa-exclamation-triangle danger"></i>

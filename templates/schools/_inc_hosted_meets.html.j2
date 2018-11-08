@@ -1,12 +1,23 @@
 {% from "/meets/_macro_meet_list.html.j2" import MEET_LIST %}
 
+  {% if school.id == session['user_school_id'] %}
+    {% set show_buttons = true %}
+  {% else %}
+    {% set show_buttons = false %}
+  {% endif %}
+
+
 {% if school.meets_hosted %}
     {% set meets = school.meets_hosted %}
-    {{ MEET_LIST(meets, school, "All", "hosted-meets-list") }}
+    {{ MEET_LIST(meets, school, "All", "hosted-meets-list", show_buttons) }}
 {% else %}
     <p>{{school.name}} is not hosting any upcoming meets.</p>
 {% endif %}
 
  <a href="{{url_for('show_new_meet_form')}}">
-    <button class="btn btn-primary">Create New Meet </button>
+    <button class="btn btn-primary btn-lg">
+      <i class="fas fa-plus-circle"></i>
+      &nbsp;&nbsp;Create New Meet
+    </button>
 </a>   
+

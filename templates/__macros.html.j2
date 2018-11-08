@@ -28,16 +28,10 @@
 {% endmacro %}
 
 
-{% macro MACRO_SHOW_ADMIN_COG(admin_url) %}
-  <a href="{{ admin_url }}">
-    <i class="fas fa-cog fa"></i>
-  </a>
-{% endmacro %}
-
 
 {% macro SHOW_MY_SCHOOL_INDICATOR(school) %}
   {% if school.id == session.user_school_id %}
-  <div class="row mb-4">
+  <div class="row mb-3">
     <div class="card bg-warning col-12">
       <h4 class="text-md-center">Managed by {{ school.name }}</h4>
     </div>
@@ -46,31 +40,34 @@
 {% endmacro %}
 
 
+
 {% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
-<div class="card">
-<div class="card-header" id="{{ event.name }}">
-<button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls=""collapse{{event.code}}">
-<span class="mr-auto">{{ event.name }} :&nbsp;</span>
-<span class-"badge badge-secondary">
-{{ meet.get_event_athlete_count_across_divs(event) }} athletes
-</span>
-</button>
-</div>
-<div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
-<div class="card-body">
-<ul class="list-group">
-{% for mde in meet.get_event_mdes(event) %}
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
-      {{ mde.division.name }}
-    </a>
-    <span class="badge badge-secondary"><strong>{{ mde.entries|length }} entries</strong></span>
-  </li>
-{% endfor %}
-</ul>
-</div>
-</div>
-</div>
+  <div class="card">
+    <div class="card-header" id="{{ event.name }}">
+      <button class="btn btn-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls="collapse{{event.code}}">
+        <span class="mr-auto">{{ event.name }} :&nbsp;</span>
+        <span class-"badge badge-secondary">
+          {{ meet.get_event_athlete_count_across_divs(event) }} athletes
+        </span>
+      </button>
+    </div>
+    <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
+      <div class="card-body">
+        <ul class="list-group">
+          {% for mde in meet.get_event_mdes(event) %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
+                {{ mde.division.name }}
+              </a>
+              <span class="badge badge-secondary">
+                <strong>{{ mde.entries|length }} entries</strong>
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
 {% endmacro %}
 
 

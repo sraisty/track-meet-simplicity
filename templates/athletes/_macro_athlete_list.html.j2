@@ -6,8 +6,9 @@
         <th>School</th>
         <th>League</th>
         <th>Division</th>
-        <th>Number of Events</th>
+        <th class="text-center">Number of Events</th>
         <th>Events</th>
+        <th class="text-center">Number of Meets</th>
       </tr>
     </thead>
     <tbody>
@@ -29,14 +30,18 @@
             {% endif %}
           </td>
           <td>{{ athlete.division.name }}</td>
-          <td>
+          <td class="text-center">
             {% set evs=athlete.get_events() %}
-            {{ evs | length }} events
+            {{ evs | length }}
           </td>
           <td>
             {% for ev in evs %}
               {{ev.name}},
             {% endfor %}
+          </td>
+          <td class="text-center">
+            {% set meets=athlete.get_meet_count() %}
+            {{ evs | length }}
           </td>
         </tr>
       {% endfor %}
