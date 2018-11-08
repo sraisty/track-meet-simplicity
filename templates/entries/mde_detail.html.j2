@@ -177,7 +177,7 @@
                   {% endif %}
                 </td>
                 <td>
-                  {{ entry.get_heat_number( max_athletes_per_heat )}}
+                  {{ entry.get_heat_number()}}
                 </td>
                 <td>
                   <a href="{{url_for('show_athlete_detail', athlete_id=entry.athlete.id)}}">
