@@ -271,6 +271,8 @@ class Meet(db.Model):
     def assign_all_mdes(self):
         for mde in self.mdes:
             mde.assign_seed_numbers()
+        self.status = "Assignments Pending"
+        db.session.commit()
 
 
 # #######################  ATHLETE CLASS #####################

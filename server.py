@@ -465,7 +465,6 @@ def show_entries(school_id=None, meet_id=None):
     if meet_id:
         meet = Meet.query.get(meet_id)
         q = q.filter_by(meet=meet)
-
     # if problems:
     #     q = q.filter_by(problem is not None)
 
