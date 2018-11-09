@@ -1,0 +1,43 @@
+Demo Script
+
+This is TrackMeetSimplicity and this is an app I created to help manage youth 
+track meets at the middle school and high school levls.  Believe it or not, these
+are enormously complicated events to manage. 
+
+The way they are done in California, the typical school track meet will  involve
+6+ schools 
+300-500 athletes
+12-20 track & field events. 
+*  4-6 "divisions" (like Grade 7 Girls, or Varisty Boys).  
+*  100 different "contests", each of which might have multiple heats
+* All have to be done within 2-3 hours
+
+And they repeat this every week.
+
+* Ahead of time, meet managers need to assign kids to events, and then do heat 
+assignments and lane assignments. 
+    - These are based on kid's prior performance
+
+Deal with situations where:
+* a contest is overfilled
+* athletes are in too many events
+* some athletes end up in no events
+* the entry files provided by coaches have errors in them
+* Each event typically has a different max number of athletes and different procedures for assigning lanes or preferred positions
+
+
+DATA MODEL WAS THE BIGGEST CHALLENGE OF THIS
+* particularly SQLAlchemy
+* query performance because  a lot of my pages are automatically pulling down 
+* a lot of data 
+* secondary relationships, relationship to the OO model, different joining strategies
+* Experimented with "safe denormalization" using SQLAlchemy-utils, but found out the problems with this approach in keeping model consistent.
+
+
+
+1. Login or Register
+
+2. Go to Register.
+
+3. Select school from list, but can also select a new school.
+    Implemented this hiding/making visible with JQuery
