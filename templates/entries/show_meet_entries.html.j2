@@ -5,7 +5,9 @@
 
 <h1>Entries: 
   {% if meet %}
-    {{meet.name}}
+    <a href="{{url_for('show_meet_detail', meet_id=meet.id)}}">
+      {{meet.name}}
+    </a>
   {% endif %}
 </h1>
   <div class="row px-">
@@ -19,7 +21,7 @@
             <th>School</th>
             <th>Division</th>
             <th>Event</th>
-            <th class="text-center">Mark</th>
+            <th class="text-center">Seed Mark</th>
             <th class="text-center">Seed Num</th>
             <th class="text-center">Heat</th>
             <th class="text-center">Problem</th>
@@ -29,7 +31,10 @@
           {% for entry in entries %}
             <tr>
               <td>
-                {{ entry.mde.id }}
+                <a href="{{url_for('show_mde_detail', meet_id=entry.meet.id, 
+                mde_id=entry.mde.id) }}">
+                  {{ entry.mde.seq_num }}
+                </a>
               </td>
               <td data-order="{{ entry.athlete.lname}}">
                 <a href="{{ url_for('show_athlete_detail', athlete_id=entry.athlete.id) }}">

@@ -6,9 +6,8 @@
 
 {% set num_entries = mde.entries | length %}
 {% set heats = mde.get_max_heats() %}
-{% set max_athletes = mde.get_max_athletes() %}
 {% set max_athletes_per_heat = mde.get_max_athletes_per_heat() %}
-
+{% set max_athletes = mde.get_max_athletes() %}
 
 {% block myschool_indicator %}
   {{ SHOW_MY_SCHOOL_INDICATOR(mde.meet.host_school) }}
@@ -89,10 +88,10 @@
     
   {% if mde.event.is_track() %}
     <table id="mde_table" class="display" data-paging='false'
-       data-order='[[ 3, "asc" ]]' >
+       data-order='[[ 0, "asc" ]]' >
   {% else %}
     <table id="mde_table" class="display" data-paging='false'
-       data-order='[[ 3, "desc" ]]' >
+       data-order='[[ 0, "desc" ]]' >
   {% endif %}
 
     <thead>
@@ -102,7 +101,7 @@
         <th>Athlete name</th>
         <th>School</th>
 
-        <th>Problem</th>
+        <th class="text-center">Problem</th>
       </tr>
     </thead>
     <tbody>
@@ -131,7 +130,7 @@
           <td><a href="{{url_for('show_school_detail', school_id=entry.athlete.school.id)}}">
           {{ entry.athlete.school.name }}</a></td>
 
-          <td>
+          <td class="text-center">
             {% if entry.problem %}
             <i class="fas fa-exclamation-triangle danger"></i>
             {% endif %}

@@ -479,7 +479,7 @@ def show_entries(school_id=None, meet_id=None):
 
 @app.route('/meets/<int:meet_id>/school/<int:school_id>/entries')
 @app.route('/meets/<int:meet_id>/entries')
-def show_meet_entries(meet_id, school_id=None, problems=False):
+def show_meet_entries(meet_id, entries=None, school_id=None, problems=False):
     """ if problems is True, the entries shown will ony be the ones with noted
         problems
     """
@@ -503,7 +503,8 @@ def show_school_entry_problems(school_id):
     q = Entry.query.filter_by(school=school).filter(Entry.problem is not None)
     problem_entries = q.all()
     # TODO
-    return render_template("#", meet, school)
+    return render_template(
+    "/entries/show_meet_entries.html.j2", meet=None, school=school)
 
 
 @app.route('/entries/<int:entry_id>/edit')
