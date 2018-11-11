@@ -23,7 +23,8 @@
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>Divisions:
       {% for division in school.divisions | sort(attribute='code') %}
-        {{ division.code }},
+        {{ division.code }}
+        {% if not loop.last %}, {% endif %}
       {% endfor %}
     </div>
   </div>
@@ -44,7 +45,7 @@
   {{ MACRO_MAKE_TAB("hosted-meets-tab", false, "Meets Hosted") }}
   {{ MACRO_MAKE_TAB("entered-meets-tab", true, "Meets Entered") }}
   {{ MACRO_MAKE_TAB("school-athletes-tab", false, "Athletes") }}
-  {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }}
+  {# {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }} #}
   {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
 {% endblock tab_navs %}
 
@@ -105,7 +106,9 @@
     </div>
     <div>
       <a href="{{url_for('show_edit_school_detail', school_id=school.id) }}">
-        <button class="btn btn-primary">Edit School Info</button>
+        <button class="btn btn-primary btn-lg">
+          <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit School Info
+        </button>
       </a>
     </div>
   {% endcall %}

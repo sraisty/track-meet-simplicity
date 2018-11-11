@@ -71,10 +71,24 @@ tbody > tr > td > a {
   border-color: #2F4858!important;
 }
 
+.btn-secondary {
+  /* medium grey (X11 Gray) */
+  background-color: #bac1b8!important;
+  border-color: #bac1b8!important;
+  color: black;
+  font-weight: 450;
+}
+
 .btn-warning {
   /* saffron yellow */
   background-color: #F6AE2D!important;
   border-color: #F6AE2D!important;
+  font-weight: 450;
+  color: black;
+}
+
+.text-warning {
+  color: #F6AE2D!important;
 }
 
 .btn-info {
@@ -182,4 +196,14 @@ a.dropdown-item.disabled {
     opacity: 0.5;
     display: block;
     font-size: 18px;
+  }
+
+
+
+  .tms-signin-card {
+    background-color: #f8f9fac9;
+  }
+
+  .card.tms-tab-border {
+    border: 1px solid rgba(0,0,0,.25);
   }

@@ -1,0 +1,75 @@
+Demo Script
+
+ABOUT ME
+    * MIT
+    * Software engineer for 3 years
+    * 15+ years in product management & product marketing
+
+MY PROJEC
+    * Software to help organize and manage youth track meets
+    * VERY COMPLICATED
+        * 500ish kids, over 100 contests, dozens of schools, limitations on 
+          # of kids in each, and complex rules for deciding which kids get
+          assigned to which events.
+        * As complex as many enterprise SW apps
+
+DATA MODEL
+    * The HEART and most of the work.  Tables for Athletes, Schools, Events, 
+    Contests, Entries, Divisons. 
+    * SQLAlchemy - fairly advanced usage.  
+
+        - relationships, primary & secondary joins, 
+
+        - enums and constraints to ensure the integrity of the data model
+
+        - extensive test suite to help me understand how SQLAlchemy worked
+
+        - big/long queries because most screens require several thousand records be aggregated
+
+ 
+
+The App
+    * Full-featured "enterprise-stye" application
+
+    * The information architecture & user experience is no-doubt influenced by many of the products I've worked on in the past.
+
+    * Over 45 routes through the application, with all the linkage from one type of scren to another that you would expect.
+
+    * Multi-user, role-based.  Each school's coach has access to view data but can only edit athletes, entries, and data for his school.  
+
+    * Workflow-oriented
+
+
+* THE BIG DEAL: Assign Athletes
+
+       - tried some denormalization with SQLutils but quickly realized that was the road to madness
+
+        - Big test suite to make sure each optimzation I made preserved the integrity of the model.
+
+        relationship with the overall object model
+
+
+I CAN'T TAKE YOU THROUGH IT PIECE BY PIECE because the product is so large, so I'm going to let the recorded screencast will show you the size and complexity of this.
+
+
+
+Because of the SIZE I had to really up my game in several areas.
+
+ OVER 45 routes:
+
+ * Learn to avoid redundant code in my Jinja templates via advanced features like macros, includes, filters, and a template inheritance hierarchy over 5 levels deep
+
+ * OBJECT MODEL:  
+    Took this as an opportunity to dig into OO programming, which had advanced 
+    significantly since I was introduced to it at MIT:
+        multiple inheritance
+        abstract classes
+        Field Events vs Track Events.
+
+* JQUERY components that I reused in a lot of places, parameterized so i could slightly change their behavior from one place to another.
+
+
+* TESTING - lots
+
+* Took a lot of pride in learning all the capabilities of Bootstrap and bending it to my will.
+

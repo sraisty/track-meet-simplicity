@@ -504,7 +504,7 @@ def show_school_entry_problems(school_id):
     problem_entries = q.all()
     # TODO
     return render_template(
-    "/entries/show_meet_entries.html.j2", meet=None, school=school)
+            "/entries/show_meet_entries.html.j2", meet=None, school=school)
 
 
 @app.route('/entries/<int:entry_id>/edit')
@@ -523,7 +523,7 @@ def do_edit_entry(meet_id, entry_id):
     # TODO
     flash("To be Implemented: Update entry.")
     return redirect(url_for(
-            'show_meet_entries', meet_id=meet_id, 
+            'show_meet_entries', meet_id=meet_id,
             school_id=session.get('user_school_id')))
 
 

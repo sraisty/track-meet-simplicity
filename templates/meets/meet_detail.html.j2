@@ -15,6 +15,25 @@
   {% set user_is_hosting = false %}
 {% endif %}
 
+
+{% if meet.status == "Unpublished" %}
+  {% set meet_status_icon = "fas fa-eye-slash text-black-50" %}
+  {% set meet_status_bar_color = "bg-secondary" %}
+{% elif meet.status == "Accepting Entries" %}
+  {% set meet_status_icon = "fas fa-vote-yea" %}
+  {% set meet_status_bar_color = "bg-info" %}
+{% elif meet.status =="Assignments Pending" %}
+{#   {% set meet_status_icon = "fas fa-clipboard text-warning" %} #}
+  {% set meet_status_icon = "fas fa-clipboard" %}
+    {% set meet_status_bar_color = "bg-warning" %}
+{% elif meet.status == "Assignments Done" %}
+  {% set meet_status_icon = "fas fa-clipboard-check text-primary" %}
+  {% set meet_status_bar_color = "bg-primary" %}  
+{# TODO: "Meet In Progress", "Completed"  #}
+{% endif %}
+
+
+
 {% block myschool_indicator %}
   {{SHOW_MY_SCHOOL_INDICATOR(meet.host_school)}}
 {% endblock %}
@@ -35,8 +54,8 @@
 
   <h6 class="mb-4">
     <div class="d-sm-flex flex-row">
-      <div class="bg-warning flex-fill p-3 text-center">
-        <h5 class="mb-0">Status: {{ meet.status }}</h5>
+      <div class="{{meet_status_bar_color}} flex-fill p-3 text-center border-bottom">
+        <h5 class="mb-0"><i class="{{meet_status_icon}}"></i>&nbsp;&nbsp;Status: {{ meet.status }}</h5>
       </div>
     </div>
     <div class="d-sm-flex flex-row ">
@@ -55,7 +74,7 @@
       {% if user_is_entered %}
         <a href="{{url_for('show_meet_entries', meet_id=meet.id, school_id=my_school_id) }}">
           <button class="btn btn-warning  btn-lg mb-1 mr-1">
-            Review My Meet Entries
+            <i class="fas fa-clipboard-list"></i>&nbsp;&nbsp;Review My Meet Entries
           </button>
         </a>
       {% else %}
@@ -90,7 +109,7 @@
   {{ MACRO_MAKE_TAB("mdetail-events-tab", true, "Event Schedule") }}
   {{ MACRO_MAKE_TAB("mdetail-schools-tab", false, "Schools") }}
   {{ MACRO_MAKE_TAB("mdetail-athletes-tab", false, "Athletes") }}
-  {{ MACRO_MAKE_TAB("mdetail-meetinfo-tab", false, "Meet Info") }}
+  {{ MACRO_MAKE_TAB("mdetail-meetinfo-tab", false, "Meet Settings") }}
 {% endblock tab_navs %}
 
 
@@ -147,10 +166,13 @@
   {% call MACRO_MAKE_TAB_CONTENT("mdetail-meetinfo-tab", false) %}
     <div class="mb-4">
       <a href="{{url_for('show_edit_meet_form', meet_id=meet.id)}}">
-        <button class="btn btn-primary">Edit Meet</button>
+        <button class="btn btn-primary btn-lg">
+          <i class="fas fa-edit"></i>&nbsp;&nbsp;
+          Edit Meet Settings
+        </button>
       </a>
     </div>
-    <div class="row">
+    <div class="row mb-3">
       <div class="col-md-6 card p-3">
         <h5>Order of Events</h5>
         <ol>
@@ -219,7 +241,10 @@
       </div>
     </div>
     <a href="{{url_for('show_edit_meet_form', meet_id=meet.id)}}">
-      <button class="btn btn-primary">Edit Meet</button>
+      <button class="btn btn-primary btn-lg">
+        <i class="fas fa-edit"></i>&nbsp;&nbsp;
+        Edit Meet Settings
+      </button>
     </a>
 
   {% endcall %}

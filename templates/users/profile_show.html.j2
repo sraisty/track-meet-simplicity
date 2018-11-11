@@ -9,12 +9,16 @@
     <p>School name: {{ user.school.name }}</p>
     <p>School code: {{ user.school.code }}</p>
     <a href="{{ url_for('show_edit_profile_form') }}">
-      <button class="btn btn-primary">Update my profile</button>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-user-circle"></i>&nbsp;&nbsp;Update My Profile
+      </button>
     </a>
 
 
     <a href="{{ url_for('show_edit_profile_form') }}">
-      <button class="btn btn-primary">Change my password</button>
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-key"></i>Change My Password
+      </button>
     <a>
 
 

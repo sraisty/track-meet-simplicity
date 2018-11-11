@@ -20,7 +20,7 @@
           <th class="text-center">Total # Entries</th>
 {#           <th>% Full</th> #}
           {% if show_actions %}
-            <th>Actions</th>
+            <th class="text-center">Actions</th>
           {% endif %}
         </tr>
       </thead>
@@ -44,9 +44,17 @@
                 {% endif %}
               </td>
               <td class="align-top">
-                {{ meet.status }}  
+                {% if meet.status == "Accepting Entries" %}
+                  <i class="fas fa-vote-yea text-warning"></i>
+                {% elif meet.status == "Assignments Pending" %}
+                  <i class="fas fa-clipboard text-info"></i>
+                {% elif meet.status == "Unpublished" %}
+                  <i class="far fa-eye-slash text-black-50"></i>
+                {% endif %}
+                {{ meet.status }}
+
               </td>
-              <td class="align-top  text-center">
+              <td class="align-top text-center">
                 {{ meet.get_athletes() | length }}
               </td>
               {% if school %}
@@ -81,7 +89,7 @@
                     <a href="{{ 
                     url_for('show_enter_meet_upload_form', meet_id=meet.id) }}">
                       <button type="button" class="btn btn-warning tms-meet-btn">
-                        Enter Meet
+                        <i class="fas fa-vote-yea"></i>&nbsp;&nbsp;Enter Meet
                       </button>
                     </a>
                   {% endif %}
