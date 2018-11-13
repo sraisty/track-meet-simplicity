@@ -8,7 +8,9 @@
 {% endblock %}
 
 {% block secondary_nav_title %}
-    Edit > {{ athlete.full_name() }}
+  <div class="align-left">
+    Edit Athlete&nbsp;&nbsp;<i class="fas fa-angle-double-right"></i>&nbsp;&nbsp{{ athlete.full_name() }}
+  </div>
 {% endblock secondary_nav_title %}
 
 
@@ -17,7 +19,7 @@
 
 
 {% block content %}
-  <form action="{{ url_for('do_edit_athlete_detail', athlete_id=athlete.id) }}" method="POST">
+  <form class="mb-5" action="{{ url_for('do_edit_athlete_detail', athlete_id=athlete.id) }}" method="POST">
     
     <div class="form-group">
       <label for="fname">First Name:</label>
@@ -79,10 +81,13 @@
       {% endif %} />
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="fas fa-check-circle"></i>&nbsp;&nbsp;Save Changes
+    </button>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
+      <i class="fas fa-times-circle"></i>&nbsp;&nbsp;Cancel
+    </a>
   </form>
-  <a href="{{ url_for('show_athlete_detail', athlete_id=athlete.id) }}">
-    <button class="btn btn-secondary">Cancel</button>
-  </a>
+
 
 {% endblock %}

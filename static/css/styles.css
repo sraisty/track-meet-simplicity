@@ -79,6 +79,8 @@ tbody > tr > td > a {
   font-weight: 450;
 }
 
+
+
 .btn-warning {
   /* saffron yellow */
   background-color: #F6AE2D!important;
@@ -102,8 +104,13 @@ tbody > tr > td > a {
 }
 
 .tms-meet-btn {
-  width: 170px;
+  width: 190px;
 }
+
+.tms-meet-btn > i {
+  line-height: 1.5;
+}
+
 
 .tms-file-upload {
   height: auto;

@@ -55,9 +55,12 @@
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary">Submit</button>
-      <a href="{{ url_for('show_school_detail', school_id=school.id) }}">
-        <button class="btn btn-secondary">Cancel</button>
+
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-check-circle"></i>&nbsp;&nbsp;Save Changes
+      </button>
+      <a class="btn btn-secondary btn-lg" href="{{ url_for('show_school_detail', school_id=school.id) }}">
+        <i class="fas fa-times-circle"></i>&nbsp;&nbsp;Cancel
       </a>
     </form>
 

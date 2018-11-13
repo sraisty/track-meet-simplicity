@@ -43,17 +43,21 @@
 
 {% macro MACRO_SHOW_EVENTS_CARD(meet, ev_type, event) %}
   <div class="card">
-    <div class="card-header" id="{{ event.name }}">
-      <button class="btn btn-link tms-link justify-content-between" data-toggle="collapse" data-target="#collapse{{event.code}}" aria-expanded="true" aria-controls="collapse{{event.code}}">
-        <span class="mr-auto">{{ event.name }} :&nbsp;</span>
-        <span class-"badge badge-secondary">
-          {{ meet.get_event_athlete_count_across_divs(event) }} athletes
-        </span>
-      </button>
-    </div>
+    <a class="flex-d flex-row card-header btn btn-link tms-link justify-content-between" id="{{ event.name }}"
+        data-toggle="collapse" data-target="#collapse{{event.code}}" 
+        aria-expanded="true" aria-controls="collapse{{event.code}}">
+      {% if meet.event_is_oversubscribed(event) %}
+        <div><i class="fas fa-exclamation-triangle text-success"></i></div>
+      {% endif %}
+      <div class="mr-auto">{{ event.name }} :&nbsp;</div>
+      <div>
+        {{ meet.get_event_athlete_count_across_divs(event) }} athletes
+        {{ meet.get_event_heat_count_across_divs(event) }} heats
+      </div>
+    </a>
     <div id="collapse{{event.code}}" class="collapse" aria-labelledby="{{event.code}}" data-parent="#{{ ev_type }}-event-accordion">
-      <div class="card-body">
-        <ul class="list-group">
+      {# <div class="card-body"> #}
+        <ul class="list-group card-body">
           {% for mde in meet.get_event_mdes(event) %}
             {% set num_entries = mde.entries|length %}
 
@@ -63,17 +67,10 @@
               {% set oversubscribed = false %}
             {% endif %}
 
-            <a href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
-              {% if mde.status == "Assigned" %}
-                {% if oversubscribed %}
-                  <li class="d-flex list-group-item bg-warning justify-content-between align-items-center">
-                {% else %}  
-                  <li class="d-flex list-group-item bg-secondary justify-content-between align-items-center">
-                {% endif %}
-              {% else %}
-                <li class="d-flex list-group-item justify-content-between align-items-center">
-              {% endif %}
-                  <div class="flex-fill tms-link d-flex">
+            <a class ="list-group-item list-group-item-action d-flex d-flex-row" 
+                href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
+                {# <li class="d-flex list-group-item justify-content-between align-items-center"> #}
+                  <div class=" d-flex flex-fill tms-link">
                     {{ mde.division.name }}
                   </div>
                   <div class="d-flex flex-fill p-1">
@@ -81,8 +78,10 @@
                       <i class="fas fa-exclamation-triangle fa-2x"></i>
                     {% elif mde.status == "Unassigned" %}
                       <i class="fas fa-hourglass-half fa-2x"></i>
-                    {% elif mde.status == "Assigned" %}
-                      <i class="fas fa-check-circle fa-2x"></i>
+                    {% elif mde.status == "Assigned" and num_entries == 0 %}
+                        <i class="fas fa-times-circle fa-2x"></i>   
+                    {% else %}                   
+                        <i class="fas fa-user-check fa-2x"></i>
                     {% endif %}
                   </div>
                   <div class="d-flex flex-fill p-1 flex-column">
@@ -100,12 +99,9 @@
                       {% endif %}
                     {% endif %}
                   </div>
-
-              </li>
             </a>
           {% endfor %}
         </ul>
-      </div>
     </div>
   </div>
 {% endmacro %}

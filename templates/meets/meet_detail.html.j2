@@ -64,41 +64,45 @@
       <div class="bg-info  flex-fill p-3 text-center">{{ meet.divisions | length }} Divisions</div>
       <div class="bg-secondary  flex-fill p-3 text-center">{{ meet.events | length }} Events</div>
       <div class="bg-info  flex-fill p-3 text-center">{{ meet.mdes | length }} Contests</div>
-      {# <div class="bg-secondary p-3 text-center"> XXX Heats</div> #}
-      <div class="bg-secondary  flex-fill p-3 text-center">{{ meet.entries | length }} Entries</div>
+      <div class="bg-secondary p-3 text-center"> 
+        {% set num_heats = meet.get_num_heats() %}
+        {% if num_heats %}
+          {{ num_heats }} Heats
+        {% else %}
+          # Heats: TBD
+        {% endif %}
+      </div>
+      <div class="bg-info  flex-fill p-3 text-center">{{ meet.entries | length }} Entries</div>
     </div>
   </h6>
 
   <div class="d-md-flex flex-row">
     <div class="mr-auto">
       {% if user_is_entered %}
-        <a href="{{url_for('show_meet_entries', meet_id=meet.id, school_id=my_school_id) }}">
-          <button class="btn btn-warning  btn-lg mb-1 mr-1">
-            <i class="fas fa-clipboard-list"></i>&nbsp;&nbsp;Review My Meet Entries
-          </button>
+        <a href="{{url_for('show_meet_entries', meet_id=meet.id, school_id=my_school_id) }}"
+           class="btn btn-warning  btn-lg mb-1 mr-1">
+            <i class="fas fa-clipboard-list"></i>
+            &nbsp;&nbsp;Review My Meet Entries
         </a>
       {% else %}
-        <a href="{{ url_for('show_enter_meet_upload_form', meet_id=meet.id) }}">
-          <button class="btn btn-warning tms-meet-btn btn-lg mb-1 mr-1">Enter Meet</button>
-        </a>
+        <a href="{{ url_for('show_enter_meet_upload_form', meet_id=meet.id) }}" class="btn btn-warning tms-meet-btn btn-lg mb-1 mr-1"><i class="fas fa-vote-yea"></i>&nbsp;&nbsp;Enter Meet</a>
       {% endif %}
     </div>
     <div>
       {% if user_is_hosting %}
-        <a href="{{url_for('show_edit_meet_form', meet_id=meet.id) }}">
-          <button class="btn btn-success btn-lg mb-1">Edit Meet Settings</button>
+        <a href="{{url_for('do_meet_assignment_all_mdes', meet_id=meet.id) }}" 
+           class="btn btn-success btn-lg mb-1">
+            <i class="fas fa-user-check"></i>&nbsp;&nbspAssign Athletes
         </a>
-        <a href="{{url_for('do_meet_assignment_all_mdes', meet_id=meet.id) }}">
-          <button class="btn btn-success btn-lg mb-1">Assign Athletes</button>
+        <a href="{{url_for('show_meet_entries', meet_id=meet.id) }}"
+           class="btn btn-success btn-lg mb-1">
+            <i class="fas fa-clipboard-list"></i>
+            &nbsp;&nbsp;Review All Meet Entries
         </a>
-        <a href="{{url_for('show_meet_entries', meet_id=meet.id) }}">
-          <button class="btn btn-success btn-lg mb-1">Review All Meet Entries</button>
+        <a href="{{url_for('show_edit_meet_form', meet_id=meet.id) }}" 
+           class="btn btn-success btn-lg mb-1">
+           <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit Meet Settings
         </a>
-  {#       <a href="#"> 
-          <button class="btn btn-success btn-lg mb-1">
-            Change Meet Status <i class="fas fa-caret-down"></i>
-          </button>
-        </a> #}
       {% endif %}
     </div>
   </div>

@@ -180,8 +180,6 @@ class Meet(db.Model):
         meet.max_heats_per_mde = meet_info_dict.get(
                 "max_heats_per_mde")
 
-
-
         # associate this meet with the selected events (i.e. "4x400 relay"),
         # and specify how the events should be ordered within this meet
         # If ev_code_order is None, then createEventOrders assumes the
@@ -224,6 +222,24 @@ class Meet(db.Model):
             count += len(mde.entries)
         return count
 
+    def get_event_heat_count_across_divs(self, ev):
+        mde_q = MeetDivisionEvent.query.filter(
+                MeetDivisionEvent.meet == self,
+                MeetDivisionEvent.event == ev)
+        count = 0
+        for mde in mde_q:
+            count += mde.get_num_assigned_heats()
+        return count
+
+    def event_is_oversubscribed(self, ev):
+        mde_q = MeetDivisionEvent.query.filter(
+                MeetDivisionEvent.meet == self,
+                MeetDivisionEvent.event == ev)
+        for mde in mde_q:
+            if len(mde.entries) > mde.get_max_athletes():
+                return True
+        return False
+
 
     def school_is_entered(self, school_id):
         school = School.query.get(school_id)
@@ -262,7 +278,6 @@ class Meet(db.Model):
         # order_by
         return school_entries
 
-
     @classmethod
     def reorder_mdes(cls):
         # TODO if user changes order of meets and divisions
@@ -274,8 +289,19 @@ class Meet(db.Model):
         self.status = "Assignments Pending"
         db.session.commit()
 
+    def get_num_heats(self):
+        # import ipdb; ipdb.set_trace()
+        if self.status == "Accepting Entries" or self.status == "Unpublished":
+            return None
+        total_heats = 0
+        for mde in self.mdes:
+            mde_heats = mde.get_num_assigned_heats()
+            if mde_heats:
+                total_heats += mde_heats
+        return total_heats
 
 # #######################  ATHLETE CLASS #####################
+
 
 class Athlete(db.Model):
     """ """
@@ -794,11 +820,12 @@ class MeetDivisionEvent(db.Model):
 
 
     def __repr__(self):
-        return "\nMeetDivEvent#{}: Meet: '{}', Event: {}, Division: {}".format(
+        return "\nMeetDivEvent#{}: Seq#:{}, Meet: '{}', Event: {}, Division: {}".format(
                 self.id,
+                self.seq_num,
                 self.meet.name,
                 self.event.code,
-                self.division.name())
+                self.division.name)
 
     @classmethod
     def generate_mdes(cls, meet, events_list, divisions_list):
@@ -850,8 +877,12 @@ class MeetDivisionEvent(db.Model):
         return self.event.max_per_heat
 
     def get_num_assigned_heats(self):
+        # import ipdb; ipdb.set_trace()
+        if len(self.entries) == 0:
+            return 0
         if len(self.entries) < self.get_max_athletes():
             return 1 + (len(self.entries)-1) // self.get_max_athletes_per_heat()
+        return self.get_max_heats()
 
     def assign_seed_numbers(self):
         # make a copy because sqlalchemy doesn't let me reorder it

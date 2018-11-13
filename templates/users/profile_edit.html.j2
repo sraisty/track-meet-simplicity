@@ -15,8 +15,12 @@
       </div>
       {{ MACRO_GET_USER_SCHOOL("Change my school to:") }}
       <button type="submit" class="btn btn-primary btn-lg">
-        <i class="fas fa-user-circle"></i>&nbsp;&nbsp;Update my Profile
+        <i class="fas fa-check-circle"></i>&nbsp;&nbsp;Save Profile Changes
       </button>
+      <a href="{{url_for('show_user_profile')}}" class="btn btn-secondary btn-lg">
+        <i class="fas fa-times-circle"></i>&nbsp;&nbsp;Cancel
+      </a>
+
     </form>
 
     <h3>Change my password</h3>
@@ -26,8 +30,11 @@
           <input type="password" id="password" class="form-control" name="password" placeholder="Password" required />
       </div>
       <button type="submit" class="btn btn-primary btn-lg">
-        <i class="fas fa-key"></i>&nbsp;&nbsp;Change my Password
+        <i class="fas fa-check-circle"></i>&nbsp;&nbsp;Save New Password
       </button>
+      <a href="{{url_for('show_user_profile')}}" class="btn btn-secondary btn-lg">
+        <i class="fas fa-times-circle"></i>&nbsp;&nbsp;Cancel
+      </a>
     </form>
 
 {% endblock content %}

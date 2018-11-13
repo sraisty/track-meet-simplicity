@@ -18,7 +18,6 @@
             <th class="text-center">{{ school.code }}<br>Athletes</th>
           {% endif %}
           <th class="text-center">Total # Entries</th>
-{#           <th>% Full</th> #}
           {% if show_actions %}
             <th class="text-center">Actions</th>
           {% endif %}
@@ -45,9 +44,9 @@
               </td>
               <td class="align-top">
                 {% if meet.status == "Accepting Entries" %}
-                  <i class="fas fa-vote-yea text-warning"></i>
+                  <i class="fas fa-vote-yea text-info"></i>
                 {% elif meet.status == "Assignments Pending" %}
-                  <i class="fas fa-clipboard text-info"></i>
+                  <i class="fas fa-clipboard text-warning"></i>
                 {% elif meet.status == "Unpublished" %}
                   <i class="far fa-eye-slash text-black-50"></i>
                 {% endif %}
@@ -65,34 +64,33 @@
               <td class="align-top text-center">
                 {{ meet.entries | length }}
               </td>
-{#               <td class="align-top">
-                % Full
-              </td> #}
+
+
               {% if show_actions %}
                 <td class="align-top">
                   {% set myschool_id=session.get('user_school_id') %}
                   {% if meet.host_school.id == myschool_id %}
-                    <a href="{{ url_for('show_edit_meet_form', meet_id=meet.id) }}">
-                      <button type="button" class="btn btn-primary tms-meet-btn">
-                        Manage Meet
-                      </button>
+                    <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}"
+                        class="btn btn-primary tms-meet-btn d-flex justify-content-between">
+                        <i class="fas fa-bullhorn"></i>
+                        <div>&nbsp;Manage Meet</div>
                     </a>
                   {% elif meet.school_is_entered(myschool_id) and meet.status == "Accepting Entries" %}
-                   {# and action=="Edit Entries" and school %} #}
-                    <a href="{{ url_for('show_meet_entries', meet_id=meet.id, school_id=myschool_id ) }}">
-                      <button type="button" class="btn btn-secondary tms-meet-btn">
-                        Review My Entries
-                      </button>
+
+                    <a href="{{ url_for('show_meet_entries', meet_id=meet.id, school_id=myschool_id ) }}" 
+                      class="btn btn-secondary tms-meet-btn d-flex justify-content-between">
+                        <i class="fas fa-clipboard-list"></i>&nbsp;&nbsp;Review My Entries
                     </a>
 
                   {% elif meet.status == 'Accepting Entries' %}
                     <a href="{{ 
-                    url_for('show_enter_meet_upload_form', meet_id=meet.id) }}">
-                      <button type="button" class="btn btn-warning tms-meet-btn">
+                      url_for('show_enter_meet_upload_form', meet_id=meet.id) }}" 
+                      class="btn btn-warning tms-meet-btn d-flex justify-content-between">
                         <i class="fas fa-vote-yea"></i>&nbsp;&nbsp;Enter Meet
-                      </button>
                     </a>
                   {% endif %}
+
+
 
                 </td>
               {% endif %}

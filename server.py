@@ -571,7 +571,7 @@ def show_edit_athlete_detail(athlete_id):
 def do_edit_athlete_detail(athlete_id):
     athlete = Athlete.query.get(athlete_id)
 
-    athlete.fname = request.form.get('name', athlete.fname)
+    athlete.fname = request.form.get('fname', athlete.fname)
     athlete.minitial = request.form.get('minitial', athlete.minitial)
     athlete.lname = request.form.get('lname', athlete.lname)
     athlete.div_id = request.form.get('division_id', athlete.div_id)

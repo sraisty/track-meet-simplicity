@@ -21,7 +21,7 @@
     <div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div>
       School:
-      <a href="{{url_for('show_school_detail', school_id=athlete.school.id) }}">
+      <a class="tms-link" href="{{url_for('show_school_detail', school_id=athlete.school.id) }}">
         {{ athlete.school.name }}
       </a>
     </div>
@@ -54,7 +54,7 @@
           {% for entry in athlete.entries %}   
             <tr>
               <td>
-                <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+                <a class="tms-link" href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
                   {{ entry.mde.meet.name }}
                 </a>
               </td>
@@ -62,7 +62,7 @@
                 {{ entry.mde.meet.date.strftime("%B %d, %Y") }}
               </td>
               <td>
-                <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+                <a class="tms-link" href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
               mde_id=entry.mde.id) }}">
                   {{ entry.event.name }}
                 </a>
@@ -99,7 +99,7 @@
           {% for entry in athlete.entries %}   
             <tr>
               <td>
-                <a href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
+                <a class="tms-link" href="{{ url_for('show_meet_detail', meet_id=entry.mde.meet.id) }}">
                   {{ entry.mde.meet.name }}
                 </a>
               </td>
@@ -107,7 +107,7 @@
                 {{ entry.mde.meet.date.strftime("%B %d, %Y") }}
               </td>
               <td>
-                <a href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
+                <a class="tms-link" href="{{ url_for('show_mde_detail', meet_id=entry.mde.meet.id,
               mde_id=entry.mde.id) }}">
                   {{ entry.event.name }}
                 </a>
@@ -148,7 +148,7 @@
       {# Gender: {{ athlete.gender }}<br> #}
       {# Grade: {{ athlete.grade }}<br> #}
       <p><strong>School:</strong>
-        <a href="{{url_for('show_school_detail', school_id= athlete.school.id) }}">
+        <a class="tms-link" href="{{url_for('show_school_detail', school_id= athlete.school.id) }}">
           {{ athlete.school.name }}
         </a>
       </p>
@@ -158,10 +158,9 @@
       <p><strong>Entry Problems:</strong> {{ athlete.problem }}</p>
       <p><strong>Coach Notes:</strong> {{ athlete.coach_notes }}</p>
 
-      <a href="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id) }}">
-        <button  class="btn btn-primary">
-          Edit Athlete Profile
-        </button>
+      <a class="btn btn-primary btn-lg" 
+         href="{{url_for('show_edit_athlete_detail', athlete_id=athlete.id) }}">
+         <i class="fas fa-edit"></i>&nbsp;&nbsp;Edit Athlete Profile
       </a>
   {% endcall %}
 
