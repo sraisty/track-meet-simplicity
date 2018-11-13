@@ -511,7 +511,7 @@ def show_school_entry_problems(school_id):
 @app.route('/meets/<int:meet_id>/entries/<int:entry_id>/edit')
 def show_edit_entry_form(entry_id, meet_id=None):
     entry = Entry.query.get(entry_id)
-    return render_template("/entries/show_edit_entry_form.html.j2", entry)
+    return render_template("/entries/entry_detail_edit_form.html.j2", entry=entry)
 
 
 @app.route('/entries/<int:entry_id>/do-edit', methods=['POST'])

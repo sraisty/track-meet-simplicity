@@ -27,7 +27,7 @@
 
 {% block nav2_subtitle %}
   <div class="d-flex flex-row justify-content-between">
-    <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}">
+    <a href="{{ url_for('show_meet_detail', meet_id=mde.meet.id) }}" class="tms-link">
       {{ mde.meet.name }}
     </a>
     {{ mde.meet.date.strftime("%B %d, %Y") }}
@@ -35,7 +35,7 @@
   <p>Status: {{mde.status}}</p>
 
   <h6>
-    <div class="d-sm-flex flex-row ">
+    <div class="d-sm-flex flex-row border-bottom">
       <div class="bg-info flex-fill p-3 text-center">Max Athletes Allowed: {{max_athletes}}</div>
       <div class="bg-secondary flex-fill  p-3 text-center">Athletes Entered: {{ num_entries }}</div>
       <div class="bg-info flex-fill p-3 text-center">
@@ -132,7 +132,9 @@
 
           <td class="text-center">
             {% if entry.problem %}
-            <i class="fas fa-exclamation-triangle danger"></i>
+              <a href="{{url_for('show_edit_entry_form', entry_id=entry.id)}}">
+                <i class="fas fa-exclamation-triangle danger text-danger"></i>
+              </a>
             {% endif %}
           </td>
         </tr>
@@ -190,7 +192,9 @@
                 </td>
                 <td>
                   {% if entry.problem %}
-                  <i class="fas fa-exclamation-triangle danger"></i>
+                  <a href="{{url_for('show_edit_entry_form', entry_id=entry.id)}}">
+                    <i class="fas fa-exclamation-triangle danger text-danger"></i>
+                  </a>
                   {% endif %}
                 </td>
               </tr>

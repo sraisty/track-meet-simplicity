@@ -62,7 +62,9 @@
               </td>
               <td class="text-center">
                 {% if entry.problem %}
-                  <i class="fas fa-exclamation-triangle danger"></i>
+                  <a href="{{url_for('show_edit_entry_form', entry_id=entry.id)}}">
+                    <i class="fas fa-exclamation-triangle danger text-danger"></i>
+                  </a>
                 {% endif %}
               </td>
             </tr>

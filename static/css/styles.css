@@ -15,6 +15,12 @@ tbody > tr > td > a {
   background-color: #2F4858!important;
 }
 
+.text-primary {
+  /* dark slate grey */
+  color: #2F4858!important;
+  font-weight: 450;
+}
+
 .bg-info {
   /* iceberg blue */
   background-color: #6EB4D1!important;
@@ -93,6 +99,16 @@ tbody > tr > td > a {
   color: #F6AE2D!important;
 }
 
+.text-danger {
+  color: #CD533B!important;
+}
+
+.text-info {
+  color: #6EB4D1!important;
+  filter: brightness(80%);  
+}
+
+
 .btn-info {
   /* iceberg blue */
   background-color: #6EB4D1!important;
@@ -111,6 +127,9 @@ tbody > tr > td > a {
   line-height: 1.5;
 }
 
+.tms-event-title {
+  font-weight: 450;
+}
 
 .tms-file-upload {
   height: auto;

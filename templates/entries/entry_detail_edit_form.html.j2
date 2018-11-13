@@ -75,7 +75,7 @@
       <form class="px-2" action="{{ url_for('do_edit_entry', meet_id=entry.meet.id, entry_id=entry.id) }}" method="POST">
         <div class="form-group col">
           {% if entry.event.is_track() %}
-            <label for="mark">Enter best time</label>
+            {# <label for="mark">Enter best time</label> #}
             <input type="text" class="form-control" name="mark" 
               placeholder="Enter athlete's best time for this event" 
               {% if entry.mark %} value="{{ entry.mark_to_string() }}"{% endif %}  />
@@ -83,7 +83,7 @@
               placeholder="seconds" disabled 
               {% if entry.mark_type %} value="{{ entry.mark_type }}"{% endif %} />
           {% else %}
-            <label for="mark"><strong>Enter best distance or height:</strong></label>
+            {# <label for="mark"><strong>Enter best distance or height:</strong></label> #}
             <input type="text" class="form-control" name="mark" 
               placeholder="Enter athlete's best distance or height for this event" 
               {% if entry.mark %} value="{{ entry.mark_to_string() }}"{% endif %}  />
@@ -101,16 +101,16 @@
 
           <a href="#">
           {# {{ url_for('do_delete_entry', entry_id=entry.id) }}" #}
-            <button class="btn btn-warning">
+            <a class="btn btn-warning">
               <i class="fas fa-trash"></i>&nbsp;&nbsp;
               Delete Entry
-            </button>
+            </a>
           </a>
           <a href="#">
             {# "{{ url_for('show_new_entry_form') }}" #}
-            <button class="btn btn-success">
+            <a class="btn btn-success">
               <i class="fas fa-plus"></i>&nbsp;&nbsp;Create New Entry
-            </button>
+            </a>
           </a>
         </div>
       </form>
