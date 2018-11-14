@@ -21,11 +21,11 @@
   {% set meet_status_bar_color = "bg-secondary" %}
 {% elif meet.status == "Accepting Entries" %}
   {% set meet_status_icon = "fas fa-vote-yea" %}
-  {% set meet_status_bar_color = "bg-info" %}
+  {% set meet_status_bar_color = "bg-warning" %}
 {% elif meet.status =="Assignments Pending" %}
 {#   {% set meet_status_icon = "fas fa-clipboard text-warning" %} #}
   {% set meet_status_icon = "fas fa-user-clock" %}
-    {% set meet_status_bar_color = "bg-warning" %}
+    {% set meet_status_bar_color = "bg-info" %}
 {% elif meet.status == "Assignments Done" %}
   {% set meet_status_icon = "fas fa-user-check text-white" %}
   {% set meet_status_bar_color = "bg-primary text-white" %}  
@@ -84,16 +84,21 @@
             <i class="fas fa-clipboard-list"></i>
             &nbsp;&nbsp;Review My Meet Entries
         </a>
-      {% else %}
-        <a href="{{ url_for('show_enter_meet_upload_form', meet_id=meet.id) }}" class="btn btn-warning tms-meet-btn btn-lg mb-1 mr-1"><i class="fas fa-vote-yea"></i>&nbsp;&nbsp;Enter Meet</a>
+      {% elif meet.status == "Accepting Entries" %}
+        <a href="{{ url_for('show_enter_meet_upload_form', meet_id=meet.id) }}" class="btn btn-warning tms-meet-btn btn-lg mb-1 mr-1">
+          <i class="fas fa-vote-yea"></i>
+          &nbsp;&nbsp;Enter Meet
+        </a>
       {% endif %}
     </div>
     <div>
       {% if user_is_hosting %}
-        <a href="{{url_for('do_meet_assignment_all_mdes', meet_id=meet.id) }}" 
-           class="btn btn-success btn-lg mb-1">
-            <i class="fas fa-user-check"></i>&nbsp;&nbspAssign Athletes
-        </a>
+        {% if meet.status == "Accepting Entries" %}
+          <a href="{{url_for('do_meet_assignment_all_mdes', meet_id=meet.id) }}" 
+             class="btn btn-success btn-lg mb-1">
+              <i class="fas fa-user-check"></i>&nbsp;&nbspAssign Athletes
+          </a>
+        {% endif %}
         <a href="{{url_for('show_meet_entries', meet_id=meet.id) }}"
            class="btn btn-success btn-lg mb-1">
             <i class="fas fa-clipboard-list"></i>

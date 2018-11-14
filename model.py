@@ -529,7 +529,7 @@ class Entry(db.Model):
     athlete_id = db.Column(db.ForeignKey("athletes.id"), nullable=False)
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
-    heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
+    # heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
     seed_num = db.Column(db.Integer, nullable=True)
 
     # An athlete's "mark" for a parituclar event is either his/her
@@ -573,7 +573,7 @@ class Entry(db.Model):
                              uselist=False,
                              back_populates="entries")
 
-    heat = db.relationship("Heat", uselist=False, back_populates="entries")
+    # heat = db.relationship("Heat", uselist=False, back_populates="entries")
 
     # editor_users = db.relationship("User", secondary="schools")
 
@@ -752,19 +752,19 @@ class Entry(db.Model):
 
 # #######################  HEAT CLASS #####################
 
-class Heat(db.Model):
-    __tablename__ = "heats"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # TODO decide if seq_num is unique to whole meet or just this MDE
-    seq_num = db.Column(db.Integer, default=1, nullable=False)
-    entries = db.relationship(
-            "Entry", uselist=True, back_populates="heat")
-    mde = db.relationship(
-        "MeetDivisionEvent", secondary="entries", uselist=False,
-        back_populates="heats")
+# class Heat(db.Model):
+#     __tablename__ = "heats"
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     # TODO decide if seq_num is unique to whole meet or just this MDE
+#     seq_num = db.Column(db.Integer, default=1, nullable=False)
+#     entries = db.relationship(
+#             "Entry", uselist=True, back_populates="heat")
+#     mde = db.relationship(
+#         "MeetDivisionEvent", secondary="entries", uselist=False,
+#         back_populates="heats")
 
-    def __repr__(self):
-        return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
+#     def __repr__(self):
+#         return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
 
     # def assign_lanes_pos(self):
     #     pass
@@ -810,13 +810,12 @@ class MeetDivisionEvent(db.Model):
             "Entry", uselist=True, order_by="Entry.mark",
             back_populates="mde")
 
-
     athletes = db.relationship(
             "Athlete", secondary="entries", uselist=True,
             back_populates="mdes")
 
-    heats = db.relationship(
-            "Heat", secondary="entries", uselist=True, back_populates="mde")
+    # heats = db.relationship(
+    #         "Heat", secondary="entries", uselist=True, back_populates="mde")
 
 
     def __repr__(self):

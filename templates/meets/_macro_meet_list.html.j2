@@ -44,9 +44,9 @@
               </td>
               <td class="align-top">
                 {% if meet.status == "Accepting Entries" %}
-                  <i class="fas fa-vote-yea text-info"></i>
+                  <i class="fas fa-vote-yea text-warning"></i>
                 {% elif meet.status == "Assignments Pending" %}
-                  <i class="fas fa-user-clock text-warning"></i>
+                  <i class="fas fa-user-clock text-info"></i>
                 {% elif meet.status == "Assignments Done" %}
                   <i class="fas fa-user-check"></i>
                 {% elif meet.status == "Unpublished" %}

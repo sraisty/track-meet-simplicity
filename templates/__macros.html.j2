@@ -80,36 +80,38 @@
 
             <a class ="list-group-item list-group-item-action d-flex d-flex-row" 
                 href="{{url_for('show_mde_detail', meet_id=meet.id, mde_id=mde.id)}}">
-                {# <li class="d-flex list-group-item justify-content-between align-items-center"> #}
-                  <div class="d-flex flex-fill p-1">
-                    {% if oversubscribed %}
-                      <i class="fas fa-exclamation-triangle fa-lg text-danger"></i>
-                    {% elif mde.status == "Unassigned" %}
-                      <i class="fas fa-clock text-primary fa-lg"></i>
-                    {% elif mde.status == "Assigned" and num_entries == 0 %}
-                        <i class="fas fa-times-circle fa-lg text-warning"></i>   
-                    {% else %}                   
-                        <i class="fas fa-user-check fa-lg text-info"></i>
-                    {% endif %}
-                  </div>
-                  <div class=" d-flex flex-fill tms-link">
-                    {{ mde.division.name }}
-                  </div>
-                  <div class="d-flex flex-fill p-1 flex-column">
-                    <span class="d-flex p-1">
-                      {{ num_entries}} entries for {{mde.get_max_athletes() }} slots
+              <div class="d-flex flex-fill p-1">
+                {% if oversubscribed %}
+                  <i class="fas fa-exclamation-triangle fa-lg text-danger"></i>
+                {% elif mde.status == "Unassigned" %}
+                  <i class="fas fa-clock text-primary fa-lg"></i>
+                {% elif mde.status == "Assigned" and num_entries == 0 %}
+                    <i class="fas fa-times-circle fa-lg text-warning"></i>   
+                {% else %}                   
+                    <i class="fas fa-user-check fa-lg text-info"></i>
+                {% endif %}
+              </div>
+              <div class=" d-flex flex-fill tms-link">
+                {{ mde.division.name }}
+              </div>
+              <div class="d-flex flex-fill flex-column">
+                <span class="d-flex">
+                  Entries: {{ num_entries}}, Slots: {{mde.get_max_athletes() }}
+                </span>
+                <span class="d-flex">
+                  Heats: {{ mde.get_num_assigned_heats() }} 
+                </span>
+                {% if mde.status == "Assigned" %}
+                  <span class="d-flex">
+                    Assigned athletes: {{ mde.get_num_assignments() }}
+                  </span>
+                  {% if oversubscribed %}
+                    <span class="d-flex">
+                      Unassigned athletes: {{ num_entries - mde.get_num_assignments() }}
                     </span>
-                    {% if mde.status == "Assigned" %}
-                      <span class="d-flex p-1">
-                        Assigned: {{ mde.get_num_assignments() }}
-                      </span>
-                      {% if oversubscribed %}
-                        <span class="d-flex p-1">
-                          Unassigned: {{ num_entries - mde.get_num_assignments() }}
-                        </span>
-                      {% endif %}
-                    {% endif %}
-                  </div>
+                  {% endif %}
+                {% endif %}
+              </div>
             </a>
           {% endfor %}
         </ul>

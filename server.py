@@ -223,8 +223,8 @@ def show_edit_school_detail(school_id):
 @app.route('/schools/<int:school_id>/do_edit', methods=['POST'])
 def do_edit_school_detail(school_id):
     school = School.query.get(school_id)
-    school.name = request.form.get('name', school.name)
-    school.code = request.form.get('code', school.code)
+    school.name = request.form.get('school_name', school.name)
+    school.code = request.form.get('school_code', school.code)
     school.league = request.form.get('league', school.league)
     school.section = request.form.get('section', school.section)
     school.city = request.form.get('city', school.city)

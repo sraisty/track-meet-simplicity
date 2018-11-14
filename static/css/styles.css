@@ -2,6 +2,10 @@ tbody > tr > td > a {
   color: #0e64c1;
 }
 
+.fa-lg {
+  line-height: 1em;
+}
+
 .btn-link {
   color: #0e64c1;
 }
