@@ -30,3 +30,12 @@ if __name__ == "__main__":
         parse_hytek_file("seed_data/{}".format(
                             EXAMPLE_MEETS[i]['filename']),
                          meet)
+
+    # Fix Unattached meets. Assign to Carmel HS.
+    carmel = School.get.filter_by(code="CARM")
+    unattached_meets = Meets.query.filter_by(host_school_id=1)
+    for m in unattached_meets:
+        m.host_school = carmel
+    db.session.commit()
+
+

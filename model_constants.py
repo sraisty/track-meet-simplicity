@@ -3,8 +3,8 @@ SUPERUSER_PASSWORD = "12345"
 USER_ROLES = ("superuser", "coach", "athlete", "other")
 
 GENDERS = ('M', 'F')
-MIDDLE_SCHOOL_GRADES = ('6', '7', '8')
 
+MIDDLE_SCHOOL_GRADES = ('6', '7', '8')
 HIGH_SCHOOL_GRADES = ('9', '10', '11', '12')
 GRADES = MIDDLE_SCHOOL_GRADES + HIGH_SCHOOL_GRADES
 
@@ -29,15 +29,19 @@ SPORTS = ("outdoor", "indoor", "cross country")
 # START_TYPE = ("allies", "lanes", "waterfall")
 
 HEAT_FLIGHT_ASSIGN_METHOD = ("best-to-worst", "worst-to-best", "random")
+SEED_MARK_TIEBREAKER = (
+    "random", "evenly_among_teams", "maximize_participants",
+    "reward_persistence")
 
 TRACK_LANE_ASSIGN_METHOD = (
         "serpentine", "random", "team lanes")
 FIELD_ORDER_ASSIGN_METHOD = (
         "best-to-worst", "worst-to-best", "teams alternate")
 
-DEFAULT_EVENT_ORDER = ["4x100M", "1600M", "100H", "110H", "65H", "400M",
-                        "100M", "800M", "300H", "200M", "3200M", "4x400M",
-                        "HJ", "PV", "LJ", "TJ", "DT", "SP"]
+DEFAULT_EVENT_ORDER = [
+        "4x100M", "1600M", "100H", "110H", "65H", "400M",
+        "100M", "800M", "300H", "200M", "3200M", "4x400M",
+        "HJ", "PV", "LJ", "TJ", "DT", "SP"]
 
 DEFAULT_DIVISION_ORDER = ["6F", "7F", "8F", "6M", "7M", "8M"]
 
@@ -219,7 +223,7 @@ EVENT_DEFS = (
         },
         {
             "code": "100H",
-            "name": "100 Meter Hurdles (Girls Only)",
+            "name": "100 Meter Hurdles (Girls)",
             "type": "hurdle",
             "max_per_heat": 8,
             "outdoor": True,
@@ -227,7 +231,7 @@ EVENT_DEFS = (
         },
         {
             "code": "110H",
-            "name": "110 Meter Hurdles (Boys Only)",
+            "name": "110 Meter Hurdles (Boys)",
             "type": "hurdle",
             "max_per_heat": 8,
             "outdoor": True,
