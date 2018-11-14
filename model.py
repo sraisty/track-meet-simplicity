@@ -23,9 +23,9 @@ from model_constants import (
     TRACK_LANE_ASSIGN_METHOD, FIELD_ORDER_ASSIGN_METHOD, EVENT_DEFS,
     DEFAULT_DIVISION_ORDER, DEFAULT_EVENT_ORDER)
 
-# This is a hack. It's a number of seconds that is greater than any track meeet
-# event would possibly take, so I can get the database to do sorting of marks
-# without special handling.
+# This is a hack. It's a number of seconds that is greater than any track meet
+# event would possibly take, so I can get the database to do sorting of athlete 
+# entry marks from best to worst without special handling.
 INFINITY_SECONDS = 99999999
 
 db = SQLAlchemy()
@@ -93,8 +93,9 @@ class Meet(db.Model):
     max_teammates_per_event = db.Column(db.Integer, default=12, nullable=True)
     max_heats_per_mde = db.Column(db.Integer, default=1, nullable=True)
 
-    # TODO  Invited Schools is a many-to-many relationship with Meets, and
-    # requires an associative table or associative object.
+    # TODO  Invited/Entered Schools is a many-to-many relationship with Meets, and
+    # requires an associative table or associative object. It is different than
+    # entered schools.
     # invited_schools = db.relationship(
     #         "School", primaryjoin="School.id == Meet.host_school_id",
     #         uselist=True, back_populates="meets_invited")
@@ -151,8 +152,8 @@ class Meet(db.Model):
 
     @classmethod
     def init_meet(cls, meet_info_dict):
-        # Note that this function might not set the meet's host_school_id if
-        # the school doesn't already exist in the database
+        # Note that this function might not set the meet's host_school_id 
+        # correctly if the school doesn't already exist in the database
         info("init_meet")
         meet = Meet(
             name=meet_info_dict['name'],
@@ -183,7 +184,7 @@ class Meet(db.Model):
         # associate this meet with the selected events (i.e. "4x400 relay"),
         # and specify how the events should be ordered within this meet
         # If ev_code_order is None, then createEventOrders assumes the
-        # meet includes all possible events in alpha order by code.
+        # meet includes all possible events in alpha order by event code.
         events = EventOrdering.create_events_in_order(
                         meet,
                         meet_info_dict.get('event_order', DEFAULT_EVENT_ORDER))
@@ -214,6 +215,10 @@ class Meet(db.Model):
         return mdes
 
     def get_event_athlete_count_across_divs(self, ev):
+        """ For this meet, get the number of athletes, in all divisions, entered
+            into an event. Note that this is the number of ENTRIES, not ASSIGNMENTS.
+            TODO - rename this function to better reflect its
+        """
         mde_q = MeetDivisionEvent.query.filter(
                 MeetDivisionEvent.meet == self,
                 MeetDivisionEvent.event == ev)
@@ -223,6 +228,12 @@ class Meet(db.Model):
         return count
 
     def get_event_heat_count_across_divs(self, ev):
+        """ For a meet, count the number of required heats across all divisions
+            that are needed for a particular event, given the current number of 
+            entries.  Won't exceed the max_heat_count for each mde, or if some 
+            MDEs don't have a max_heat_count set, it won't exceed the overall 
+            setting for MaxHeatCount for the entire meet.
+        """
         mde_q = MeetDivisionEvent.query.filter(
                 MeetDivisionEvent.meet == self,
                 MeetDivisionEvent.event == ev)
@@ -230,6 +241,18 @@ class Meet(db.Model):
         for mde in mde_q:
             count += mde.get_num_assigned_heats()
         return count
+
+    def get_num_heats(self):
+        # TODO - seems redundant with get_event_heat_count_across_divs.
+        # Do I really need both? 
+        if self.status == "Accepting Entries" or self.status == "Unpublished":
+            return None
+        total_heats = 0
+        for mde in self.mdes:
+            mde_heats = mde.get_num_assigned_heats()
+            if mde_heats:
+                total_heats += mde_heats
+        return total_heats
 
     def event_is_oversubscribed(self, ev):
         mde_q = MeetDivisionEvent.query.filter(
@@ -239,11 +262,6 @@ class Meet(db.Model):
             if len(mde.entries) > mde.get_max_athletes():
                 return True
         return False
-
-
-    def school_is_entered(self, school_id):
-        school = School.query.get(school_id)
-        return school in self.schools_entered()
 
     def schools_entered(self):
         """ returns a list of school objects, ordered alphabetically by the
@@ -259,14 +277,22 @@ class Meet(db.Model):
             info(f"\t\t\t{s.name}, {s.code}")
         return schools
 
+    def school_is_entered(self, school_id):
+        school = School.query.get(school_id)
+        return school in self.schools_entered()
+
     def get_athletes(self, school_id=None):
+        """ Returns a list of athletes entered into this meet.
+        If school_id is
+        provided, it returns a list of the meet's athletes from that school
+        Note that each athlete only appears in the list once, regardless of
+        how many events the athlete is entered into.
+        """
         q = db.session.query(Athlete).join(Athlete.entries).join(Entry.meet)
         q = q.filter(Meet.id == self.id).distinct()
         if school_id:
             q = q.filter(Athlete.school_id == school_id)
-
         q = q.order_by(Athlete.fname).order_by(Athlete.lname)
-
         athletes = q.all()
         return athletes
 
@@ -275,7 +301,6 @@ class Meet(db.Model):
         for entry in self.entries:
             if entry.athlete.school_id == school_id:
                 school_entries.add(entry)
-        # order_by
         return school_entries
 
     @classmethod
@@ -284,21 +309,15 @@ class Meet(db.Model):
         pass
 
     def assign_all_mdes(self):
+        """ For each MDE in the Meet, takes the current set of entries and 
+        assigns athletes to the MDE and assign seed numbers. If an MDE was 
+        already "assigned", this method overrides that previous assignment. 
+        """
         for mde in self.mdes:
             mde.assign_seed_numbers()
         self.status = "Assignments Pending"
         db.session.commit()
 
-    def get_num_heats(self):
-        # import ipdb; ipdb.set_trace()
-        if self.status == "Accepting Entries" or self.status == "Unpublished":
-            return None
-        total_heats = 0
-        for mde in self.mdes:
-            mde_heats = mde.get_num_assigned_heats()
-            if mde_heats:
-                total_heats += mde_heats
-        return total_heats
 
 # #######################  ATHLETE CLASS #####################
 
@@ -337,7 +356,6 @@ class Athlete(db.Model):
         self.minitial = minitial
         self.lname = lname
         self.phone = phone
-
         # TODO - test to see if athlete already exists?
 
         # set athlete's division
@@ -370,81 +388,6 @@ class Athlete(db.Model):
             school = School.query.filter_by(code="UNA").one()
         self.school = school
 
-
-    def __repr__(self):
-        return "\n<ATHL# {}: {}, {}, {}>".format(
-                self.id,
-                self.full_name(),
-                self.school.__repr__(),
-                self.division.__repr__())
-
-    def full_name(self):
-        return self._get_full_name(self.fname, self.minitial, self.lname)
-
-    @staticmethod
-    def _get_full_name(fname, minitial, lname):
-        """ Creates a fullname from the first, last name, and middle initial
-        """
-        if not (fname and lname):
-            raise TmsError("Must provide first and last name.")
-        if minitial:
-            return f"{fname} {minitial[0]}. {lname}"
-        return f"{fname} {lname}"
-
-    @classmethod
-    def get_athlete(cls, fname, middle, lname, gender, school_code):
-        """ If a athlete is already in the database, returns that athlete's
-        object. If not, returns None. An athlete is considered to be already
-        in the database if the athlete's fname, middle initial, lname, gender,
-        and school_code all match.
-        """
-        athletes_same_name = Athlete.query.filter_by(
-            fname=fname, lname=lname, minitial=middle).all()
-        for ath in athletes_same_name:
-            if (ath.school.code == school_code and
-                    ath.division.gender == gender):
-                return ath
-        return
-
-    def get_meets(self):
-        # def get_meets(self, meet_status, include_past_meets):
-        """ Returns a list of all the meet objects that this athlete is
-        entered into. If athlete is not entered into any meets, returns None.
-        """
-        q = db.session.query(Meet)
-        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
-        q = q.filter(Athlete.id == self.id).distinct()
-        q = q.order_by(Meet.date)
-        meets = q.all()
-        return meets
-
-    def get_meet_count(self):
-        # def get_meets(self, meet_status, include_past_meets):
-        """ Returns a list of all the meet objects that this athlete is
-        entered into. If athlete is not entered into any meets, returns None.
-        """
-        q = db.session.query(Meet)
-        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
-        q = q.filter(Athlete.id == self.id).distinct()
-        q = q.order_by(Meet.date)
-        return q.count()
-
-    def get_events(self):
-        q = db.session.query(EventDefinition)
-        q = q.join(Athlete.entries).join(Entry.event)
-        q = q.filter(Athlete.id == self.id).distinct()
-        events = q.all()
-        return events
-
-    @staticmethod
-    def get_tuples_all_athletes():
-        q = db.session.query(
-                Athlete.fname, Athlete.lname, Athlete.id, School.name,
-                School.id, EventDefinition.id, EventDefinition.name,
-                EventDefinition.code, Division.id, Division.name, Division.code,
-                Meet.id, Meet.name)
-        q = q.filter(Entry.meet_id == Meet.id)
-        q = q.filter(Entry.athlete_id == Athlete.id)
 
     @classmethod
     def add_athlete_to_db(cls, first_name, middle, last_name, gender,
@@ -510,6 +453,86 @@ class Athlete(db.Model):
         return athlete
 
 
+    def __repr__(self):
+        return "\n<ATHL# {}: {}, {}, {}>".format(
+                self.id,
+                self.full_name(),
+                self.school.__repr__(),
+                self.division.__repr__())
+
+    def full_name(self):
+        # TODO - should this just be a hybrid column in database
+        return self._get_full_name(self.fname, self.minitial, self.lname)
+
+    @staticmethod
+    def _get_full_name(fname, minitial, lname):
+        """ Creates a fullname from the first, last name, and middle initial
+            Separated into a static method for easy testing
+        """
+        if not (fname and lname):
+            raise TmsError("Must provide first and last name.")
+        if minitial:
+            return f"{fname} {minitial[0]}. {lname}"
+        return f"{fname} {lname}"
+
+    @classmethod
+    def get_athlete(cls, fname, middle, lname, gender, school_code):
+        """ If a athlete is already in the database, returns that athlete's
+        object. If not, returns None. An athlete is considered to be already
+        in the database if the athlete's fname, middle initial, lname, gender,
+        and school_code all match.
+        Note that GRADE is not considered.
+        """
+        athletes_same_name = Athlete.query.filter_by(
+            fname=fname, lname=lname, minitial=middle).all()
+        for ath in athletes_same_name:
+            if (ath.school.code == school_code and
+                    ath.division.gender == gender):
+                return ath
+        return
+
+    # def get_meets(self, meet_status, include_past_meets):
+    def get_meets(self):
+        """ Returns a list of all the meet objects that this athlete is
+        entered into. If athlete is not entered into any meets, returns None.
+        """
+        q = db.session.query(Meet)
+        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
+        q = q.filter(Athlete.id == self.id).distinct()
+        q = q.order_by(Meet.date)
+        meets = q.all()
+        return meets
+
+    # def get_meets(self, meet_status, include_past_meets):
+    def get_meet_count(self):
+        """ Returns the number of meets that this athlete is
+        entered into. If athlete is not entered into any meets, returns 0.
+        """
+        q = db.session.query(Meet)
+        q = q.join(Meet.mdes).join(MeetDivisionEvent.athletes)
+        q = q.filter(Athlete.id == self.id).distinct()
+        q = q.order_by(Meet.date)
+        return q.count()
+
+    def get_events(self):
+        q = db.session.query(EventDefinition)
+        q = q.join(Athlete.entries).join(Entry.event)
+        q = q.filter(Athlete.id == self.id).distinct()
+        events = q.all()
+        return events
+
+    # UNUSED?
+    # @staticmethod
+    # def get_tuples_all_athletes():
+    #     q = db.session.query(
+    #             Athlete.fname, Athlete.lname, Athlete.id, School.name,
+    #             School.id, EventDefinition.id, EventDefinition.name,
+    #             EventDefinition.code, Division.id, Division.name, Division.code,
+    #             Meet.id, Meet.name)
+    #     q = q.filter(Entry.meet_id == Meet.id)
+    #     q = q.filter(Entry.athlete_id == Athlete.id)
+
+
 # #######################  ENTRY CLASS #####################
 mark_type_enum = Enum(*MARK_TYPES, name="mark_type")
 
@@ -529,7 +552,7 @@ class Entry(db.Model):
     athlete_id = db.Column(db.ForeignKey("athletes.id"), nullable=False)
     mde_id = db.Column(db.ForeignKey("meet_division_events.id"),
                        nullable=False)
-    # heat_id = db.Column(db.ForeignKey("heats.id"), nullable=True)
+
     seed_num = db.Column(db.Integer, nullable=True)
 
     # An athlete's "mark" for a parituclar event is either his/her
@@ -537,6 +560,11 @@ class Entry(db.Model):
     # inches, with precision to the hundredth of a second and up to 1/4 inch.
     mark = db.Column(db.Numeric(12, 2), nullable=True)
     mark_type = db.Column(mark_type_enum, nullable=True)
+
+    # TODO - this problem column probably violates normal form for the database
+    # when use to denote an entry not gettign assigned to an MDE. 
+    # Refactor.
+
     # describes a problem with the athlete's entry that a user needs to resolve
     problem = db.Column(db.String(64), nullable=True)
 
@@ -573,8 +601,6 @@ class Entry(db.Model):
                              uselist=False,
                              back_populates="entries")
 
-    # heat = db.relationship("Heat", uselist=False, back_populates="entries")
-
     # editor_users = db.relationship("User", secondary="schools")
 
     def __init__(self, athlete, mde):
@@ -592,7 +618,6 @@ class Entry(db.Model):
                 .format(
                     self.id, self.athlete.full_name(), self.athlete.school.code,
                     self.event.code, self.division.code, self.meet.name))
-
 
     # SETTING MARKS
     def set_mark(self, mark_string=None, mark_measure_type=None):
@@ -643,7 +668,6 @@ class Entry(db.Model):
         t_list = time_string.split(':')[::-1]
         if t_list[-1][-1] == "h":
             raise TmsError("UNIMPLEMENTED: hand-timed marks")
-
         secs = 0
         for i in range(0, len(t_list)):
             secs += float(t_list[i]) * 60**i
@@ -688,8 +712,6 @@ class Entry(db.Model):
             return self._inches_mark_to_string()
         else:
             raise TmsError("UNIMPLEMENTED: metric field distance marks")
-
-    # ---------
 
     def _seconds_mark_to_string(self):
         if self.mark == INFINITY_SECONDS:
@@ -750,26 +772,6 @@ class Entry(db.Model):
             return 1 + (self.seed_num - 1) // max_athletes_per_heat
 
 
-# #######################  HEAT CLASS #####################
-
-# class Heat(db.Model):
-#     __tablename__ = "heats"
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     # TODO decide if seq_num is unique to whole meet or just this MDE
-#     seq_num = db.Column(db.Integer, default=1, nullable=False)
-#     entries = db.relationship(
-#             "Entry", uselist=True, back_populates="heat")
-#     mde = db.relationship(
-#         "MeetDivisionEvent", secondary="entries", uselist=False,
-#         back_populates="heats")
-
-#     def __repr__(self):
-#         return "<HEAT #{self.id}, {mde.event}, {mde.division}>"
-
-    # def assign_lanes_pos(self):
-    #     pass
-
-
 # #######################  MEETDIVISION EVENT CLASS #####################
 
 mde_status_enum = Enum(*MDE_STATUS, name="mde_status")
@@ -778,7 +780,7 @@ mde_status_enum = Enum(*MDE_STATUS, name="mde_status")
 class MeetDivisionEvent(db.Model):
     """
     Associative table to handle the many to many relationship between Events,
-    Divisions, and Meets
+    Divisions, and Meets. Aka "contests
     """
     __tablename__ = "meet_division_events"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -805,17 +807,16 @@ class MeetDivisionEvent(db.Model):
             "EventDefinition", uselist=False,
             )
     entries = db.relationship(
-            # in ascending order, so in proper order for track event seeding
-            # need to reverse it for field events
+            # in ascending order by mark, so in proper best-to-worst order for
+            # track event seeding (where lowest time is best). 
+            # But for field events we need to reverse it. (longest distance is 
+            # the best performance)
             "Entry", uselist=True, order_by="Entry.mark",
             back_populates="mde")
 
     athletes = db.relationship(
             "Athlete", secondary="entries", uselist=True,
             back_populates="mdes")
-
-    # heats = db.relationship(
-    #         "Heat", secondary="entries", uselist=True, back_populates="mde")
 
 
     def __repr__(self):
@@ -853,11 +854,6 @@ class MeetDivisionEvent(db.Model):
 
         db.session.commit()
 
-    # def schools(self):
-    #     schools = set()
-    #     for athlete in self.athletes:
-    #         schools.add(athlete)
-    #     return list(schools)
 
     def get_max_heats(self):
         if self.max_heats:
@@ -884,6 +880,9 @@ class MeetDivisionEvent(db.Model):
         return self.get_max_heats()
 
     def assign_seed_numbers(self):
+
+        #if seed_tiebreaker == "random": 
+        # TODO - handle other types of tie breakers.
         # make a copy because sqlalchemy doesn't let me reorder it
         entries = self.entries[:]
 
@@ -960,10 +959,11 @@ class School(db.Model):
 
     entries = db.relationship(
             "Entry", secondary="athletes", uselist=True,
-            back_populates="school",
-            )
+            back_populates="school")
+
     divisions = db.relationship(
         "Division", secondary="athletes", uselist=True)
+
     coaches = db.relationship("User", uselist=True, backref="editor_users")
 
     meets_hosted = db.relationship(
@@ -989,8 +989,8 @@ class School(db.Model):
         if section:
             self.section = section.upper()
 
-    # def __repr__(self):
-        # return "<SCHOOL id#{}: {}, {}>".format(self.id, self.name, self.code)
+    def __repr__(self):
+        return "<SCHOOL id#{}: {}, {}>".format(self.id, self.name, self.code)
 
     @classmethod
     def init_unattached_school(cls):
@@ -1045,9 +1045,8 @@ class EventDefinition(db.Model):
 
     mdes = db.relationship("MeetDivisionEvent")
     # divisions = db.relationship("Division", secondary="meet_division_events")
-    # meets = db.relationship("Meet", secondary="meet_division_events")
     entries = db.relationship("Entry", secondary="meet_division_events")
-    # heats
+
 
     def __repr__(self):
         return "\n<EVENT_DEF {}, Name: {}, Type: {}>".format(
@@ -1202,9 +1201,6 @@ class Division(db.Model):
         returned list.
 
         SIDE EFFECT: adds and commits records to the database.
-
-        We assume that if there are numbered GRADES, that they the division is
-        for children and shoudl use the labels "boys" and "girls".
         """
         divs = []
         for gender_str in gender_list:
@@ -1323,6 +1319,8 @@ class User(db.Model):
     def create_superuser(cls):
         # TODO - get rid of this method and have a superuser be auto-created
         # when table is first created
+        # TODO - SUPERUSER_PPASSWORD Should be from the Secrets File, not 
+        # hardcoded into the constant_models file
         superuser = User(
             email=SUPERUSER_EMAIL, password=SUPERUSER_PASSWORD,
             role="superuser")
