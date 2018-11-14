@@ -424,7 +424,7 @@ def do_edit_mde_detail(meet_id, mde_id):
         mde.max_heats = int(max_heats)
     mde.mde_notes = request.form.get('mde_notes', mde.mde_notes)
     db.session.commit()
-    flash("Saved new settings for mde.event.name for mde.division.name",
+    flash(f"Saved new settings for {mde.event.name} for {mde.division.name}",
           "success")
     return redirect(url_for('show_mde_detail', meet_id=meet_id, mde_id=mde.id))
 
