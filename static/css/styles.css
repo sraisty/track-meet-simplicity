@@ -13,6 +13,7 @@ tbody > tr > td > a {
 .bg-primary {
   /* dark slate grey */
   background-color: #2F4858!important;
+  color: #FFF;
 }
 
 .text-primary {
