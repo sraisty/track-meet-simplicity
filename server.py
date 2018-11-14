@@ -56,7 +56,7 @@ app.jinja_env.autoescape = select_autoescape(
 @app.route('/test')
 def test_render():
     entry = Entry.query.get(7000)
-    return render_template('/test/test.html.j2', entry=entry)
+    return render_template('/test_templates/test.html.j2', entry=entry)
 
 
 @app.route('/')
