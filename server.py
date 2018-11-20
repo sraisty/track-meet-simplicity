@@ -5,8 +5,7 @@ import os
 from flask import (Flask, render_template, redirect, request, flash,
                    session, url_for)
 from werkzeug.utils import secure_filename
-from jinja2 import StrictUndefined
-from jinja2 import select_autoescape
+from jinja2 import StrictUndefined, select_autoescape
 # from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 # import requests
@@ -246,7 +245,7 @@ def show_all_meets():
 @app.route('/meets/<int:meet_id>')
 def show_meet_detail(meet_id):
     meet = Meet.query.filter_by(id=meet_id).order_by(Meet.date).first_or_404()
-    # TODO if meet.status="Accepting Entries" and myschool not entered yet:
+    # TODO if meet.status=="Accepting Entries" and myschool not entered yet:
     #   dispaly enter meet button
     # else if accepting entries and my school has entered
     #   buttton to display edit my meet roster / entries
@@ -282,6 +281,7 @@ def do_new_meet_form():
     mi['ev_code_list'] = request.form.get("ev_code_list", DEFAULT_EVENT_ORDER)
     mi['div_code_list'] = request.form.get(
             "div_code_list", DEFAULT_DIVISION_ORDER)
+    # TODO
     # seeding tiebreakers
     # heat assignment method
     # lane/position assignment method
@@ -453,7 +453,6 @@ def do_meet_assignment_all_mdes(meet_id):
 def show_entries(school_id=None, meet_id=None):
 
     problems = request.args.get('problems')
-    # import ipdb; ipdb.set_trace()
 
     q = Entry.query
     # q = db.session.query(Entry.id, )
@@ -623,6 +622,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# #######################
 
 if __name__ == '__main__':
     from sys import argv
