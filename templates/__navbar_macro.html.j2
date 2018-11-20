@@ -1,13 +1,16 @@
 {% macro MACRO_PRIMARY_NAV(selected_menuitem) %}
   {# TODO - handle selecting the active tab in the navbar #}
   <nav class="navbar navbar-expand-md navbar-dark sticky-top bg-primary mb-0">
-    <a class="navbar-brand  ml-2" href="{{ url_for('show_school_detail',
-                       school_id=session.user_school_id) }}">TrackMeetSimplicity</a>
+    <a class="navbar-brand ml-2" 
+        href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
+      TrackMeetSimplicity
+    </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav mr-auto">
+      {# <ul class="navbar-nav mr-auto"> #}
+      <ul class="navbar-nav mr-auto d-flex flex-row justify-content-between">
 
         <li class="nav-item">
           <a class="nav-link" id="home_navbar" 
@@ -15,7 +18,7 @@
             Home
           </a>
         </li>
-        </li>
+{#         </li> #}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarMeetMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Meets
@@ -29,7 +32,9 @@
         {# <li class="nav-item dropdown"> #}
         <li class="nav-item">
           <a class="nav-link" id="schools_navbar" 
-             href="{{ url_for('show_all_schools') }}">Schools</a></li>
+             href="{{ url_for('show_all_schools') }}">
+            Schools
+          </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" id="athletes_navbar" href="{{ url_for('show_all_athletes') }}">
@@ -37,7 +42,7 @@
           </a>
         </li>
 
-{#         <li class="nav-item dropdown">
+{#       <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarEntriesLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Entries
           </a>
@@ -47,11 +52,13 @@
           </div>
         </li> #}
 
-{#         <li class="nav-item">
-          <a class="nav-link disabled" href="#">Divisions</a></li>
+{#      <li class="nav-item">
+          <a class="nav-link disabled" href="#">Divisions</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link disabled" href="#">Events</a></li>
+          <a class="nav-link disabled" href="#">
+            Events
+          </a>
         </li> 
 #}
 
