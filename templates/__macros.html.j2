@@ -46,8 +46,8 @@
     <a class="card-header btn btn-link tms-link " id="{{ event.name }}"
         data-toggle="collapse" data-target="#collapse{{event.code}}" 
         aria-expanded="true" aria-controls="collapse{{event.code}}">
-      <div class="d-flex flex-row">
-        <div class="d-flex flex-fill">
+      <div class="d-flex flex-row justify-content-between">
+        <div>
           {% if meet.event_is_oversubscribed(event) %}
             <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
           {% elif meet.status == "Accepting Entries" %}
@@ -59,10 +59,15 @@
           {% endif %}     
         </div>
 
-        <div class="d-flex flex-fill tms-event-title">{{ event.name }}</div>
-        <div class="d-flex flex-fill">
+        <div class="tms-event-title">{{ event.name }}</div>
+        <div>
           {{ meet.get_event_athlete_count_across_divs(event) }} athletes,
-          {{ meet.get_event_heat_count_across_divs(event) }} heats
+          {{ meet.get_event_heat_count_across_divs(event) }} 
+          {% if event.is_track() %}
+            heats
+          {% else %}
+            flights
+          {% endif %}
         </div>
       </div>
     </a>
@@ -99,7 +104,11 @@
                   Entries: {{ num_entries}}, Slots: {{mde.get_max_athletes() }}
                 </span>
                 <span class="d-flex">
-                  Heats: {{ mde.get_num_assigned_heats() }} 
+                  {% if mde.event.is_track() %}
+                    Heats: {{ mde.get_num_assigned_heats() }} 
+                   {% else %}
+                    Flights: {{ mde.get_num_assigned_heats() }} 
+                  {% endif %}
                 </span>
                 {% if mde.status == "Assigned" %}
                   <span class="d-flex">
