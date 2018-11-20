@@ -69,7 +69,7 @@
 
 
               {% if show_actions %}
-                <td class="align-top">
+                <td class="align-top text-center">
                   {% set myschool_id=session.get('user_school_id') %}
                   {% if meet.host_school.id == myschool_id %}
                     <a href="{{ url_for('show_meet_detail', meet_id=meet.id) }}"

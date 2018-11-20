@@ -16,7 +16,7 @@
 {% block secondary_nav_title %}
   <div class="d-flex flex-row align-items-center mb-3">
     <div class="badge bg-primary text-white mb-0 p-2  align-middle">
-      <h4 class="mb-0">#{{mde.seq_num}}</h4>
+      <h4 class="mb-0"># {{mde.seq_num}}</h4>
     </div>
     <div class="px-2 mb-0  align-middle">
       {{ mde.event.name }}: {{ mde.division.name }}
@@ -80,8 +80,8 @@
 
   <a href="{{url_for('do_mde_assign_athletes', meet_id=mde.meet.id, mde_id=mde.id) }}">
     {% if mde.status == "Unassigned" %}
-      <button class="btn btn-warning btn-large id="mde-assign-button">
-        Make Athlete Assignments
+      <button class="btn btn-warning btn-lg id="mde-assign-button">
+        <i class="fas fa-user-check"></i>&nbsp;&nbsp;Assign Athletes
       </button>   
     {% endif %}
   </a>
