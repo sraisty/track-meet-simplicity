@@ -8,15 +8,16 @@ from parse_hytek import parse_hytek_file
 
 from model import (
     Meet, Athlete, Entry, Division, School, EventDefinition, MeetDivisionEvent,
-    Heat, EventOrdering, DivOrdering, User, TmsApp, db,
+    EventOrdering, DivOrdering, User, TmsApp, db,
     INFINITY_SECONDS, EVENT_DEFS)
 
 from server import app
 
-from test_utils import setup_test_app_db, teardown_test_db_app
+from test.test_utils import (
+    setup_test_app_db, teardown_test_db_app, EXAMPLE_MEETS)
 
 from util import error, warning, info
-from seed import EXAMPLE_MEETS
+
 
 NUM_SEED_MEETS = 1
 
@@ -31,7 +32,6 @@ class TestVerifyEmptyDatabase(unittest.TestCase):
         self.assertEqual(0, Athlete.query.count())
         self.assertEqual(0, Entry.query.count())
         self.assertEqual(0, MeetDivisionEvent.query.count())
-        self.assertEqual(0, Heat.query.count())
         self.assertEqual(0, School.query.count())
         self.assertEqual(0, EventDefinition.query.count())
         self.assertEqual(0, EventOrdering.query.count())

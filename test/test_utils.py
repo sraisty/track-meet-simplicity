@@ -146,7 +146,7 @@ EXAMPLE_MEETS = (
         "date": "May 8, 2019",
         "description": "",
         "status": "Unpublished",
-        "host_school_id": 1,    # carmel
+        "host_school_id": 5,    # carmel
         "division_order": ["F", "M"],
         "event_order": ["1600M", "100H"],
         "filename": ""

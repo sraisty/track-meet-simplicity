@@ -9,13 +9,13 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from model import (
         db, TmsApp, Division, School, EventDefinition, Meet, MeetDivisionEvent,
-        Athlete, Entry, EventOrdering, DivOrdering, Heat, User,
+        Athlete, Entry, EventOrdering, DivOrdering, User,
         GENDERS, MIDDLE_SCHOOL_GRADES, GRADES, EVENT_DEFS, INFINITY_SECONDS,
         TmsError)
 
 from server import app
 
-from test_utils import (
+from test.test_utils import (
     teardown_test_db_app, setup_test_app_db, EXAMPLE_MEETS)
 
 
@@ -51,9 +51,6 @@ class TestDatabaseEmpty(unittest.TestCase):
 
     def test_schools_empty_at_init(self):
         self.assertEqual(0, School.query.count())
-
-    def test_heats_empty_at_init(self):
-        self.assertEqual(0, Heat.query.count())
 
     def test_users_empty_at_init(self):
         self.assertEqual(0, User.query.count())
@@ -362,7 +359,6 @@ class TestTmsAppInit(unittest.TestCase):
         self.assertEqual(Meet.query.count(), 0)
         self.assertEqual(Athlete.query.count(), 0)
         self.assertEqual(Entry.query.count(), 0)
-        self.assertEqual(Heat.query.count(), 0)
         self.assertEqual(MeetDivisionEvent.query.count(), 0)
         self.assertEqual(School.query.count(), 0)
         self.assertEqual(EventDefinition.query.count(), 0)
@@ -386,7 +382,6 @@ class TestTmsAppInit(unittest.TestCase):
         self.assertEqual(Meet.query.count(), 0)
         self.assertEqual(Athlete.query.count(), 0)
         self.assertEqual(Entry.query.count(), 0)
-        self.assertEqual(Heat.query.count(), 0)
         self.assertEqual(MeetDivisionEvent.query.count(), 0)
         self.assertEqual(EventOrdering.query.count(), 0)
         self.assertEqual(DivOrdering.query.count(), 0)
@@ -495,7 +490,7 @@ class TestEntryMarks(unittest.TestCase):
         db.session.commit()
         entry_1600m.set_mark()
 
-        # Test no mark provided for the event
+        # Test when no mark is provided for the event
         self.assertEqual(entry_1600m.mark, INFINITY_SECONDS)
         self.assertEqual(entry_1600m.mark_type, "seconds")
         self.assertEqual(entry_1600m.mark_to_string(), "")
@@ -511,7 +506,7 @@ class TestEntryMarks(unittest.TestCase):
 
     def test_field_english_string_to_inches(self):
         self.assertEqual(120, Entry._field_english_string_to_inches("10'"))
-        # No ' character provided as feet symbol
+        # Test when no ' character provided as feet symbol in distance mark
         self.assertIsNone(Entry._field_english_string_to_inches("8"))
         self.assertEqual(
             1200.25, Entry._field_english_string_to_inches("100' 0.25"))
@@ -571,7 +566,6 @@ class TestEntryToEventRelationships(unittest.TestCase):
         self.assertIsNotNone(mde.entries)
         self.assertIsNotNone(veronica.entries)
 
-        # This is the line that used to error
         self.assertEqual(entry.event, entry.mde.event)
 
         self.assertEqual(mde.entries[0].athlete.fname, "Veronica")
@@ -610,6 +604,7 @@ class TestAthleteEntriesMdeRelationships(unittest.TestCase):
     #     self.assertEqual(
     #         mde_longjump.athletes_count, len(mde_longjump.athletes))
 
+
 class TestAthleteEntriesSchoolRelationships(unittest.TestCase):
     def setUp(self):
         setup_test_app_db()
@@ -626,48 +621,6 @@ class TestAthleteEntriesSchoolRelationships(unittest.TestCase):
     def tearDown(self):
         teardown_test_db_app()
 
-    # def test_school_athletes_count(self):
-    #     for i in range(10):
-    #         ath = Athlete(
-    #                 fname=f"ath{i}", minitial="", lname="ath{i}", gender='F',
-    #                 grade='7', school_code=self.school.code)
-    #         db.session.add(ath)
-    #     db.session.commit()
-    #     self.assertEqual(10, len(self.school.athletes))
-    #     self.assertEqual(10, self.school.athletes_count)
-
-    # def test_school_entries_count(self):
-
-    #     div_7g = Division.query.filter_by(code="7F").one()
-    #     div_7b = Division.query.filter_by(code="7M").one()
-    #     mde_lj7g = MeetDivisionEvent.query.filter_by(
-    #             meet=self.meet,
-    #             event_code="LJ",
-    #             division=div_7g).one()
-    #     mde_lj7g = MeetDivisionEvent.query.filter_by(
-    #             meet=self.meet,
-    #             event_code="LJ",
-    #             division=div_7g).one()
-    #     mde_400_7g = MeetDivisionEvent.query.filter_by(
-    #             meet=self.meet,
-    #             event_code="400M",
-    #             division=div_7g).one()
-
-    #     for i in range(10):
-    #         ath = Athlete(
-    #                 fname=f"ath{i}", minitial="", lname="ath{i}", gender='F',
-    #                 grade='7', school_code=self.school.code)
-    #         db.session.add(ath)
-    #         entry_lj = Entry(mde=mde_lj7g, athlete=ath)
-    #         db.session.add(entry_lj)
-    #         if i % 2 == 0:
-    #             entry_400 = Entry(mde=mde_400_7g, athlete=ath)
-    #             db.session.add(entry_400)
-
-    #     db.session.commit()
-
-    #     self.assertEqual(15, len(self.school.entries))
-    #     self.assertEqual(15, self.school.entries_count)
 
 
 # ##################################
