@@ -10,7 +10,12 @@
 {% endblock %}
 
 {% block secondary_nav_title %}
-  {{ school.name }}
+  <div>
+    {% if session['user_school_id'] == school.id %}
+      <i class="fas fa-home"></i>&nbsp;
+    {% endif %}
+    {{ school.name }}
+  </div>
 {% endblock secondary_nav_title %}
 
 
@@ -45,7 +50,7 @@
   {{ MACRO_MAKE_TAB("hosted-meets-tab", false, "Meets Hosted") }}
   {{ MACRO_MAKE_TAB("entered-meets-tab", true, "Meets Entered") }}
   {{ MACRO_MAKE_TAB("school-athletes-tab", false, "Athletes") }}
-  {# {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }} #}
+  {{ MACRO_MAKE_TAB("school-problems-tab", false, "Entry Problems") }}
   {{ MACRO_MAKE_TAB("school-info-tab", false, "School Info") }}
 {% endblock tab_navs %}
 

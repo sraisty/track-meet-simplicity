@@ -82,7 +82,7 @@
         <a href="{{url_for('show_meet_entries', meet_id=meet.id, school_id=my_school_id) }}"
            class="btn btn-warning  btn-lg mb-1 mr-1">
             <i class="fas fa-clipboard-list"></i>
-            &nbsp;&nbsp;Review My Meet Entries
+            &nbsp;&nbsp;Review {{session['user_school_name']}} Entries
         </a>
       {% elif meet.status == "Accepting Entries" %}
         <a href="{{ url_for('show_enter_meet_upload_form', meet_id=meet.id) }}" class="btn btn-warning tms-meet-btn btn-lg mb-1 mr-1">
@@ -96,7 +96,7 @@
         {% if meet.status == "Accepting Entries" %}
           <a href="{{url_for('do_meet_assignment_all_mdes', meet_id=meet.id) }}" 
              class="btn btn-success btn-lg mb-1">
-              <i class="fas fa-user-check"></i>&nbsp;&nbspAssign Athletes
+              <i class="fas fa-user-check"></i>&nbsp;&nbsp;Assign Athletes
           </a>
         {% endif %}
         <a href="{{url_for('show_meet_entries', meet_id=meet.id) }}"
