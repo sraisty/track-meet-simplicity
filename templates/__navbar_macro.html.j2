@@ -12,7 +12,7 @@
       {# <ul class="navbar-nav mr-auto"> #}
       <ul class="navbar-nav mr-auto d-flex flex-row justify-content-between">
 
-          <li class="nav-item {% if request.path == '/home' %}active{% endif %}">
+          <li class="nav-item px-3 {% if request.path == '/home' %}active{% endif %}">
             <a class="nav-link" id="home_navbar" 
                href="{{ url_for('show_school_detail', school_id=session.user_school_id) }}">
               Home
@@ -20,7 +20,7 @@
           </li>
 
 
-        <li class="nav-item dropdown {% if '/meets' in request.path %} active {% endif %}">
+        <li class="nav-item dropdown px-3 {% if '/meets' in request.path %} active {% endif %}">
           <a class="nav-link dropdown-toggle" href="#" id="navbarMeetMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Meets
           </a>
@@ -30,14 +30,14 @@
           </div>
         </li>
 
-        <li class="nav-item {% if '/schools' in request.path %} active {% endif %}">
+        <li class="nav-item px-3 {% if '/schools' in request.path %} active {% endif %}">
           <a class="nav-link" id="schools_navbar" 
              href="{{ url_for('show_all_schools') }}">
             Schools
           </a>
         </li>
 
-        <li class="nav-item {% if '/athletes' in request.path %} active {% endif %}">
+        <li class="nav-item px-3 {% if '/athletes' in request.path %} active {% endif %}">
           <a class="nav-link" id="athletes_navbar" href="{{ url_for('show_all_athletes') }}">
             Athletes
           </a>
